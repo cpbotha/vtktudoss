@@ -1,0 +1,16 @@
+#
+# This module is provided as VTKTUD_USE_FILE by VTKTUDConfig.cmake.  It can
+# be INCLUDEd in a project to load the needed compiler and linker
+# settings to use VTKTUD.
+#
+
+IF(NOT VTKTUD_USE_FILE_INCLUDED)
+  SET(VTKTUD_USE_FILE_INCLUDED 1)
+
+  # Add include directories needed to use VTKTUD.
+  INCLUDE_DIRECTORIES(${VTKTUD_INCLUDE_DIRS})
+
+  # Add link directories needed to use VTKTUD.
+  LINK_DIRECTORIES(${VTKTUD_LIBRARY_DIRS})
+
+ENDIF(NOT VTKTUD_USE_FILE_INCLUDED)

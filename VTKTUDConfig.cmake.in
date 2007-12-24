@@ -1,0 +1,27 @@
+#-----------------------------------------------------------------------------
+#
+# VTKTUDConfig.cmake - VTKTUD CMake configuration file for external projects.
+#
+# This file is configured by VTKTUD and used by the UseVTKTUD.cmake module
+# to load VTKTUD's settings for an external project.
+
+# The VTK include file directories.
+SET(VTKTUD_INCLUDE_DIRS "@VTKTUD_INCLUDE_DIRS_CONFIG@")
+
+# The VTK library directories.
+SET(VTKTUD_LIBRARY_DIRS "@VTKTUD_LIBRARY_DIRS_CONFIG@")
+
+# The location of the UseVTKTUD.cmake file.
+SET(VTKTUD_USE_FILE "@VTKTUD_USE_FILE@")
+
+# VTKTUD Configuration options.
+SET(VTKTUD_BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")
+SET(VTKTUD_WRAP_JAVA "@VTKTUD_WRAP_JAVA@")
+SET(VTKTUD_WRAP_PYTHON "@VTKTUD_WRAP_PYTHON@")
+SET(VTKTUD_WRAP_TCL "@VTKTUD_WRAP_TCL@")
+
+# Kits built
+SET(VTKTUD_KITS_BUILT @VTKTUD_KITS_FORCONFIG@)
+FOREACH(kit ${VTKTUD_KITS_BUILT})
+  SET(VTKTUD_USE_${kit} ON)
+ENDFOREACH(kit)
