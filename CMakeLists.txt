@@ -1,3 +1,7 @@
+# CMakeLists.txt file for VTKTUDOSS
+# copyright TU Delft Data Visualization Group
+# Berkeley Licensing
+
 #
 # Set the project name.
 #
@@ -34,7 +38,8 @@ IF (VTKTUDOSS_CAN_BUILD)
 
   # Core (non-optional kits)
   SET(VTKTUDOSS_KITS_CORE
-    Widgets "Extra new-style (post 5.0) widgets"
+    Graphics
+    Widgets
   )
 
   # Optional kits
@@ -64,6 +69,7 @@ IF (VTKTUDOSS_CAN_BUILD)
 
   # Process optional kits
   LIST(LENGTH VTKTUDOSS_KITS_OPTIONAL nkits)
+  IF(LENGTH) # we can only do this if there is at least 1 optional kit
   MATH(EXPR nkits "(${nkits} / 2) - 1" )
   FOREACH(i RANGE ${nkits})
     MATH(EXPR j "${i} * 2")
@@ -84,9 +90,10 @@ IF (VTKTUDOSS_CAN_BUILD)
       SET(VTKTUDOSS_KITS_NOTBUILT ${VTKTUDOSS_KITS_NOTBUILT} ${kit})
     ENDIF (BUILD_${kit_uc})
   ENDFOREACH(i)
+  ENDIF(LENGTH)
 
   # Process Contrib kits
-  OPTION(BUILD_CONTRIB "Build contributed code." OFF)
+  OPTION(BUILD_CONTRIB "Build contributed code (NOTHING HERE YET)." OFF)
   IF(BUILD_CONTRIB)
     LIST(LENGTH VTKTUDOSS_KITS_CONTRIB nkits)
     MATH(EXPR nkits "(${nkits} / 2) - 1" )
@@ -115,17 +122,18 @@ IF (VTKTUDOSS_CAN_BUILD)
   # Build examples too ?
   #
 
-  OPTION(BUILD_EXAMPLES "Build examples." ON)
-  IF (BUILD_EXAMPLES)
-    SUBDIRS(Examples)
-  ENDIF (BUILD_EXAMPLES)
+  # uncomment when you start adding Examples!
+  # OPTION(BUILD_EXAMPLES "Build examples." ON)
+  # IF (BUILD_EXAMPLES)
+  #   SUBDIRS(Examples)
+  # ENDIF (BUILD_EXAMPLES)
 
 
   #
   # Build Utilities (Doxygen)
   #
 
-  SUBDIRS(Utilities)
+  #SUBDIRS(Utilities)
 
   INCLUDE_DIRECTORIES(${VTKTUDOSS_BINARY_DIR})
 

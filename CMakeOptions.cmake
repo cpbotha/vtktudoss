@@ -1,9 +1,9 @@
 #
 # Configure output paths for libraries and executables.
 #
-SET(LIBRARY_OUTPUT_PATH ${VTKTUD_BINARY_DIR}/bin CACHE PATH
+SET(LIBRARY_OUTPUT_PATH ${VTKTUDOSS_BINARY_DIR}/bin CACHE PATH
     "Single output directory for building all libraries.")
-SET(EXECUTABLE_OUTPUT_PATH ${VTKTUD_BINARY_DIR}/bin CACHE PATH
+SET(EXECUTABLE_OUTPUT_PATH ${VTKTUDOSS_BINARY_DIR}/bin CACHE PATH
     "Single output directory for building all executables.")
 MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
 
@@ -23,9 +23,9 @@ INCLUDE(${VTK_USE_FILE})
 OPTION(BUILD_SHARED_LIBS
        "Build with shared libraries."
        ${VTK_BUILD_SHARED_LIBS})
-# Copy the CMake option to a setting with VTKTUD_ prefix for use in
+# Copy the CMake option to a setting with VTKTUDOSS_ prefix for use in
 # our project.  This name is used in vtkmyConfigure.h.in.
-SET(VTKTUD_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
+SET(VTKTUDOSS_BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS})
 
 # If this is a build tree, provide an option for putting
 # this project's executables and libraries in with VTK's.
@@ -57,23 +57,23 @@ ENDIF (EXISTS ${VTK_DIR}/bin)
 
 IF (VTK_WRAP_TCL)
 
-  OPTION(VTKTUD_WRAP_TCL
+  OPTION(VTKTUDOSS_WRAP_TCL
          "Wrap classes into the TCL interpreted language."
          ON)
 
-  IF(VTKTUD_WRAP_TCL)
-    SET(VTK_WRAP_TCL3_INIT_DIR "${VTKTUD_SOURCE_DIR}/Wrapping")
+  IF(VTKTUDOSS_WRAP_TCL)
+    SET(VTK_WRAP_TCL3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapTcl.cmake)
-  ENDIF(VTKTUD_WRAP_TCL)
+  ENDIF(VTKTUDOSS_WRAP_TCL)
 
 ELSE (VTK_WRAP_TCL)
 
-  IF (VTKTUD_WRAP_TCL)
-    MESSAGE("Warning. VTKTUD_WRAP_TCL is ON but the VTK version you have "
+  IF (VTKTUDOSS_WRAP_TCL)
+    MESSAGE("Warning. VTKTUDOSS_WRAP_TCL is ON but the VTK version you have "
             "chosen has not support for Tcl (VTK_WRAP_TCL is OFF).  "
-            "Please set VTKTUD_WRAP_TCL to OFF.")
-    SET (VTKTUD_WRAP_TCL OFF)
-  ENDIF (VTKTUD_WRAP_TCL)
+            "Please set VTKTUDOSS_WRAP_TCL to OFF.")
+    SET (VTKTUDOSS_WRAP_TCL OFF)
+  ENDIF (VTKTUDOSS_WRAP_TCL)
 
 ENDIF (VTK_WRAP_TCL)
 
@@ -83,29 +83,29 @@ ENDIF (VTK_WRAP_TCL)
 
 IF (VTK_WRAP_PYTHON)
 
-  OPTION(VTKTUD_WRAP_PYTHON
+  OPTION(VTKTUDOSS_WRAP_PYTHON
          "Wrap classes into the Python interpreted language."
          ON)
 
-  IF (VTKTUD_WRAP_PYTHON)
-    SET(VTK_WRAP_PYTHON3_INIT_DIR "${VTKTUD_SOURCE_DIR}/Wrapping")
+  IF (VTKTUDOSS_WRAP_PYTHON)
+    SET(VTK_WRAP_PYTHON3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapPython.cmake)
     IF (WIN32)
       IF (NOT BUILD_SHARED_LIBS)
         MESSAGE(FATAL_ERROR "Python support requires BUILD_SHARED_LIBS to be ON.")
-        SET (VTKTUD_CAN_BUILD 0)
+        SET (VTKTUDOSS_CAN_BUILD 0)
       ENDIF (NOT BUILD_SHARED_LIBS)
     ENDIF (WIN32)
-  ENDIF (VTKTUD_WRAP_PYTHON)
+  ENDIF (VTKTUDOSS_WRAP_PYTHON)
 
 ELSE (VTK_WRAP_PYTHON)
 
-  IF (VTKTUD_WRAP_PYTHON)
-    MESSAGE("Warning. VTKTUD_WRAP_PYTHON is ON but the VTK version you have "
+  IF (VTKTUDOSS_WRAP_PYTHON)
+    MESSAGE("Warning. VTKTUDOSS_WRAP_PYTHON is ON but the VTK version you have "
             "chosen has not support for Python (VTK_WRAP_PYTHON is OFF).  "
-            "Please set VTKTUD_WRAP_PYTHON to OFF.")
-    SET (VTKTUD_WRAP_PYTHON OFF)
-  ENDIF (VTKTUD_WRAP_PYTHON)
+            "Please set VTKTUDOSS_WRAP_PYTHON to OFF.")
+    SET (VTKTUDOSS_WRAP_PYTHON OFF)
+  ENDIF (VTKTUDOSS_WRAP_PYTHON)
 
 ENDIF (VTK_WRAP_PYTHON)
 
@@ -115,33 +115,33 @@ ENDIF (VTK_WRAP_PYTHON)
 
 IF (VTK_WRAP_JAVA)
 
-  OPTION(VTKTUD_WRAP_JAVA
+  OPTION(VTKTUDOSS_WRAP_JAVA
          "Wrap classes into the Java interpreted language."
          ON)
 
-  IF (VTKTUD_WRAP_JAVA)
-    SET(VTK_WRAP_JAVA3_INIT_DIR "${VTKTUD_SOURCE_DIR}/Wrapping")
+  IF (VTKTUDOSS_WRAP_JAVA)
+    SET(VTK_WRAP_JAVA3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapJava.cmake)
     IF (WIN32)
       IF (NOT BUILD_SHARED_LIBS)
         MESSAGE(FATAL_ERROR "Java support requires BUILD_SHARED_LIBS to be ON.")
-        SET (VTKTUD_CAN_BUILD 0)
+        SET (VTKTUDOSS_CAN_BUILD 0)
       ENDIF (NOT BUILD_SHARED_LIBS)
     ENDIF (WIN32)
 
     # Tell the java wrappers where to go.
-    SET(VTK_JAVA_HOME ${VTKTUD_BINARY_DIR}/java/vtkmy)
+    SET(VTK_JAVA_HOME ${VTKTUDOSS_BINARY_DIR}/java/vtkmy)
     MAKE_DIRECTORY(${VTK_JAVA_HOME})
-  ENDIF (VTKTUD_WRAP_JAVA)
+  ENDIF (VTKTUDOSS_WRAP_JAVA)
 
 ELSE (VTK_WRAP_JAVA)
 
-  IF (VTKTUD_WRAP_JAVA)
-    MESSAGE("Warning. VTKTUD_WRAP_JAVA is ON but the VTK version you have "
+  IF (VTKTUDOSS_WRAP_JAVA)
+    MESSAGE("Warning. VTKTUDOSS_WRAP_JAVA is ON but the VTK version you have "
             "chosen has not support for Java (VTK_WRAP_JAVA is OFF).  "
-            "Please set VTKTUD_WRAP_JAVA to OFF.")
-    SET (VTKTUD_WRAP_JAVA OFF)
-  ENDIF (VTKTUD_WRAP_JAVA)
+            "Please set VTKTUDOSS_WRAP_JAVA to OFF.")
+    SET (VTKTUDOSS_WRAP_JAVA OFF)
+  ENDIF (VTKTUDOSS_WRAP_JAVA)
 
 ENDIF (VTK_WRAP_JAVA)
 

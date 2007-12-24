@@ -1,20 +1,20 @@
 """
-Python import module for vtktud.
+Python import module for vtktudoss.
 
-$Id: vtktud.py.in 313 2007-09-21 11:05:30Z stef $
+$Id: vtktudoss.py.in 313 2007-09-21 11:05:30Z stef $
 """
 
 # change this file and commit if you want this updated
 version = "$Revision: 313 $"
 
 import os
-kits = "@VTKTUD_KITS_FORPYTHON@".split(";")
+kits = "@VTKTUDOSS_KITS_FORPYTHON@".split(";")
 for kit in kits:
     try:
         if os.name == 'posix':
-          eval(compile("from libvtktud" + kit + "Python import *", __file__, 'exec'))
+          eval(compile("from libvtktudoss" + kit + "Python import *", __file__, 'exec'))
         else:
-          eval(compile("from vtktud" + kit + "Python import *", __file__, 'exec'))
+          eval(compile("from vtktudoss" + kit + "Python import *", __file__, 'exec'))
     except ImportError,e:
         print e
 del kit
