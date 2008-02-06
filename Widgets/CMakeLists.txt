@@ -42,7 +42,7 @@ IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
   # instead of ".dll" as of Python 2.5.  Older python versions do support
   # this suffix.
   IF(WIN32 AND NOT CYGWIN)
-    SET_TARGET_PROPERTIES(vtktudossGraphicsPython PROPERTIES SUFFIX ".pyd")
+    SET_TARGET_PROPERTIES(vtktudossWidgetsPython PROPERTIES SUFFIX ".pyd")
   ENDIF(WIN32 AND NOT CYGWIN)
 ENDIF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
 
