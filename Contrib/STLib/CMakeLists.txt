@@ -33,7 +33,7 @@ IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
   vtktudossSTLibPythonInit.cxx)
   TARGET_LINK_LIBRARIES (vtktudossSTLibPython vtktudossSTLibPythonD)
   TARGET_LINK_LIBRARIES (vtktudossSTLibPythonD
-			             vtkCommonPythonD)
+                         vtktudossSTLib)
   # Python extension modules on Windows must have the extension ".pyd"
   # instead of ".dll" as of Python 2.5.  Older python versions do support
   # this suffix.
