@@ -112,9 +112,9 @@ IF (VTKTUDOSS_CAN_BUILD)
         # Add it to the include dirs, required for building wrappers
         INCLUDE_DIRECTORIES(${VTKTUDOSS_SOURCE_DIR}/Contrib/${kit})
         # Add to the list of kits built
-        SET(VTKTUDOSS_KITS_BUILT ${VTKTUDOSS_KITS_BUILT} "Contrib${kit}")
+        SET(VTKTUDOSS_KITS_BUILT ${VTKTUDOSS_KITS_BUILT} "${kit}")
       ELSE(BUILD_CONTRIB_${kit_uc})
-        SET(VTKTUDOSS_KITS_NOTBUILT ${VTKTUDOSS_KITS_NOTBUILT} "Contrib${kit}")
+        SET(VTKTUDOSS_KITS_NOTBUILT ${VTKTUDOSS_KITS_NOTBUILT} "${kit}")
       ENDIF(BUILD_CONTRIB_${kit_uc})
     ENDFOREACH(i)
   ENDIF(BUILD_CONTRIB)
