@@ -50,6 +50,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   # Contrib (3rd party) kits
   # Syntax: Dirname "Description"
   SET(VTKTUDOSS_KITS_CONTRIB
+      STLib "Mauch's STLib (CPT)"
   )
 
   #
@@ -93,7 +94,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   ENDIF(LENGTH)
 
   # Process Contrib kits
-  OPTION(BUILD_CONTRIB "Build contributed code (NOTHING HERE YET)." OFF)
+  OPTION(BUILD_CONTRIB "Build contributed code." OFF)
   IF(BUILD_CONTRIB)
     LIST(LENGTH VTKTUDOSS_KITS_CONTRIB nkits)
     MATH(EXPR nkits "(${nkits} / 2) - 1" )
