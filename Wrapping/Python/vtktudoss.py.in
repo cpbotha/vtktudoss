@@ -3,7 +3,7 @@ Python import module for vtktudoss.
 """
 
 # change this file and commit if you want this updated
-stamp = '20080917-0008'
+stamp = '20080917-0022'
 version = "$Revision$"
 
 def __configure_dl():
