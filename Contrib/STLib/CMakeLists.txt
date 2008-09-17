@@ -15,14 +15,14 @@ SET (STLib_SRCS
 
 # Create the vtktudossWidgets C++ library
 ADD_LIBRARY (vtktudossSTLib ${STLib_SRCS})
-TARGET_LINK_LIBRARIES(vtktudossSTLib vtkCommon)
+TARGET_LINK_LIBRARIES(vtktudossSTLib vtkFiltering vtkGraphics vtkCommon)
 
 # Create the vtktudossSTLib Tcl library
 IF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
   VTK_WRAP_TCL3 (vtktudossSTLibTCL STLibTCL_SRCS
   "${STLib_SRCS}" "")
   ADD_LIBRARY (vtktudossSTLibTCL ${STLibTCL_SRCS})
-  TARGET_LINK_LIBRARIES (vtktudossSTLibTCL vtkCommonTCL)
+  TARGET_LINK_LIBRARIES (vtktudossSTLibTCL vtktudossSTLib)
 ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossSTLib Python library.
@@ -33,6 +33,9 @@ IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
   vtktudossSTLibPythonInit.cxx)
   TARGET_LINK_LIBRARIES (vtktudossSTLibPython vtktudossSTLibPythonD)
   TARGET_LINK_LIBRARIES (vtktudossSTLibPythonD
+                         vtkFilteringPythonD
+                         vtkGraphicsPythonD
+                         vtkCommonPythonD
                          vtktudossSTLib)
   # Python extension modules on Windows must have the extension ".pyd"
   # instead of ".dll" as of Python 2.5.  Older python versions do support
