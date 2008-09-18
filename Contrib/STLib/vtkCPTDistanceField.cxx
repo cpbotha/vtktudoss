@@ -207,25 +207,29 @@ int vtkCPTDistanceField::RequestData(vtkInformation *vtkNotUsed(request),
 
 	// Set up the CPT module
 	cpt::State<3, double> state;
-	state.setParameters(domain, MaximumDistance);
-	state.setLattice(Dimensions, domain);
+	state.setParameters(domain, this->MaximumDistance);
+	state.setLattice(this->Dimensions, domain);
 	// We use a single grid covering the entire lattice
 	int zeroes[3] = {0, 0, 0};
-	state.insertGrid(zeroes, Dimensions, 
+	state.insertGrid(zeroes, this->Dimensions, 
 		static_cast<double*>(output->GetScalarPointer()), 0, 0, 0);
 
-	state.setBRepWithNoClipping(numVerts, verts, numFaces, faces);
+	//state.setBRepWithNoClipping(numVerts, verts, numFaces, faces);
+    state.setBRep(numVerts, verts, numFaces, faces);
 	
 	// Now compute the distance field
 	vtkDebugMacro(<<"Computing CPT...");
 	state.computeClosestPointTransform();
 
+    //state.floodFillDetermineSign(this->MaximumDistance);
+    state.floodFillAtBoundary(this->MaximumDistance);
+
 	// Check the grids (see cpt3.cc example)
-	if (!state.areGridsValid())
-	{
-		vtkErrorMacro(<<"Warning! Computed distance field is not valid!");
+	//if (!state.areGridsValid())
+	//{
+	//	vtkErrorMacro(<<"Warning! Computed distance field is not valid!");
 		// Not sure if we should exit here...
-	}
+	//}
 
 	vtkDebugMacro(<<"Done!");
 
