@@ -40,6 +40,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   SET(VTKTUDOSS_KITS_CORE
     Graphics
     Widgets
+    CompVis
   )
 
   # Optional kits
