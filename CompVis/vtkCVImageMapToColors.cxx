@@ -22,9 +22,9 @@
 #include "vtkScalarsToColors.h"
 #include "vtkPointData.h"
 
-//vtkCxxRevisionMacro(vtkCVImageMapToColors, "$Revision: 1.30 $");
+vtkCxxRevisionMacro(vtkCVImageMapToColors, "$Revision: 1.0 $")
 vtkStandardNewMacro(vtkCVImageMapToColors);
-vtkCxxSetObjectMacro(vtkCVImageMapToColors,LookupTable,vtkScalarsToColors);
+vtkCxxSetObjectMacro(vtkCVImageMapToColors,LookupTable2,vtkScalarsToColors);
 
 //----------------------------------------------------------------------------
 // Constructor sets default values
@@ -78,6 +78,7 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   unsigned long count = 0;
   unsigned long target;
   int dataType = inData->GetScalarType();
+  // size of scalar type in bytes
   int scalarSize = inData->GetScalarSize();
   int numberOfComponents,numberOfOutputComponents,outputFormat;
   int rowLength;
@@ -93,7 +94,7 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   target = static_cast<unsigned long>(extZ*extY/50.0);
   target++;
 
-  // Get increments to march through data
+  // Get increments to march through data, taking into account number of components
   inData->GetContinuousIncrements(outExt, inIncX, inIncY, inIncZ);
   // because we are using void * and char * we must take care
   // of the scalar size in the increments
@@ -105,10 +106,25 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   outputFormat = self->GetOutputFormat();
   rowLength = extX*scalarSize*numberOfComponents;
 
+  if (dataType != VTK_SHORT)
+  {
+    vtkErrorWithObjectMacro(self, <<"Input data needs to be type short.");
+    return;
+  }
+
+  if (outputFormat != VTK_RGBA && outputFormat != VTK_RGB)
+  {
+    vtkErrorWithObjectMacro(self, <<"Output format needs to be RGB or RGBA.");
+    return;
+  }
+
   // Loop through output pixels
   outPtr1 = outPtr;
   inPtr1 = static_cast<void *>(
     static_cast<char *>(inPtr) + self->GetActiveComponent()*scalarSize);
+
+  double c1[3], c2[3];
+
   for (idxZ = 0; idxZ < extZ; idxZ++)
     {
     for (idxY = 0; !self->AbortExecute && idxY < extY; idxY++)
@@ -121,23 +137,29 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
           }
         count++;
         }
-      lookupTable->MapScalarsThroughTable2(inPtr1,outPtr1,
-                                           dataType,extX,numberOfComponents,
-                                           outputFormat);
-      if (self->GetPassAlphaToOutput() &&
-          dataType == VTK_UNSIGNED_CHAR && numberOfComponents > 1 &&
-          (outputFormat == VTK_RGBA || outputFormat == VTK_LUMINANCE_ALPHA))
-        {
-        unsigned char *outPtr2 = outPtr1 + numberOfOutputComponents - 1;
-        unsigned char *inPtr2 = static_cast<unsigned char *>(inPtr1)
-          - self->GetActiveComponent()*scalarSize + numberOfComponents - 1;
-        for (int i = 0; i < extX; i++)
-          {
-          *outPtr2 = (*outPtr2 * *inPtr2)/255;
-          outPtr2 += numberOfOutputComponents;
-          inPtr2 += numberOfComponents;
-          }
-        }
+
+      // inPtr1 is now a pointer to the first instance of the first active component for this row
+      // outPtr1 is a pointer to the output RGB(A) data
+
+      //lookupTable->MapScalarsThroughTable2(inPtr1,outPtr1,
+      //                                     dataType,extX,numberOfComponents,
+      //                                     outputFormat);
+
+      unsigned char *outPtr3 = outPtr1;
+      short *inPtr3 = static_cast<short*>(inPtr1);
+      for (int i = 0; i < extX; i++)
+      {
+        // lookup first component at ...
+        lookupTable->GetColor(static_cast<double>(*inPtr3), c1);
+        outPtr3[0] = 0; // c1[0] * 255.0;
+        outPtr3[1] = c1[1] * 255.0;
+        outPtr3[2] = c1[2] * 255.0;
+        if (outputFormat = VTK_RGBA) outPtr3[3] = 255;
+        outPtr3 += numberOfOutputComponents;
+        inPtr3 += numberOfComponents;
+        
+      }
+
       outPtr1 += outIncY + extX*numberOfOutputComponents;
       inPtr1 = static_cast<void *>(
         static_cast<char *>(inPtr1) + inIncY + rowLength);
@@ -159,6 +181,9 @@ void vtkCVImageMapToColors::ThreadedRequestData(
   vtkImageData **outData,
   int outExt[6], int id)
 {
+  
+  
+  
   void *inPtr = inData[0][0]->GetScalarPointerForExtent(outExt);
   void *outPtr = outData[0]->GetScalarPointerForExtent(outExt);
 
