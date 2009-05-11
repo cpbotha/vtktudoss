@@ -22,9 +22,17 @@ public:
   // We need to check the modified time of the lookup table too.
   virtual unsigned long GetMTime();
 
+  vtkSetMacro(ConfidenceThreshold, double);
+  vtkGetMacro(ConfidenceThreshold, double);
+
+
 protected:
   vtkCVImageMapToColors();
   ~vtkCVImageMapToColors();
+
+  virtual int RequestData(vtkInformation *request,
+                          vtkInformationVector **inputVector,
+                          vtkInformationVector *outputVector);
 
   void ThreadedRequestData(vtkInformation *request,
                            vtkInformationVector **inputVector,
@@ -33,6 +41,8 @@ protected:
                            int extent[6], int id);
 
   vtkScalarsToColors *LookupTable2;
+
+  double ConfidenceThreshold;
 
 private:
   vtkCVImageMapToColors(const vtkCVImageMapToColors&);  // Not implemented.

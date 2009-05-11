@@ -31,6 +31,7 @@ vtkCxxSetObjectMacro(vtkCVImageMapToColors,LookupTable2,vtkScalarsToColors);
 vtkCVImageMapToColors::vtkCVImageMapToColors()
 {
   this->LookupTable2 = NULL;
+  this->ConfidenceThreshold = 32;
 }
 
 //----------------------------------------------------------------------------
@@ -62,6 +63,56 @@ unsigned long vtkCVImageMapToColors::GetMTime()
 }
 
 
+int vtkCVImageMapToColors::RequestData(vtkInformation *request,
+                                      vtkInformationVector **inputVector,
+                                      vtkInformationVector *outputVector)
+{
+
+  
+  
+
+  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
+  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+
+  vtkImageData *outData = vtkImageData::SafeDownCast(
+    outInfo->Get(vtkDataObject::DATA_OBJECT()));
+  vtkImageData *inData = vtkImageData::SafeDownCast(
+    inInfo->Get(vtkDataObject::DATA_OBJECT()));
+
+  if (inData->GetScalarType() != VTK_SHORT)
+  {
+    vtkErrorMacro(<<"Input data needs to be type short.");
+    return 1;
+  }
+
+  if (inData->GetNumberOfScalarComponents() < 3)
+  {
+    vtkErrorMacro(<<"Need at least 3 scalar components.");
+    return 1;
+  }
+
+  if (this->OutputFormat != VTK_RGBA && this->OutputFormat != VTK_RGB)
+  {
+    vtkErrorMacro(<<"Output format needs to be RGB or RGBA.");
+    return 1;
+  }
+
+  if (this->LookupTable2 == NULL)
+  {
+    vtkErrorMacro(<<"Need LookupTable2 for this job.");
+    return 1;
+  }
+
+
+return this->Superclass::RequestData(request, inputVector, outputVector);
+
+}
+
+
+
+
+
+
 //----------------------------------------------------------------------------
 // This non-templated function executes the filter for any type of data.
 
@@ -83,6 +134,7 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   int numberOfComponents,numberOfOutputComponents,outputFormat;
   int rowLength;
   vtkScalarsToColors *lookupTable = self->GetLookupTable();
+  vtkScalarsToColors *lookupTable2 = self->GetLookupTable2();
   unsigned char *outPtr1;
   void *inPtr1;
 
@@ -106,29 +158,22 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   outputFormat = self->GetOutputFormat();
   rowLength = extX*scalarSize*numberOfComponents;
 
-  if (dataType != VTK_SHORT)
-  {
-    vtkErrorWithObjectMacro(self, <<"Input data needs to be type short.");
-    return;
-  }
-
-  if (outputFormat != VTK_RGBA && outputFormat != VTK_RGB)
-  {
-    vtkErrorWithObjectMacro(self, <<"Output format needs to be RGB or RGBA.");
-    return;
-  }
-
+  
   // Loop through output pixels
   outPtr1 = outPtr;
   inPtr1 = static_cast<void *>(
     static_cast<char *>(inPtr) + self->GetActiveComponent()*scalarSize);
 
-  double c1[3], c2[3];
+  double col[3];
+  short conf, cval, fval;
+  double conf_thresh = self->GetConfidenceThreshold();
+  
 
   for (idxZ = 0; idxZ < extZ; idxZ++)
     {
     for (idxY = 0; !self->AbortExecute && idxY < extY; idxY++)
       {
+      // haha slimy.  progress updating is only done from the first thread.
       if (!id)
         {
         if (!(count%target))
@@ -141,19 +186,28 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
       // inPtr1 is now a pointer to the first instance of the first active component for this row
       // outPtr1 is a pointer to the output RGB(A) data
 
-      //lookupTable->MapScalarsThroughTable2(inPtr1,outPtr1,
-      //                                     dataType,extX,numberOfComponents,
-      //                                     outputFormat);
+      // in mode 1:
+      // component 1 == context
+      // component 2 == focus
+      // component 3 == distance
 
       unsigned char *outPtr3 = outPtr1;
       short *inPtr3 = static_cast<short*>(inPtr1);
       for (int i = 0; i < extX; i++)
       {
-        // lookup first component at ...
-        lookupTable->GetColor(static_cast<double>(*inPtr3), c1);
-        outPtr3[0] = 0; // c1[0] * 255.0;
-        outPtr3[1] = c1[1] * 255.0;
-        outPtr3[2] = c1[2] * 255.0;
+        
+        cval = *inPtr3;
+        fval = *(inPtr3+1);
+        conf = *(inPtr3+2);
+
+        if (conf > conf_thresh)
+          lookupTable->GetColor(static_cast<double>(cval), col);
+        else
+          lookupTable2->GetColor(static_cast<double>(fval), col);
+
+        outPtr3[0] = col[0] * 255.0;
+        outPtr3[1] = col[1] * 255.0;
+        outPtr3[2] = col[2] * 255.0;
         if (outputFormat = VTK_RGBA) outPtr3[3] = 255;
         outPtr3 += numberOfOutputComponents;
         inPtr3 += numberOfComponents;
