@@ -32,6 +32,8 @@ vtkCVImageMapToColors::vtkCVImageMapToColors()
 {
   this->LookupTable2 = NULL;
   this->ConfidenceThreshold = 32;
+  this->FocusTarget = 3; // c0 - c1
+  this->ContextTarget = 0; // c0
 }
 
 //----------------------------------------------------------------------------
@@ -161,12 +163,19 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
   
   // Loop through output pixels
   outPtr1 = outPtr;
+  //inPtr1 = static_cast<void *>(
+  //  static_cast<char *>(inPtr) + self->GetActiveComponent()*scalarSize);
+
+  // we don't use the ActiveComponent ivar
   inPtr1 = static_cast<void *>(
-    static_cast<char *>(inPtr) + self->GetActiveComponent()*scalarSize);
+    static_cast<char *>(inPtr));
+
 
   double col[3];
-  short conf, cval, fval;
+  short conf, c0val, c1val, fval, cval;
   double conf_thresh = self->GetConfidenceThreshold();
+  int focus_target = self->GetFocusTarget();
+  int context_target = self->GetContextTarget();
   
 
   for (idxZ = 0; idxZ < extZ; idxZ++)
@@ -186,24 +195,63 @@ void vtkCVImageMapToColorsExecute(vtkCVImageMapToColors *self,
       // inPtr1 is now a pointer to the first instance of the first active component for this row
       // outPtr1 is a pointer to the output RGB(A) data
 
-      // in mode 1:
-      // component 1 == context
-      // component 2 == focus
-      // component 3 == distance
-
       unsigned char *outPtr3 = outPtr1;
       short *inPtr3 = static_cast<short*>(inPtr1);
       for (int i = 0; i < extX; i++)
       {
         
-        cval = *inPtr3;
-        fval = *(inPtr3+1);
+        // first and second components are c0 and c1 respectively
+        // third component is always the confidence distance
+        c0val = *inPtr3;
+        c1val = *(inPtr3+1);
         conf = *(inPtr3+2);
 
         if (conf > conf_thresh)
+        {
+          switch (context_target)
+          {
+          case 0:
+            // c0
+            cval = c0val;
+            break;
+          case 1:
+            // c1
+            cval = c1val;
+            break;
+          case 2:
+            // minc1
+            cval = -c1val;
+            break;
+          case 3:
+            // diff
+            cval = c0val - c1val;
+            break;
+          }
           lookupTable->GetColor(static_cast<double>(cval), col);
+        }
         else
+        {
+          switch (focus_target)
+          {
+          case 0:
+            // c0
+            fval = c0val;
+            break;
+          case 1:
+            // c1
+            fval = c1val;
+            break;
+          case 2:
+            // minc1
+            fval = -c1val;
+            break;
+          case 3:
+            // diff
+            fval = c0val - c1val;
+            break;
+          }
           lookupTable2->GetColor(static_cast<double>(fval), col);
+        }
 
         outPtr3[0] = col[0] * 255.0;
         outPtr3[1] = col[1] * 255.0;

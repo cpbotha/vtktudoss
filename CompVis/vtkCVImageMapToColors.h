@@ -22,8 +22,30 @@ public:
   // We need to check the modified time of the lookup table too.
   virtual unsigned long GetMTime();
 
+  // Description:
+  // if the confidence distance (3d component) is greater than this,
+  // then we're in the context region, otherwise we're in the focus
+  // region.
   vtkSetMacro(ConfidenceThreshold, double);
   vtkGetMacro(ConfidenceThreshold, double);
+
+  // Description:
+  // Specify what is shown in the focus area.
+  vtkSetMacro(FocusTarget, int);
+  vtkGetMacro(FocusTarget, int);
+  void SetFocusTargetToC0() { this->FocusTarget = 0; };
+  void SetFocusTargetToC1() { this->FocusTarget = 1; };
+  void SetFocusTargetToMinC1() { this->FocusTarget = 2; };
+  void SetFocusTargetToDiff() {this->FocusTarget = 3; };
+
+  // Description:
+  // Specify what is shown in the context area.
+  vtkSetMacro(ContextTarget, int);
+  vtkGetMacro(ContextTarget, int);
+  void SetContextTargetToC0() { this->ContextTarget = 0; };
+  void SetContextTargetToC1() { this->ContextTarget = 1; };
+  void SetContextTargetToMinC1() { this->ContextTarget = 2; };
+  void SetContextTargetToDiff() {this->ContextTarget = 3; };
 
 
 protected:
@@ -43,6 +65,8 @@ protected:
   vtkScalarsToColors *LookupTable2;
 
   double ConfidenceThreshold;
+  int FocusTarget;
+  int ContextTarget;
 
 private:
   vtkCVImageMapToColors(const vtkCVImageMapToColors&);  // Not implemented.
