@@ -32,7 +32,7 @@ vtkCVImageMapToColors::vtkCVImageMapToColors()
 {
   this->LookupTable2 = NULL;
   this->ConfidenceThreshold = 32;
-  this->FocusTarget = 3; // c0 - c1
+  this->FocusTarget = 0; // c0
   this->ContextTarget = 0; // c0
 }
 
