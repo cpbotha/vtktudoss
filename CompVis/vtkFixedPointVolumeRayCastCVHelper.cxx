@@ -714,6 +714,8 @@ void vtkFixedPointVolumeRayCastCVHelper::GenerateImage(
   void *data     = mapper->GetCurrentScalars()->GetVoidPointer(0);
   int scalarType = mapper->GetCurrentScalars()->GetDataType();
 
+  cout << "cpbotha: in CVHelper" << endl;
+
   // Nearest Neighbor interpolate
   if ( mapper->ShouldUseNearestNeighborInterpolation( vol ) )
     {

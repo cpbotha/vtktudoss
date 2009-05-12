@@ -41,6 +41,23 @@ public:
 
   void RenderSubVolume();
 
+//BTX
+  // Description:
+  // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
+  // Initialize rendering for this volume.
+  // cpbotha: I've had to override this JUST so that my RenderSubVolume() is called,
+  // as VTK doesn't have that as virtual.
+  void Render( vtkRenderer *, vtkVolume * );
+//ETX
+
+  // Description:
+  // Activate comparative visualisation mode.  When 0, this acts just like a normal
+  // vtkFixedPointVRCM.  With CompVis 1, the first comparison mode is activated.
+  vtkSetMacro(CompVisMode, int);
+  vtkGetMacro(CompVisMode, int);
+
+  vtkGetObjectMacro( CVHelper, vtkFixedPointVolumeRayCastCVHelper );
+
 protected:
   vtkCVFixedPointVolumeRayCastMapper();
   ~vtkCVFixedPointVolumeRayCastMapper();
@@ -49,6 +66,8 @@ protected:
   friend VTK_THREAD_RETURN_TYPE CVFixedPointVolumeRayCastMapper_CastRays( void *arg );
 
   vtkFixedPointVolumeRayCastCVHelper *CVHelper;
+
+  int CompVisMode;
   
 
 private:
