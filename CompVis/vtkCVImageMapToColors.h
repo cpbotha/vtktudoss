@@ -37,6 +37,7 @@ public:
   void SetFocusTargetToC1() { this->FocusTarget = 1; };
   void SetFocusTargetToMinC1() { this->FocusTarget = 2; };
   void SetFocusTargetToDiff() {this->FocusTarget = 3; };
+  void SetFocusTargetToMagicLens() {this->FocusTarget = 4; };
 
   // Description:
   // Specify what is shown in the context area.
@@ -46,7 +47,6 @@ public:
   void SetContextTargetToC1() { this->ContextTarget = 1; };
   void SetContextTargetToMinC1() { this->ContextTarget = 2; };
   void SetContextTargetToDiff() {this->ContextTarget = 3; };
-
 
 protected:
   vtkCVImageMapToColors();

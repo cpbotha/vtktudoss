@@ -5,6 +5,8 @@
 #
 
 SET (CompVis_SRCS
+   vtkCVFixedPointVolumeRayCastMapper
+   vtkFixedPointVolumeRayCastCVHelper
    vtkCVImageMapToColors
 )
 
@@ -13,7 +15,7 @@ SET (CompVis_SRCS
 
 # Create the vtktudossWidgets C++ library
 ADD_LIBRARY (vtktudossCompVis ${CompVis_SRCS})
-TARGET_LINK_LIBRARIES(vtktudossCompVis vtkImaging)
+TARGET_LINK_LIBRARIES(vtktudossCompVis vtkImaging vtkVolumeRendering)
 
 # Create the vtktudossCompVis Tcl library
 IF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
@@ -33,6 +35,7 @@ IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
   TARGET_LINK_LIBRARIES (vtktudossCompVisPythonD
 			             vtkRenderingPythonD
                          vtkGraphicsPythonD 
+                         vtkVolumeRenderingPythonD
                          vtktudossCompVis)
   # Python extension modules on Windows must have the extension ".pyd"
   # instead of ".dll" as of Python 2.5.  Older python versions do support
