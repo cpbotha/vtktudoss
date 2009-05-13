@@ -705,6 +705,152 @@ void vtkFixedPointCVHelperGenerateImageIndependentTrilin( T *data,
 }
 
 
+// volume render 3-component short data
+template <class T>
+void vtkFixedPointCVHelperGenerateImageCV1( T *data, 
+                                            int threadID,
+                                            int threadCount,
+                                            vtkCVFixedPointVolumeRayCastMapper *mapper,
+                                            vtkVolume *vol)
+{
+  VTKKWRCHelper_InitializeWeights();
+
+  // this defines c
+  VTKKWRCHelper_InitializationAndLoopStartShadeTrilin();
+
+  VTKKWRCHelper_InitializeCompositeMultiTrilin();
+  VTKKWRCHelper_InitializeCompositeMultiShadeTrilin();
+
+  for ( k = 0; k < numSteps; k++ )
+    {
+    if ( k )
+      {
+      mapper->FixedPointIncrement( pos, dir );
+      }
+    
+    VTKKWRCHelper_CroppingCheckTrilin( pos );
+    
+    mapper->ShiftVectorDown( pos, spos );
+    if ( spos[0] != oldSPos[0] ||
+         spos[1] != oldSPos[1] ||
+         spos[2] != oldSPos[2] )
+      {
+      oldSPos[0] = spos[0];
+      oldSPos[1] = spos[1];
+      oldSPos[2] = spos[2];
+
+      // address of first component
+      dptr = data + spos[0]*inc[0] + spos[1]*inc[1] + spos[2]*inc[2];
+
+      // third component (distance) - we just use nearest neighbour in this case.
+      val[2] = static_cast<short>(((*(dptr+2)) + shift[2])*scale[2]);
+
+      dirPtrABCD = gradientDir[spos[2]  ] + spos[0]*dInc[0] + spos[1]*dInc[1];
+      dirPtrEFGH = gradientDir[spos[2]+1] + spos[0]*dInc[0] + spos[1]*dInc[1];
+
+      if (val[2] < 32)
+        {
+        // cell corner scalar values for first component
+        VTKKWRCHelper_GetCellComponentScalarValues( dptr, 0, scale[0], shift[0] );
+      
+        // cell corner gradient values for first component
+
+        VTKKWRCHelper_GetCellComponentDirectionValues( dirPtrABCD, dirPtrEFGH, 0 ); 
+
+        }
+      else
+        {
+        // second component
+        dptr++;
+        VTKKWRCHelper_GetCellComponentScalarValues( dptr, 1, scale[1], shift[1] );
+
+        // second component
+        dirPtrABCD++;
+        dirPtrEFGH++;
+        VTKKWRCHelper_GetCellComponentDirectionValues( dirPtrABCD, dirPtrEFGH, 1 ); 
+        }
+      
+      // third component (distance) - won't need gradients, just using as mask
+      //dirPtrABCD++;
+      //dirPtrEFGH++;
+      //VTKKWRCHelper_GetCellComponentDirectionValues( dirPtrABCD, dirPtrEFGH, 2 ); 
+
+
+      } // if (spos[0] != ...
+
+    
+    
+    // calculate weights for combining corner values
+    VTKKWRCHelper_ComputeWeights(pos);
+
+    // use weights and corner values to interpolate scalar values
+    // for all N components (3d param; we only need 2).  Use c (2nd param) as a loop control var,
+    // stuff interpolated values in 'val' (1st param) array.
+    //VTKKWRCHelper_InterpolateScalarComponent( val, c, 2 );
+
+    // first component inside focus, second component outside
+    if (val[2] < 32)
+      VTKKWRCHelper_InterpolateSingleScalarComponent( val, 0 )
+    else
+      VTKKWRCHelper_InterpolateSingleScalarComponent( val, 1);
+    
+    //VTKKWRCHelper_LookupAndCombineIndependentColorsInterpolateShadeUS( 
+    //  colorTable, scalarOpacityTable, diffuseShadingTable,
+    //  specularShadingTable, val, weights, components, tmp );  
+    // cpbotha: call above is usually used, we're going to replace it
+    // with inline code and MO-DI-FY!
+
+#define COLORTABLE colorTable
+#define SOTABLE scalarOpacityTable
+#define DTABLE diffuseShadingTable
+#define STABLE specularShadingTable
+#define SCALAR val
+#define WEIGHTS weights
+//#define COMPONENTS components
+#define COMPONENTS 2
+#define COLOR tmp
+
+
+  unsigned int _tmp[4] = {0,0,0,0};                                                                                             \
+  unsigned short _alpha[4] = {0,0,0,0};  
+  int _idx;
+  
+  if (val[2] < 32)
+    _idx = 0;
+  else
+    _idx = 1;
+
+
+    _alpha[_idx] = static_cast<unsigned short>(SOTABLE[_idx][SCALAR[_idx]]);                                      \
+    
+                                                                                                                                \
+  if ( !_alpha[_idx] ) {continue;}    
+  
+    
+      _tmp[0] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[1] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[2] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
+      _tmp[3] = _alpha[_idx];                                                                                                  \
+      VTKKWRCHelper_InterpolateShadingComponent( DTABLE, STABLE, _tmp, _idx );                                                 \
+
+  if (!_tmp[3]) {continue;}                                                                                                     \
+  COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
+  COLOR[1] = (_tmp[1]>32767)?(32767):(_tmp[1]);                                                                                 \
+  COLOR[2] = (_tmp[2]>32767)?(32767):(_tmp[2]);                                                                                 \
+  COLOR[3] = (_tmp[3]>32767)?(32767):(_tmp[3]);
+
+    // end of MO-DI-FY!
+
+    
+    VTKKWRCHelper_CompositeColorAndCheckEarlyTermination( color, tmp, remainingOpacity );
+    } // for (k = ...
+  
+  VTKKWRCHelper_SetPixelColor( imagePtr, color, remainingOpacity );  
+  VTKKWRCHelper_IncrementAndLoopEnd();
+}
+
+
+
 void vtkFixedPointVolumeRayCastCVHelper::GenerateImage(
   int threadID,
   int threadCount,
@@ -713,8 +859,6 @@ void vtkFixedPointVolumeRayCastCVHelper::GenerateImage(
 {
   void *data     = mapper->GetCurrentScalars()->GetVoidPointer(0);
   int scalarType = mapper->GetCurrentScalars()->GetDataType();
-
-  cout << "cpbotha: in CVHelper" << endl;
 
   // Nearest Neighbor interpolate
   if ( mapper->ShouldUseNearestNeighborInterpolation( vol ) )
@@ -822,13 +966,40 @@ void vtkFixedPointVolumeRayCastCVHelper::GenerateImage(
     // Indepedent components (more than one)
     else if ( vol->GetProperty()->GetIndependentComponents() )
       {
-      switch ( scalarType )
-        {
-        vtkTemplateMacro( 
-          vtkFixedPointCVHelperGenerateImageIndependentTrilin(
-            static_cast<VTK_TT *>(data),
-            threadID, threadCount, mapper, vol) );
-        }
+        // cpbotha: we're going to integrate here...
+        // logic in the base vtkFPVRCMapper dictates that it prepares as
+        // many TFs / LUTs as there are components.  We are expecting
+        // three-component datasets, so we'll just have to add a dummy¡
+        // third transfer function.  One could also consider overriding
+        // UpdateColorTable() and its caller PerVolumeInitialization()
+        //
+        // yay! seems we DON'T have to add a dummy.
+        if (mapper->GetCompVisMode() > 0)
+          {
+          // for now, we only do signed shorts
+          if ( scalarType == VTK_SHORT && mapper->GetCurrentScalars()->GetNumberOfComponents() >= 3)
+            {
+              vtkFixedPointCVHelperGenerateImageCV1(
+                static_cast<short*>(data),
+                threadID, threadCount, mapper, vol);
+            }
+          else
+            {
+              // work-around for Python threading bug
+              if (threadID == 0)
+                vtkErrorMacro("CompVis mode data must have at least 3 short components.");
+            }
+          }
+        else
+          {
+          switch ( scalarType )
+            {
+            vtkTemplateMacro( 
+              vtkFixedPointCVHelperGenerateImageIndependentTrilin(
+                static_cast<VTK_TT *>(data),
+                threadID, threadCount, mapper, vol) );
+            }
+          }
       }
     // Dependent components
     else

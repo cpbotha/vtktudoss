@@ -30,6 +30,21 @@
 class vtkCVFixedPointVolumeRayCastMapper;
 class vtkVolume;
 
+//BTX  
+#define VTKKWRCHelper_InterpolateSingleScalarComponent( VAL, IDX )               \
+    {                                                                                   \
+    VAL[IDX] =                                                                         \
+    (0x7fff + ((A[IDX]*((0x4000 + w1Xw1Y*w1Z)>>VTKKW_FP_SHIFT)) +                      \
+               (B[IDX]*((0x4000 + w2Xw1Y*w1Z)>>VTKKW_FP_SHIFT)) +                      \
+               (C[IDX]*((0x4000 + w1Xw2Y*w1Z)>>VTKKW_FP_SHIFT)) +                      \
+               (D[IDX]*((0x4000 + w2Xw2Y*w1Z)>>VTKKW_FP_SHIFT)) +                      \
+               (E[IDX]*((0x4000 + w1Xw1Y*w2Z)>>VTKKW_FP_SHIFT)) +                      \
+               (F[IDX]*((0x4000 + w2Xw1Y*w2Z)>>VTKKW_FP_SHIFT)) +                      \
+               (G[IDX]*((0x4000 + w1Xw2Y*w2Z)>>VTKKW_FP_SHIFT)) +                      \
+               (H[IDX]*((0x4000 + w2Xw2Y*w2Z)>>VTKKW_FP_SHIFT)))) >> VTKKW_FP_SHIFT;   \
+    }                                                                                   \
+//ETX 
+
 class VTK_EXPORT vtkFixedPointVolumeRayCastCVHelper : public vtkFixedPointVolumeRayCastHelper
 {
 public:
