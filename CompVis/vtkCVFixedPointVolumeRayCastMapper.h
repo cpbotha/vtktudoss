@@ -12,9 +12,21 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkCVFixedPointVolumeRayCastMapper - A fixed point mapper for volumes
+// .NAME vtkCVFixedPointVolumeRayCastMapper - A fixed point mapper for the
+// comparative visualisation of multi-component volumes.
 // .SECTION Description
-
+//
+// I derived this class and also created the vtkFixedPointVolumeRayCastCVHelper
+// to test ideas for multi-component comparative visualisation of volumes.  This
+// specific experiment was not that successful, primarily due to speed issues
+// that I should have expected. :)  It does work, but too slow: 128x128x80 x 3 
+// volume gets rendered at about 2 to 3 seconds per frame on my core duo 1 2GHz
+// laptop.  That's too slow to get for example animation going at any reasonable rate.
+//
+// I'm keeping this class in here, because it does show a clear example of how
+// to stuff at the ray level with multiple TFs and multiple components.
+//
+// -- cpbotha
 
 // .SECTION see also
 // vtkVolumeMapper

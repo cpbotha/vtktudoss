@@ -16,8 +16,16 @@
 
 =========================================================================*/
 
-// .NAME vtkFixedPointVolumeRayCastCVHelper - A helper that generates composite images for the volume ray cast mapper
+// .NAME vtkFixedPointVolumeRayCastCVHelper - A helper that generates CompVis images for the volume ray cast mapper
 // .SECTION Description
+//
+// This is a fixed point helper that I added to be able to test comparative
+// visualisation strategies on multi-component volumes.  The whole infrastructure
+// seems to work, but things are unfortunately a tad on the slow side.  This helper
+// should be used together with the vtkCVFixedPointVolumeRayCastMapper, also in
+// vtktudoss.
+//
+// -- cpbotha
 //
 // .SECTION see also
 // vtkFixedPointVolumeRayCastMapper

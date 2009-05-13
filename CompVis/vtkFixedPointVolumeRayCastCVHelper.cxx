@@ -704,6 +704,11 @@ void vtkFixedPointCVHelperGenerateImageIndependentTrilin( T *data,
   VTKKWRCHelper_IncrementAndLoopEnd();
 }
 
+// by default this is using nearest neighbour interpolation for the gradients
+// but linear interpolation for the data values.  If you want to use linear
+// interpolation on the gradients as well, uncomment the define.
+//#define NNGRADIENT
+
 
 // volume render 3-component short data
 template <class T>
@@ -720,12 +725,19 @@ void vtkFixedPointCVHelperGenerateImageCV1( T *data,
 
   VTKKWRCHelper_InitializeCompositeMultiTrilin();
   VTKKWRCHelper_InitializeCompositeMultiShadeTrilin();
+  
+#ifdef NNGRADIENT
+  // experiment 1: use NN gradient
+  unsigned short *dirPtr;
+#endif
 
   for ( k = 0; k < numSteps; k++ )
     {
     if ( k )
       {
       mapper->FixedPointIncrement( pos, dir );
+
+
       }
     
     VTKKWRCHelper_CroppingCheckTrilin( pos );
@@ -734,10 +746,15 @@ void vtkFixedPointCVHelperGenerateImageCV1( T *data,
     if ( spos[0] != oldSPos[0] ||
          spos[1] != oldSPos[1] ||
          spos[2] != oldSPos[2] )
-      {
+      { 
       oldSPos[0] = spos[0];
       oldSPos[1] = spos[1];
       oldSPos[2] = spos[2];
+
+#ifdef NNGRADIENT
+      // experiment 1: use NN gradient
+      dirPtr = gradientDir[spos[2]] + spos[0]*dInc[0] + spos[1]*dInc[1];
+#endif
 
       // address of first component
       dptr = data + spos[0]*inc[0] + spos[1]*inc[1] + spos[2]*inc[2];
@@ -745,17 +762,20 @@ void vtkFixedPointCVHelperGenerateImageCV1( T *data,
       // third component (distance) - we just use nearest neighbour in this case.
       val[2] = static_cast<short>(((*(dptr+2)) + shift[2])*scale[2]);
 
+#ifndef NNGRADIENT
       dirPtrABCD = gradientDir[spos[2]  ] + spos[0]*dInc[0] + spos[1]*dInc[1];
       dirPtrEFGH = gradientDir[spos[2]+1] + spos[0]*dInc[0] + spos[1]*dInc[1];
+#endif
 
       if (val[2] < 32)
         {
         // cell corner scalar values for first component
         VTKKWRCHelper_GetCellComponentScalarValues( dptr, 0, scale[0], shift[0] );
-      
-        // cell corner gradient values for first component
 
+#ifndef NNGRADIENT      
+        // cell corner gradient values for first component
         VTKKWRCHelper_GetCellComponentDirectionValues( dirPtrABCD, dirPtrEFGH, 0 ); 
+#endif
 
         }
       else
@@ -764,10 +784,12 @@ void vtkFixedPointCVHelperGenerateImageCV1( T *data,
         dptr++;
         VTKKWRCHelper_GetCellComponentScalarValues( dptr, 1, scale[1], shift[1] );
 
+#ifndef NNGRADIENT
         // second component
         dirPtrABCD++;
         dirPtrEFGH++;
         VTKKWRCHelper_GetCellComponentDirectionValues( dirPtrABCD, dirPtrEFGH, 1 ); 
+#endif
         }
       
       // third component (distance) - won't need gradients, just using as mask
@@ -827,11 +849,22 @@ void vtkFixedPointCVHelperGenerateImageCV1( T *data,
   if ( !_alpha[_idx] ) {continue;}    
   
     
-      _tmp[0] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
-      _tmp[1] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
-      _tmp[2] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   \
-      _tmp[3] = _alpha[_idx];                                                                                                  \
-      VTKKWRCHelper_InterpolateShadingComponent( DTABLE, STABLE, _tmp, _idx );                                                 \
+      _tmp[0] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]  ])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   
+      _tmp[1] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+1])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   
+      _tmp[2] = static_cast<unsigned short>(((COLORTABLE[_idx][3*SCALAR[_idx]+2])*_alpha[_idx] + 0x7fff)>>(VTKKW_FP_SHIFT));   
+      _tmp[3] = _alpha[_idx];       
+      
+#ifndef NNGRADIENT
+      // oi... the shading is looked-up for the per-cell corner gradient directions
+      // the resultant per-corner shading components are added together using the
+      // weights.
+      VTKKWRCHelper_InterpolateShadingComponent( DTABLE, STABLE, _tmp, _idx );
+#else
+
+      // experiment 1: use NN gradient
+      unsigned short normalnn = *dirPtr;
+      VTKKWRCHelper_LookupShading( DTABLE[_idx], STABLE[_idx], normalnn, _tmp );
+#endif
 
   if (!_tmp[3]) {continue;}                                                                                                     \
   COLOR[0] = (_tmp[0]>32767)?(32767):(_tmp[0]);                                                                                 \
