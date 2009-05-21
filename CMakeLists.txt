@@ -191,4 +191,15 @@ IF (VTKTUDOSS_CAN_BUILD)
     ADD_DEFINITIONS(-D_SCL_SECURE_NO_DEPRECATE)
   ENDIF(CMAKE_COMPILER_2005) 
 
+
+  # specify installation
+  # get all files in the lib output path (dlls and such)
+  FILE(GLOB libs ${LIBRARY_OUTPUT_PATH}/*)
+  # copy them all to the output dir in lib/
+  INSTALL(FILES ${libs} 
+      DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+  # copy our python wrapping to the output dir in lib/
+  INSTALL(FILES ${VTKTUDOSS_BINARY_DIR}/Wrapping/Python/vtktudoss.py
+      DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+
 ENDIF (VTKTUDOSS_CAN_BUILD)
