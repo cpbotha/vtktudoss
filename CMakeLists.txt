@@ -192,9 +192,21 @@ IF (VTKTUDOSS_CAN_BUILD)
   ENDIF(CMAKE_COMPILER_2005) 
 
   # specify installation
+
+  # first derive dir holding the DLLs
+  IF(CMAKE_CONFIGURATION_TYPES)
+   # on multi-config systems, e.g. win, we want bin/RelWthDebInfo 
+   # I have to escape the ${BUILD_TYPE}, no idea why yet.
+   SET(inst_from_dir ${LIBRARY_OUTPUT_PATH}/\${BUILD_TYPE})
+  ELSE(CMAKE_CONFIGURATION_TYPES)
+   # on single config systems, it's just bin
+   SET(inst_from_dir ${LIBRARY_OUTPUT_PATH})
+  ENDIF(CMAKE_CONFIGURATION_TYPES)
+
+  # specify installation
   # copy all libs to the output dir in lib/; relative DESTINATION dir
   # is interpreted relative to CMAKE_INSTALL_PREFIX
-  INSTALL(DIRECTORY ${LIBRARY_OUTPUT_PATH}/
+  INSTALL(DIRECTORY ${inst_from_dir}/
       DESTINATION lib)
   # copy our python wrapping to the output dir in lib/
   INSTALL(FILES ${VTKTUDOSS_BINARY_DIR}/Wrapping/Python/vtktudoss.py
