@@ -40,6 +40,11 @@ AxesWidget : test class
 #include "vtkViewport.h"
 #include "vtkDataSetMapper.h"
 
+// we're using snprintf to convert from integer to string representation
+#ifdef _MSC_VER  //all MS compilers define this (version)
+     #define snprintf _snprintf
+#endif
+
 vtkCxxRevisionMacro(vtkAdvancedAngleWidget, "$Revision: 1.2 $");
 vtkStandardNewMacro(vtkAdvancedAngleWidget);
 
