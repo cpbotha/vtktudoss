@@ -44,6 +44,7 @@ IF (VTKTUDOSS_CAN_BUILD)
     Widgets
     CompVis
     Filtering
+    Rendering
   )
 
   # Optional kits
