@@ -43,6 +43,7 @@ IF (VTKTUDOSS_CAN_BUILD)
     Graphics
     Widgets
     CompVis
+    Filtering
   )
 
   # Optional kits
