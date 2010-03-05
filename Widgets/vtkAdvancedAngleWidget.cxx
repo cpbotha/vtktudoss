@@ -72,6 +72,17 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 	
 	this->nudgeactor = vtkActor::New();
 
+
+    // we have to init these as well so Peter's destruction in the
+    // the dtor doesn't break everything...
+    this->innerArcMapA = NULL;
+	this->innerArcMapB = NULL;
+	this->outerArcMapA = NULL;
+	this->outerArcMapB = NULL;
+	this->outer2ArcMapA = NULL;
+	this->outer2ArcMapB = NULL;
+
+
 	this->HandlePropertyDarkBlue = vtkProperty::New();
 	this->HandlePropertyBlue = vtkProperty::New();
 	this->HandlePropertyLightBlue = vtkProperty::New();
@@ -155,18 +166,39 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 // Destructor
 vtkAdvancedAngleWidget::~vtkAdvancedAngleWidget()
 {	
-	this->innerArcMapA->Delete();
+    // thank you cpbotha, segfault preventor!
+	
+    // instantiated in CreatePrimaryArc
+    if (this->innerArcMapA)
+        this->innerArcMapA->Delete();
+    // instantiated in ctor
 	this->innerArcA->Delete();
-	this->innerArcMapB->Delete();
-	this->innerArcB->Delete();
-	this->outerArcMapA->Delete();
+    // instantiated in CreatePrimaryArc
+    if (this->innerArcMapB)
+        this->innerArcMapB->Delete();
+	// instantiated in ctor
+    this->innerArcB->Delete();
+    // instantiated in CreateArcRange1
+    if (this->outerArcMapA)
+        this->outerArcMapA->Delete();
+    // instantiated in ctor
 	this->outerArcA->Delete();
-	this->outerArcMapB->Delete();
+    // instantiated in CreateArgRange1
+    if (this->outerArcMapB)
+        this->outerArcMapB->Delete();
+    // instantiated in ctor
 	this->outerArcB->Delete();
-	this->outer2ArcMapA->Delete();
+    // instantiated in CreateArcRange2
+    if (this->outer2ArcMapA)
+        this->outer2ArcMapA->Delete();
+    // instantiated in ctor
 	this->outer2ArcA->Delete();
-	this->outer2ArcMapB->Delete();
+    // instantiated in CreateArcRange2
+    if (this->outer2ArcMapB)
+        this->outer2ArcMapB->Delete();
+    // instantiated in ctor
 	this->outer2ArcB->Delete();
+    // instantiated in ctor
 	this->nudgeactor->Delete();
 
 	this->Transform->Delete();
