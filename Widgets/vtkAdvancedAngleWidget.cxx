@@ -159,6 +159,8 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 	this->CurrentHandle = NULL;
 
 	this->Transform = vtkTransform::New();
+
+	this->FileName = NULL;
 }
 
 
@@ -203,6 +205,7 @@ vtkAdvancedAngleWidget::~vtkAdvancedAngleWidget()
 
 	this->Transform->Delete();
     this->HandlePicker->Delete();
+	this->SetFileName(0);
 }
 
 
@@ -822,6 +825,13 @@ void vtkAdvancedAngleWidget::SetEnabled(int enabling)
     return;
     }
 
+  if (!this->FileName || (this->FileName && (0==strlen(this->FileName))))
+    {
+    vtkErrorMacro(<<"A FileName must be specified.");
+    return;
+    }
+
+
   if ( enabling ) //------------------------------------------------------------
     {
 		vtkDebugMacro(<<"Enabling widget");
@@ -974,7 +984,7 @@ void vtkAdvancedAngleWidget::PlaceWidget(double bds[6])
 void vtkAdvancedAngleWidget::CreateNudge()
 {
 	this->stlreader = vtkSTLReader::New();
-	this->stlreader->SetFileName("c:/widgetnudge.stl");
+	this->stlreader->SetFileName(this->FileName);
 	this->stlreader->Update();
 	
 	this->nudgemapper = vtkDataSetMapper::New();

@@ -130,6 +130,9 @@ public:
 	vtkSetVectorMacro(widgetcolor,double,3);
 	vtkGetVectorMacro(widgetcolor,double,3);
 
+	vtkSetStringMacro(FileName);
+    vtkGetStringMacro(FileName);
+
 	virtual void GetTransform(vtkTransform *t);
 	virtual void GetTransformForActor(vtkTransform *t);
 	virtual void GetInitialOrientationTransform(vtkTransform *t);
@@ -138,6 +141,8 @@ protected:
     vtkAdvancedAngleWidget(void);
 	~vtkAdvancedAngleWidget(void);
 	//BTX - manage the state of the widget
+	char *FileName;
+
 	int State;
 	enum WidgetState
 	{
