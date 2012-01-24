@@ -27,6 +27,7 @@ ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossCompVis Python library.
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (vtktudossCompVisPython CompVisPython_SRCS "${CompVis_SRCS}")
   ADD_LIBRARY (vtktudossCompVisPythonD ${CompVisPython_SRCS})
   ADD_LIBRARY (vtktudossCompVisPython MODULE

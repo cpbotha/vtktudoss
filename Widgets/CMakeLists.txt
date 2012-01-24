@@ -27,6 +27,7 @@ ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossWidgets Python library.
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (vtktudossWidgetsPython WidgetsPython_SRCS "${Widgets_SRCS}")
   ADD_LIBRARY (vtktudossWidgetsPythonD ${WidgetsPython_SRCS})
   ADD_LIBRARY (vtktudossWidgetsPython MODULE

@@ -25,6 +25,7 @@ ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossRendering Python library.
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (vtktudossRenderingPython RenderingPython_SRCS "${Rendering_SRCS}")
   ADD_LIBRARY (vtktudossRenderingPythonD ${RenderingPython_SRCS})
   ADD_LIBRARY (vtktudossRenderingPython MODULE

@@ -25,6 +25,7 @@ ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossGraphics Python library.
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (vtktudossGraphicsPython GraphicsPython_SRCS "${Graphics_SRCS}")
   ADD_LIBRARY (vtktudossGraphicsPythonD ${GraphicsPython_SRCS})
   ADD_LIBRARY (vtktudossGraphicsPython MODULE

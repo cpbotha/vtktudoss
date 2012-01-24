@@ -25,6 +25,7 @@ ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
 
 # Create the vtktudossFiltering Python library.
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
+  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (vtktudossFilteringPython FilteringPython_SRCS "${Filtering_SRCS}")
   ADD_LIBRARY (vtktudossFilteringPythonD ${FilteringPython_SRCS})
   ADD_LIBRARY (vtktudossFilteringPython MODULE
