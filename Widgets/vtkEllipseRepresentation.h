@@ -55,7 +55,7 @@ public:
 
   // Description:
   // Standard VTK methods.
-  vtkTypeRevisionMacro(vtkEllipseRepresentation,vtkWidgetRepresentation);
+  vtkTypeMacro(vtkEllipseRepresentation,vtkWidgetRepresentation);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:
