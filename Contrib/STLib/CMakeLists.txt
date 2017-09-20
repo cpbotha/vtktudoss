@@ -26,6 +26,8 @@ INSTALL(TARGETS ${BASENAME}
   ARCHIVE DESTINATION ${LIB_DESTINATION}
   LIBRARY DESTINATION ${LIB_DESTINATION})
 
+# this is used almost verbatim in other kits
+# only "target_link_libraries(...PythonD ...)" needs to be modified per kit
 IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
   INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
   VTK_WRAP_PYTHON3 (${BASENAME}Python KITPython_SRCS "${KIT_SRCS}")
