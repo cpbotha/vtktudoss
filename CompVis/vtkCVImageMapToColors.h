@@ -10,7 +10,7 @@ class VTK_EXPORT vtkCVImageMapToColors : public vtkImageMapToColors
 {
 public:
   static vtkCVImageMapToColors *New();
-  vtkTypeRevisionMacro(vtkCVImageMapToColors,vtkImageMapToColors);
+  vtkTypeMacro(vtkCVImageMapToColors,vtkImageMapToColors);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:

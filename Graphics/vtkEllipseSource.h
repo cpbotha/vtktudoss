@@ -39,7 +39,7 @@ public:
   // Construct default ellipse source.
   static vtkEllipseSource *New();
 
-  vtkTypeRevisionMacro(vtkEllipseSource,vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkEllipseSource,vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:

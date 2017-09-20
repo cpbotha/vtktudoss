@@ -81,7 +81,7 @@ public:
 
   // Description:
   // Standard methods for a VTK class.
-  vtkTypeRevisionMacro(vtkEllipseWidget,vtkAbstractWidget);
+  vtkTypeMacro(vtkEllipseWidget,vtkAbstractWidget);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   // Description:

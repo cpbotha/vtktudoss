@@ -31,7 +31,7 @@ class VTK_EXPORT vtkAdvancedAngleWidget : public vtk3DWidget
 {
 public:
 	void PrintSelf(ostream& os, vtkIndent indent);
-	vtkTypeRevisionMacro(vtkAdvancedAngleWidget,vtk3DWidget);
+	vtkTypeMacro(vtkAdvancedAngleWidget,vtk3DWidget);
 	static vtkAdvancedAngleWidget *New();
 
 	double widgetcolor[3];

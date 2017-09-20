@@ -16,7 +16,7 @@ class VTK_EXPORT vtktudExtendedOpenGLPolyDataMapper : public vtkOpenGLPolyDataMa
 {
 public:
   static vtktudExtendedOpenGLPolyDataMapper *New();
-  vtkTypeRevisionMacro(vtktudExtendedOpenGLPolyDataMapper,vtkOpenGLPolyDataMapper);
+  vtkTypeMacro(vtktudExtendedOpenGLPolyDataMapper,vtkOpenGLPolyDataMapper);
 
 
   virtual void RenderPiece(vtkRenderer *ren, vtkActor *a);

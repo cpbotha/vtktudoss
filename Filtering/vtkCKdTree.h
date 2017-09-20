@@ -26,7 +26,7 @@ class vtkMatrix4x4;
 class VTK_EXPORT vtkCKdTree : public vtkPolyDataAlgorithm
 {
 public:
-	vtkTypeRevisionMacro(vtkCKdTree,vtkPolyDataAlgorithm);
+	vtkTypeMacro(vtkCKdTree,vtkPolyDataAlgorithm);
 	
 	
 	vtkGetObjectMacro(ptidtypearray, vtkIdTypeArray);

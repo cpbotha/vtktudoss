@@ -47,7 +47,7 @@ class VTK_EXPORT vtkCVFixedPointVolumeRayCastMapper : public vtkFixedPointVolume
 {
 public:
   static vtkCVFixedPointVolumeRayCastMapper *New();
-  vtkTypeRevisionMacro(vtkCVFixedPointVolumeRayCastMapper,vtkFixedPointVolumeRayCastMapper);
+  vtkTypeMacro(vtkCVFixedPointVolumeRayCastMapper,vtkFixedPointVolumeRayCastMapper);
   void PrintSelf( ostream& os, vtkIndent indent );
 
 

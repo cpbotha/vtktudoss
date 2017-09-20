@@ -7,7 +7,7 @@
 class VTK_EXPORT vtkCPTDistanceField : public vtkImageAlgorithm
 {
 public:
-	vtkTypeRevisionMacro(vtkCPTDistanceField, vtkImageAlgorithm);
+	vtkTypeMacro(vtkCPTDistanceField, vtkImageAlgorithm);
 	void PrintSelf(ostream &os, vtkIndent indent);
 
 	static vtkCPTDistanceField *New();
