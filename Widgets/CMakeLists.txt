@@ -15,42 +15,5 @@ SET (Widgets_SRCS
 
 # Create the vtktudossWidgets C++ library
 ADD_LIBRARY (vtktudossWidgets ${Widgets_SRCS})
-TARGET_LINK_LIBRARIES(vtktudossWidgets vtktudossGraphics vtkGraphics vtkRendering vtkFiltering vtkHybrid vtkWidgets vtkCommon)
+TARGET_LINK_LIBRARIES(vtktudossWidgets vtktudossGraphics ${VTK_LIBRARIES})
 
-# Create the vtktudossWidgets Tcl library
-IF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
-  VTK_WRAP_TCL3 (vtktudossWidgetsTCL WidgetsTCL_SRCS
-  "${Widgets_SRCS}" "")
-  ADD_LIBRARY (vtktudossWidgetsTCL ${WidgetsTCL_SRCS})
-  TARGET_LINK_LIBRARIES (vtktudossWidgetsTCL vtkFilteringTCL vtkWidgetsTCL vtktudossWidgets)
-ENDIF (VTK_WRAP_TCL AND VTKTUDOSS_WRAP_TCL)
-
-# Create the vtktudossWidgets Python library.
-IF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
-  INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
-  VTK_WRAP_PYTHON3 (vtktudossWidgetsPython WidgetsPython_SRCS "${Widgets_SRCS}")
-  ADD_LIBRARY (vtktudossWidgetsPythonD ${WidgetsPython_SRCS})
-  ADD_LIBRARY (vtktudossWidgetsPython MODULE
-  vtktudossWidgetsPythonInit.cxx)
-  TARGET_LINK_LIBRARIES (vtktudossWidgetsPython vtktudossWidgetsPythonD)
-  TARGET_LINK_LIBRARIES (vtktudossWidgetsPythonD
-			             vtkGraphicsPythonD
-			 vtkRenderingPythonD
-			 vtkFilteringPythonD
-                         vtkHybridPythonD
-                         vtkWidgetsPythonD 
-                         vtktudossWidgets)
-  # Python extension modules on Windows must have the extension ".pyd"
-  # instead of ".dll" as of Python 2.5.  Older python versions do support
-  # this suffix.
-  IF(WIN32 AND NOT CYGWIN)
-    SET_TARGET_PROPERTIES(vtktudossWidgetsPython PROPERTIES SUFFIX ".pyd")
-  ENDIF(WIN32 AND NOT CYGWIN)
-ENDIF (VTK_WRAP_PYTHON AND VTKTUDOSS_WRAP_PYTHON)
-
-# Create the vtktudossWidgets Java library.
-IF (VTK_WRAP_JAVA AND VTKTUDOSS_WRAP_JAVA)
-  VTK_WRAP_JAVA3 (vtktudossWidgetsJava ImagingJava_SRCS "${Widgets_SRCS}")
-  ADD_LIBRARY (vtktudossWidgetsJava SHARED ${Widgetsava_SRCS})
-  TARGET_LINK_LIBRARIES (vtktudossWidgetsJava vtktudossWidgets)
-ENDIF (VTK_WRAP_JAVA AND VTKTUDOSS_WRAP_JAVA)
