@@ -13,6 +13,7 @@ fi
 SRC_DIR=$RECIPE_DIR/..
 cd $SRC_DIR
 
+rm -rf build
 mkdir -p build
 cd build
 
