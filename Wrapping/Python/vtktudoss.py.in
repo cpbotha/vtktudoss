@@ -2,61 +2,10 @@
 Python import module for vtktudoss.
 """
 
-# change this file and commit if you want this updated
-stamp = '20080917-0022'
-version = "$Revision$"
-
-def __configure_dl():
-    # took DL handling from Mathieu Malaterre's vtkgdcm.py
-
-    # extremely important !
-    # http://gcc.gnu.org/faq.html#dso
-    # http://mail.python.org/pipermail/python-dev/2002-May/023923.html
-    # http://wiki.python.org/moin/boost.python/CrossExtensionModuleDependencies
-    # This is now merged in VTK 5.2:
-    # http://vtk.org/cgi-bin/viewcvs.cgi/Wrapping/Python/vtk/__init__.py?r1=1.13&r2=1.14
-    import sys
-    orig_dlopen_flags = sys.getdlopenflags()
-
-    try:
-      import dl
-    except ImportError:
-      # are we on AMD64 ?
-      try:
-        import DLFCN as dl
-      except ImportError:
-        print "Could not import dl"
-        dl = None
-
-    if dl:
-     sys.setdlopenflags(dl.RTLD_NOW|dl.RTLD_GLOBAL)
-
-    return dl, orig_dlopen_flags
-
-def __deconfigure_dl(dl, orig_dlopen_flags):
-    import sys
-    # revert:
-    sys.setdlopenflags(orig_dlopen_flags)
-    del sys, dl
-
-
-import os
-
-
-if os.name == 'posix':
-    dl, orig_dlopen_flags = __configure_dl()
-
 kits = "@VTKTUDOSS_KITS_FORPYTHON@".split(";")
 for kit in kits:
     try:
-        if os.name == 'posix':
-          eval(compile("from libvtktudoss" + kit + "Python import *", __file__, 'exec'))
-        else:
-          eval(compile("from vtktudoss" + kit + "Python import *", __file__, 'exec'))
-    except ImportError,e:
-        print e
+        eval(compile("from vtktudoss" + kit + "Python import *", __file__, 'exec'))
+    except ImportError as e:
+        print(e)
 del kit
-
-if os.name == 'posix':
-    __deconfigure_dl(dl, orig_dlopen_flags)
-
