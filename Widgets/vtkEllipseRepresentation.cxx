@@ -36,7 +36,7 @@
 #include "vtkObjectFactory.h"
 #include "vtkInteractorObserver.h"
 
-vtkCxxRevisionMacro(vtkEllipseRepresentation, "$Revision: 1.21 $");
+
 vtkStandardNewMacro(vtkEllipseRepresentation);
 
 

@@ -5,7 +5,7 @@ was not wrapped for python, so the C probably means something like Crappy.
 =========================================================================*/
 #include "vtkCKdTree.h"
 
-vtkCxxRevisionMacro(vtkCKdTree, "$Revision: 1.0 $");
+
 vtkStandardNewMacro(vtkCKdTree);
 
 

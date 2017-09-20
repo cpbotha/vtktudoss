@@ -22,7 +22,7 @@
 #include "vtkScalarsToColors.h"
 #include "vtkPointData.h"
 
-vtkCxxRevisionMacro(vtkCVImageMapToColors, "$Revision: 1.0 $")
+
 vtkStandardNewMacro(vtkCVImageMapToColors);
 vtkCxxSetObjectMacro(vtkCVImageMapToColors,LookupTable2,vtkScalarsToColors);
 

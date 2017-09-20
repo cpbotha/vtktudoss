@@ -19,7 +19,7 @@
 
 #include <cassert>
 
-vtkCxxRevisionMacro(vtkCPTDistanceField, "$Revision: 1.00 $");
+
 vtkStandardNewMacro(vtkCPTDistanceField);
 
 //----------------------------------------------------------------------------

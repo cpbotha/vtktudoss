@@ -26,7 +26,7 @@
 #include "vtkWidgetEvent.h"
 #include "vtkRenderWindow.h"
 
-vtkCxxRevisionMacro(vtkEllipseWidget, "1.10");
+
 vtkStandardNewMacro(vtkEllipseWidget);
 
 

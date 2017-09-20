@@ -45,7 +45,7 @@ AxesWidget : test class
      #define snprintf _snprintf
 #endif
 
-vtkCxxRevisionMacro(vtkAdvancedAngleWidget, "$Revision: 1.2 $");
+
 vtkStandardNewMacro(vtkAdvancedAngleWidget);
 
 // Constructor

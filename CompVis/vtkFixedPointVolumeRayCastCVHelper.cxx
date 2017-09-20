@@ -30,7 +30,7 @@
 
 #include <math.h>
 
-vtkCxxRevisionMacro(vtkFixedPointVolumeRayCastCVHelper, "$Revision: 1.0 $");
+
 vtkStandardNewMacro(vtkFixedPointVolumeRayCastCVHelper);
 
 // Construct a new vtkFixedPointVolumeRayCastCVHelper with default values

@@ -24,7 +24,7 @@
 
 
 
-vtkCxxRevisionMacro(vtkEllipseSource, "$Revision: 1.7 $");
+
 vtkStandardNewMacro(vtkEllipseSource);
 
 vtkEllipseSource::vtkEllipseSource()

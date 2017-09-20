@@ -30,7 +30,7 @@
 #include "vtkTimerLog.h"
 #include <math.h>
 
-vtkCxxRevisionMacro(vtkCVFixedPointVolumeRayCastMapper, "$Revision: 1.0 $");
+
 vtkStandardNewMacro(vtkCVFixedPointVolumeRayCastMapper); 
 
 

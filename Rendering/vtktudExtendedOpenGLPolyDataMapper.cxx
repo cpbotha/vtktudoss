@@ -47,7 +47,7 @@
 
 #include <math.h>
 
-vtkCxxRevisionMacro(vtktudExtendedOpenGLPolyDataMapper, "$Revision: 1.00 $");
+
 vtkStandardNewMacro(vtktudExtendedOpenGLPolyDataMapper);
 
 // Construct empty object.
