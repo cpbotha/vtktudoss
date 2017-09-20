@@ -5,9 +5,15 @@
 # NB: on macOS you have to set CXX_FLAGS to -stdlib=libstdc++
 # if not, you'll get e.g. PrintSelf symbol not found
 
-PROJECT (VTKTUDOSS)
+# NB: you need to set INSTALL_PYTHON_MODULE_DIR to conda SP_DIR, i.e. the relevant Python site-packages
+
+PROJECT (vtktudoss)
 
 cmake_minimum_required(VERSION 3.3)
+
+SET(LIB_DESTINATION lib)
+SET(BIN_DESTINATION bin)
+SET(INCLUDE_DESTINATION "include/${PROJECT_NAME}")
 
 #
 # Assume everything is set up correctly for build.
@@ -203,15 +209,6 @@ IF (VTKTUDOSS_CAN_BUILD)
   ELSE(CMAKE_CONFIGURATION_TYPES)
    # on single config systems, it's just bin
    SET(inst_from_dir ${LIBRARY_OUTPUT_PATH})
-  ENDIF(CMAKE_CONFIGURATION_TYPES)
-
-  # specify installation
-  # copy all libs to the output dir in lib/; relative DESTINATION dir
-  # is interpreted relative to CMAKE_INSTALL_PREFIX
-  INSTALL(DIRECTORY ${inst_from_dir}/
-      DESTINATION lib)
-  # copy our python wrapping to the output dir in lib/
-  INSTALL(FILES ${VTKTUDOSS_BINARY_DIR}/Wrapping/Python/vtktudoss.py
-      DESTINATION lib)
+ ENDIF(CMAKE_CONFIGURATION_TYPES)
 
 ENDIF (VTKTUDOSS_CAN_BUILD)
