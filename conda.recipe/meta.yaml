@@ -1,0 +1,26 @@
+package:
+  name: vtktudoss
+  version: 0.0.1
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - python
+    - cmake >=3.6.0
+    - ninja >=1.7  # [unix]
+    - vtk 7.1.0
+  run:
+    - python
+    - vtk 7.1.0
+
+test:
+  imports:
+    - vtktudoss
+
+about:
+  home: https://github.com/cpbotha/vtktudoss
+  license: BSD3
+  summary: vtktudoss with Python bindings
+
