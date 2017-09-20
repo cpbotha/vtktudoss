@@ -28,7 +28,7 @@ SET (VTKTUDOSS_CAN_BUILD 1)
 # Load CMake commands that you probably should not modify.
 #
 
-INCLUDE (${VTKTUDOSS_SOURCE_DIR}/CMakeOptions.cmake)
+INCLUDE (${PROJECT_SOURCE_DIR}/CMakeOptions.cmake)
 
 #
 # If everything is OK, then go into the sub directories and build.
@@ -76,7 +76,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   FOREACH(kit ${VTKTUDOSS_KITS_CORE})
     SUBDIRS(${kit})
     # Add it to the include dirs, otherwise building the wrappers may fail
-    INCLUDE_DIRECTORIES(${VTKTUDOSS_SOURCE_DIR}/${kit})
+    INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${kit})
   ENDFOREACH(kit)
 
   # Process optional kits
@@ -95,7 +95,7 @@ IF (VTKTUDOSS_CAN_BUILD)
     IF (BUILD_${kit_uc})
       SUBDIRS(${kit})
       # Add it to the include dirs, otherwise building the wrappers may fail
-      INCLUDE_DIRECTORIES(${VTKTUDOSS_SOURCE_DIR}/${kit})
+      INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/${kit})
       # Add to the list of kits built
       SET(VTKTUDOSS_KITS_BUILT ${VTKTUDOSS_KITS_BUILT} ${kit})
     ELSE (BUILD_${kit_uc})
@@ -121,7 +121,7 @@ IF (VTKTUDOSS_CAN_BUILD)
       IF(BUILD_CONTRIB_${kit_uc})
         SUBDIRS(Contrib/${kit})
         # Add it to the include dirs, required for building wrappers
-        INCLUDE_DIRECTORIES(${VTKTUDOSS_SOURCE_DIR}/Contrib/${kit})
+        INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/Contrib/${kit})
         # Add to the list of kits built
         SET(VTKTUDOSS_KITS_BUILT ${VTKTUDOSS_KITS_BUILT} "${kit}")
       ELSE(BUILD_CONTRIB_${kit_uc})
@@ -147,15 +147,15 @@ IF (VTKTUDOSS_CAN_BUILD)
 
   #SUBDIRS(Utilities)
 
-  INCLUDE_DIRECTORIES(${VTKTUDOSS_BINARY_DIR})
+  INCLUDE_DIRECTORIES(${PROJECT_BINARY_DIR})
 
   #
   # Generate files for using VTKTUDOSS from another cmake project
   #
 
-  SET(VTKTUDOSS_INCLUDE_DIRS_CONFIG "${VTKTUDOSS_SOURCE_DIR}")
+  SET(vtktudoss_INCLUDE_DIRS_CONFIG "${PROJECT_SOURCE_DIR}")
   SET(VTKTUDOSS_LIBRARY_DIRS_CONFIG "${LIBRARY_OUTPUT_PATH}")
-  SET(VTKTUDOSS_USE_FILE "${VTKTUDOSS_BINARY_DIR}/UseVTKTUDOSS.cmake")
+  SET(VTKTUDOSS_USE_FILE "${PROJECT_BINARY_DIR}/UseVTKTUDOSS.cmake")
   SET(VTKTUDOSS_KITS_FORCONFIG)
   FOREACH(kit ${VTKTUDOSS_KITS_BUILT})
     STRING(TOUPPER ${kit} kit_uc)
@@ -165,16 +165,18 @@ IF (VTKTUDOSS_CAN_BUILD)
     ENDIF(${kit} MATCHES "^Contrib")
     SET(VTKTUDOSS_KITS_FORCONFIG ${VTKTUDOSS_KITS_FORCONFIG} ${kit_uc})
   ENDFOREACH(kit)
-  CONFIGURE_FILE( 
-    ${VTKTUDOSS_SOURCE_DIR}/UseVTKTUDOSS.cmake.in
-    ${VTKTUDOSS_BINARY_DIR}/UseVTKTUDOSS.cmake
-    COPYONLY IMMEDIATE
-  )
-  CONFIGURE_FILE(
-    ${VTKTUDOSS_SOURCE_DIR}/VTKTUDOSSConfig.cmake.in
-    ${VTKTUDOSS_BINARY_DIR}/VTKTUDOSSConfig.cmake
-    @ONLY IMMEDIATE
-  )
+
+  # cpbotha disabling -- if you need this, fix it. :)
+  # CONFIGURE_FILE( 
+  #   ${PROJECT_SOURCE_DIR}/Usevtktudoss.cmake.in
+  #   ${PROJECT_BINARY_DIR}/UseVTKTUDOSS.cmake
+  #   COPYONLY IMMEDIATE
+  # )
+  # CONFIGURE_FILE(
+  #   ${PROJECT_SOURCE_DIR}/vtktudossConfig.cmake.in
+  #   ${PROJECT_BINARY_DIR}/VTKTUDOSSConfig.cmake
+  #   @ONLY IMMEDIATE
+  # )
 
   #
   # Generate python import module
@@ -183,8 +185,8 @@ IF (VTKTUDOSS_CAN_BUILD)
   IF(VTKTUDOSS_WRAP_PYTHON)
     SET(VTKTUDOSS_KITS_FORPYTHON ${VTKTUDOSS_KITS_BUILT})
     CONFIGURE_FILE(
-      "${VTKTUDOSS_SOURCE_DIR}/Wrapping/Python/vtktudoss.py.in" 
-      "${VTKTUDOSS_BINARY_DIR}/Wrapping/Python/vtktudoss.py"
+      "${PROJECT_SOURCE_DIR}/Wrapping/Python/vtktudoss.py.in" 
+      "${PROJECT_BINARY_DIR}/Wrapping/Python/vtktudoss.py"
       @ONLY
     )
   ENDIF(VTKTUDOSS_WRAP_PYTHON)

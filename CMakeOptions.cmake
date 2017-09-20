@@ -1,9 +1,9 @@
 #
 # Configure output paths for libraries and executables.
 #
-SET(LIBRARY_OUTPUT_PATH ${VTKTUDOSS_BINARY_DIR}/bin CACHE PATH
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH
     "Single output directory for building all libraries.")
-SET(EXECUTABLE_OUTPUT_PATH ${VTKTUDOSS_BINARY_DIR}/bin CACHE PATH
+SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin CACHE PATH
     "Single output directory for building all executables.")
 MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH EXECUTABLE_OUTPUT_PATH)
 
@@ -62,7 +62,7 @@ IF (VTK_WRAP_TCL)
          ON)
 
   IF(VTKTUDOSS_WRAP_TCL)
-    SET(VTK_WRAP_TCL3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
+    SET(VTK_WRAP_TCL3_INIT_DIR "${PROJECT_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapTcl.cmake)
   ENDIF(VTKTUDOSS_WRAP_TCL)
 
@@ -93,7 +93,7 @@ IF (VTK_WRAP_PYTHON)
     # and in each of the kits in the Python wrapping clause an explicit
     # INCLUDE_DIRECTORIES("${PYTHON_INCLUDE_PATH}")
 
-    SET(VTK_WRAP_PYTHON3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
+    SET(VTK_WRAP_PYTHON3_INIT_DIR "${PROJECT_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapPython.cmake)
     IF (WIN32)
       IF (NOT BUILD_SHARED_LIBS)
@@ -125,7 +125,7 @@ IF (VTK_WRAP_JAVA)
          ON)
 
   IF (VTKTUDOSS_WRAP_JAVA)
-    SET(VTK_WRAP_JAVA3_INIT_DIR "${VTKTUDOSS_SOURCE_DIR}/Wrapping")
+    SET(VTK_WRAP_JAVA3_INIT_DIR "${PROJECT_SOURCE_DIR}/Wrapping")
     INCLUDE(${VTK_CMAKE_DIR}/vtkWrapJava.cmake)
     IF (WIN32)
       IF (NOT BUILD_SHARED_LIBS)
@@ -135,7 +135,7 @@ IF (VTK_WRAP_JAVA)
     ENDIF (WIN32)
 
     # Tell the java wrappers where to go.
-    SET(VTK_JAVA_HOME ${VTKTUDOSS_BINARY_DIR}/java/vtkmy)
+    SET(VTK_JAVA_HOME ${PROJECT_BINARY_DIR}/java/vtkmy)
     MAKE_DIRECTORY(${VTK_JAVA_HOME})
   ENDIF (VTKTUDOSS_WRAP_JAVA)
 
