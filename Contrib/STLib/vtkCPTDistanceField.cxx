@@ -79,7 +79,8 @@ int vtkCPTDistanceField::RequestInformation(vtkInformation *vtkNotUsed(request),
 	}
 
 	// Make sure the input is updated
-	input->Update();
+        // VTK 6+: we can't do this anymore.
+	//input->Update();
 
 	input->GetBounds(bounds);
 	if (!PadBounds(bounds))
@@ -167,7 +168,7 @@ int vtkCPTDistanceField::RequestData(vtkInformation *vtkNotUsed(request),
 	// Triangulate the input mesh first
 	vtkSmartPointer<vtkTriangleFilter> triangulate = 
 		vtkSmartPointer<vtkTriangleFilter>::New();
-	triangulate->SetInput(input);
+	triangulate->SetInputData(input);
 	triangulate->Update();
 	vtkPolyData *mesh = triangulate->GetOutput();
 
@@ -203,7 +204,8 @@ int vtkCPTDistanceField::RequestData(vtkInformation *vtkNotUsed(request),
 	vtkDebugMacro(<<"Preparing the CPT module...");
 	
 	// Allocate the field
-	AllocateOutputData(output);
+        // VTK6+ prototype: vtkDataObject, vtkInformation
+	AllocateOutputData(output, outInfo);
 
 	// Set up the CPT module
 	cpt::State<3, double> state;
