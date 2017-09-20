@@ -2,13 +2,12 @@
 # copyright TU Delft Data Visualization Group
 # Berkeley Licensing
 
-#
-# Set the project name.
-#
+# NB: on macOS you have to set CXX_FLAGS to -stdlib=libstdc++
+# if not, you'll get e.g. PrintSelf symbol not found
 
 PROJECT (VTKTUDOSS)
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.3)
 
 #
 # Assume everything is set up correctly for build.
@@ -41,10 +40,11 @@ IF (VTKTUDOSS_CAN_BUILD)
   # Core (non-optional kits)
   SET(VTKTUDOSS_KITS_CORE
     Graphics
-    Widgets
-    CompVis
-    Filtering
-    Rendering
+# FIXME: Disabling most kits so we can get up and running!
+#    Widgets
+#    CompVis
+#    Filtering
+#    Rendering
   )
 
   # Optional kits
