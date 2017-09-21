@@ -2,10 +2,15 @@
 Python import module for vtktudoss.
 """
 
+from __future__ import absolute_import
+
 kits = "@VTKTUDOSS_KITS_FORPYTHON@".split(";")
 for kit in kits:
     try:
+        # we are installed together with top-level vtkPython imports
+        eval(compile("from .vtktudoss" + kit + "Python import *", __file__, 'exec'))
+    except ImportError:
+        # during development however, we could be separate
         eval(compile("from vtktudoss" + kit + "Python import *", __file__, 'exec'))
-    except ImportError as e:
-        print(e)
+
 del kit
