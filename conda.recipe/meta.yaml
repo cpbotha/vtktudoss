@@ -15,10 +15,6 @@ requirements:
     - python
     - vtk 7.1.0
 
-test:
-  imports:
-    - vtktudoss
-
 about:
   home: https://github.com/cpbotha/vtktudoss
   license: BSD3
