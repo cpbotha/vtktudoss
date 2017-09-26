@@ -1,6 +1,6 @@
 package:
   name: vtktudoss
-  version: 0.0.1
+  version: 0.0.2
 
 build:
   number: 0
@@ -17,10 +17,6 @@ requirements:
   run:
     - python
     - vtk 7.1.0
-
-test:
-  imports:
-    - vtktudoss
 
 about:
   home: https://github.com/cpbotha/vtktudoss

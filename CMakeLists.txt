@@ -189,6 +189,8 @@ IF (VTKTUDOSS_CAN_BUILD)
       "${PROJECT_BINARY_DIR}/Wrapping/Python/vtktudoss.py"
       @ONLY
     )
+
+    INSTALL(FILES "${PROJECT_BINARY_DIR}/Wrapping/Python/vtktudoss.py" DESTINATION ${INSTALL_PYTHON_MODULE_DIR}/${PROJECT_NAME} RENAME "__init__.py")
   ENDIF(VTKTUDOSS_WRAP_PYTHON)
 
   #
