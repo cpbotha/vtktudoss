@@ -15,6 +15,11 @@ SET(LIB_DESTINATION lib)
 SET(BIN_DESTINATION bin)
 SET(INCLUDE_DESTINATION "include/${PROJECT_NAME}")
 
+# Set fpermissive flag fi we're compiling with GCC
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+ENDIF()
+
 #
 # Assume everything is set up correctly for build.
 #
