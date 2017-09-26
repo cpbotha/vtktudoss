@@ -1,8 +1,6 @@
 set BUILD_CONFIG=Release
 set PYTHON_LIBRARY=%PREFIX%\libs\python%PY_VER:~0,1%%PY_VER:~2,1%.lib
 
-cd %RECIPE_DIR\..
-
 cmake . -G "NMake Makefiles" ^
     -Wno-dev ^
     -DPYTHON_INCLUDE_DIR:PATH="%PREFIX%/include" ^
