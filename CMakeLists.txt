@@ -15,6 +15,11 @@ SET(LIB_DESTINATION lib)
 SET(BIN_DESTINATION bin)
 SET(INCLUDE_DESTINATION "include/${PROJECT_NAME}")
 
+# Set fpermissive flag fi we're compiling with GCC
+IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
+ENDIF()
+
 #
 # Assume everything is set up correctly for build.
 #
@@ -37,9 +42,9 @@ INCLUDE (${PROJECT_SOURCE_DIR}/CMakeOptions.cmake)
 IF (VTKTUDOSS_CAN_BUILD)
 
   #
-  # This is the list of kits available in VTKTUDOSS. Each kit corresponds to 
-  # a sub-directory with the same name holding your local classes. Sorting 
-  # classes by kit like VTK does (Common, Rendering, Filtering, Imaging, 
+  # This is the list of kits available in VTKTUDOSS. Each kit corresponds to
+  # a sub-directory with the same name holding your local classes. Sorting
+  # classes by kit like VTK does (Common, Rendering, Filtering, Imaging,
   # IO, etc.) is a good thing and prevents numerous dependencies problems.
   #
 
@@ -89,7 +94,7 @@ IF (VTKTUDOSS_CAN_BUILD)
     LIST(GET VTKTUDOSS_KITS_OPTIONAL ${j} kit)
     LIST(GET VTKTUDOSS_KITS_OPTIONAL ${k} kit_desc)
     STRING(TOUPPER ${kit} kit_uc)
-    
+
     # Create an option for this kit and build it if selected
     OPTION(BUILD_${kit_uc} "${kit_desc}" OFF)
     IF (BUILD_${kit_uc})
@@ -115,7 +120,7 @@ IF (VTKTUDOSS_CAN_BUILD)
       LIST(GET VTKTUDOSS_KITS_CONTRIB ${j} kit)
       LIST(GET VTKTUDOSS_KITS_CONTRIB ${k} kit_desc)
       STRING(TOUPPER ${kit} kit_uc)
-      
+
       # Create an option for this kit and build it if selected
       OPTION(BUILD_CONTRIB_${kit_uc} "Contrib: build ${kit_desc}." OFF)
       IF(BUILD_CONTRIB_${kit_uc})
@@ -167,7 +172,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   ENDFOREACH(kit)
 
   # cpbotha disabling -- if you need this, fix it. :)
-  # CONFIGURE_FILE( 
+  # CONFIGURE_FILE(
   #   ${PROJECT_SOURCE_DIR}/Usevtktudoss.cmake.in
   #   ${PROJECT_BINARY_DIR}/UseVTKTUDOSS.cmake
   #   COPYONLY IMMEDIATE
@@ -185,7 +190,7 @@ IF (VTKTUDOSS_CAN_BUILD)
   IF(VTKTUDOSS_WRAP_PYTHON)
     SET(VTKTUDOSS_KITS_FORPYTHON ${VTKTUDOSS_KITS_BUILT})
     CONFIGURE_FILE(
-      "${PROJECT_SOURCE_DIR}/Wrapping/Python/vtktudoss.py.in" 
+      "${PROJECT_SOURCE_DIR}/Wrapping/Python/vtktudoss.py.in"
       "${PROJECT_BINARY_DIR}/Wrapping/Python/vtktudoss.py"
       @ONLY
     )
@@ -201,13 +206,13 @@ IF (VTKTUDOSS_CAN_BUILD)
   IF(CMAKE_COMPILER_2005)
     ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE)
     ADD_DEFINITIONS(-D_SCL_SECURE_NO_DEPRECATE)
-  ENDIF(CMAKE_COMPILER_2005) 
+  ENDIF(CMAKE_COMPILER_2005)
 
   # specify installation
 
   # first derive dir holding the DLLs
   IF(CMAKE_CONFIGURATION_TYPES)
-   # on multi-config systems, e.g. win, we want bin/RelWthDebInfo 
+   # on multi-config systems, e.g. win, we want bin/RelWthDebInfo
    # I have to escape the ${BUILD_TYPE}, no idea why yet.
    SET(inst_from_dir ${LIBRARY_OUTPUT_PATH}/\${BUILD_TYPE})
   ELSE(CMAKE_CONFIGURATION_TYPES)
