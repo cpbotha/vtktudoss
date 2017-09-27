@@ -7,40 +7,41 @@
 class VTK_EXPORT vtkCPTDistanceField : public vtkImageAlgorithm
 {
 public:
-	vtkTypeMacro(vtkCPTDistanceField, vtkImageAlgorithm);
-	void PrintSelf(ostream &os, vtkIndent indent);
+  vtkTypeMacro(vtkCPTDistanceField, vtkImageAlgorithm);
+  void PrintSelf(ostream &os, vtkIndent indent);
 
-	static vtkCPTDistanceField *New();
+  static vtkCPTDistanceField *New();
 
-	//int ProcessRequest(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
+  //int ProcessRequest(vtkInformation*, vtkInformationVector**, vtkInformationVector*);
 
-	// Maximum distance up to which the field should be computed
-	vtkGetMacro(MaximumDistance, double);
-	vtkSetMacro(MaximumDistance, double);
+  // Maximum distance up to which the field should be computed
+  vtkGetMacro(MaximumDistance, double);
+  vtkSetMacro(MaximumDistance, double);
 
-	// The distance field will have the polydata's bounds, padded by this amount
-	vtkGetMacro(Padding, double);
-	vtkSetMacro(Padding, double);
+  // The distance field will have the polydata's bounds, padded by this amount
+  vtkGetMacro(Padding, double);
+  vtkSetMacro(Padding, double);
 
-	// Resolution of the distance field
-	vtkGetVector3Macro(Dimensions, int);
-	vtkSetVector3Macro(Dimensions, int);
+  // Resolution of the distance field
+  vtkGetVector3Macro(Dimensions, int);
+  vtkSetVector3Macro(Dimensions, int);
 
 protected:
-	vtkCPTDistanceField();
-	~vtkCPTDistanceField();
+  vtkCPTDistanceField();
+  ~vtkCPTDistanceField();
 
-	virtual int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-	virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
-	virtual int FillInputPortInformation(int port, vtkInformation* info);
+  virtual int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  virtual int FillInputPortInformation(int port, vtkInformation* info);
 
-	bool PadBounds(double *bounds);
+  bool PadBounds(double *bounds);
 
-	double MaximumDistance;
-	double Padding;
-	int Dimensions[3];
+  double MaximumDistance;
+  double Padding;
+  int Dimensions[3];
+  double Bounds[6];
 
 private:
-	vtkCPTDistanceField(const vtkCPTDistanceField&);  // Not implemented.
-	void operator=(const vtkCPTDistanceField&);  // Not implemented.
+  vtkCPTDistanceField(const vtkCPTDistanceField&);        // Not implemented.
+  void operator=(const vtkCPTDistanceField&);        // Not implemented.
 };
