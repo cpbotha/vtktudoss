@@ -68,8 +68,6 @@ int vtkCPTDistanceField::RequestInformation(vtkInformation *vtkNotUsed(request),
                0, this->Dimensions[1]-1,
                0, this->Dimensions[2]-1);
 
-  // Get padded bounds
-  double bounds[6];
   vtkPolyData *input = vtkPolyData::SafeDownCast(
     inInfo->Get(vtkDataObject::DATA_OBJECT()));
   if (!input)
@@ -82,6 +80,8 @@ int vtkCPTDistanceField::RequestInformation(vtkInformation *vtkNotUsed(request),
   // VTK 6+: we can't do this anymore.
   //input->Update();
 
+  // Get padded bounds
+  double bounds[6];
   input->GetBounds(bounds);
   if (!PadBounds(bounds))
   {
