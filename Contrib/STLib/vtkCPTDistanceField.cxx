@@ -76,9 +76,10 @@ int vtkCPTDistanceField::RequestInformation(vtkInformation *vtkNotUsed(request),
     return 1;
   }
 
-  // Make sure the input is updated
-  // VTK 6+: we can't do this anymore.
-  //input->Update();
+  // TODO: Figure out how to get an updated source here so we can get the
+  // correct bounds since we can't call input->Update() anymore since VTK 6.
+  // To handle this for now, the source needs to be updated manually or data
+  // must be passed in with SetInputData().
 
   // Get padded bounds
   double bounds[6];
