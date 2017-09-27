@@ -258,7 +258,8 @@ bool vtkCPTDistanceField::PadBounds(double *bounds)
   if (bounds[0] > bounds[1] || bounds[2] > bounds[3] || bounds[4] > bounds[5])
   {
     // TODO: this seems to occur sometimes, e.g., when a reader has not yet updated
-    vtkErrorMacro(<<"Input polydata has invalid bounds!");
+    vtkErrorMacro(<<"Input polydata has invalid bounds: (" << bounds[0] << ", " << bounds[2] << ", " << bounds[4]<<
+                  ") to (" << bounds[1] << ", " << bounds[3] << ", " << bounds[5] << ")");
     return false;
   }
   for (int i = 0; i < 3; ++i)
