@@ -23,8 +23,14 @@ public:
   vtkSetMacro(Padding, double);
 
   // Resolution of the distance field
+  // The first two dimensions are used no matter what the unused axis is
   vtkGetVector3Macro(Dimensions, int);
   vtkSetVector3Macro(Dimensions, int);
+
+  // The index of the axis that isn't used
+  // 0 - X, 1 - Y, 2 - Z
+  vtkGetMacro(UnusedAxis, int);
+  vtkSetMacro(UnusedAxis, int);
 
 protected:
   vtkCPTDistanceField2D();
@@ -40,6 +46,7 @@ protected:
   double Padding;
   int Dimensions[3];
   double Bounds[6];
+  int UnusedAxis;
 
 private:
   vtkCPTDistanceField2D(const vtkCPTDistanceField2D&);        // Not implemented.

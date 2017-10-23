@@ -25,10 +25,12 @@ vtkStandardNewMacro(vtkCPTDistanceField2D);
 //----------------------------------------------------------------------------
 // Constructor
 vtkCPTDistanceField2D::vtkCPTDistanceField2D()
+ : MaximumDistance(1.0),
+   Padding(0.0),
+   UnusedAxis(2)
 {
-  MaximumDistance = 1.0;
-  Padding = 0.0;
-  Dimensions[0] = Dimensions[1] = Dimensions[2] = 64;
+  Dimensions[0] = Dimensions[1] = 64;
+  Dimensions[2] = 1;
 }
 
 //----------------------------------------------------------------------------
@@ -157,10 +159,26 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
   }
   // CPT domain uses a different ordering...
   double domain[4];
-  domain[0] = bounds[0];
-  domain[1] = bounds[2];
-  domain[2] = bounds[1];
-  domain[3] = bounds[3];
+  switch (UnusedAxis) {
+    case 0:
+    domain[0] = bounds[2];
+    domain[1] = bounds[4];
+    domain[2] = bounds[3];
+    domain[3] = bounds[5];
+    break;
+    case 1:
+    domain[0] = bounds[0];
+    domain[1] = bounds[4];
+    domain[2] = bounds[1];
+    domain[3] = bounds[5];
+    break;
+    case 2:
+    domain[0] = bounds[0];
+    domain[1] = bounds[2];
+    domain[2] = bounds[1];
+    domain[3] = bounds[3];
+    break;
+  }
 
   vtkDebugMacro(<<"Converting to BRep...");
 
@@ -175,14 +193,31 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
   vtkDebugMacro(<<"Collecting points...");
   vtkIdType numVerts = mesh->GetNumberOfPoints();
   double *verts = new double[2 * numVerts];
+  int axis_indices[2];
+  switch (UnusedAxis) {
+    case 0:
+    // Drop the x value
+    axis_indices[0] = 1;
+    axis_indices[1] = 2;
+    break;
+    case 1:
+    axis_indices[0] = 0;
+    // Drop the y value
+    axis_indices[1] = 2;
+    break;
+    case 2:
+    axis_indices[0] = 0;
+    axis_indices[1] = 1;
+    // Drop the z value
+    break;
+  }
   for (vtkIdType i = 0; i < numVerts; ++i)
   {
     double v[3];
     // Copy the point
     mesh->GetPoint(i, v);
-    verts[i * 2] = v[0];
-    verts[i * 2 + 1] = v[1];
-    // Drop the z value
+    verts[i * 2] = v[axis_indices[0]];
+    verts[i * 2 + 1] = v[axis_indices[1]];
   }
   vtkDebugMacro(<<"Collecting faces...");
   vtkIdType numFaces = mesh->GetNumberOfCells();
