@@ -156,13 +156,11 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
     return 1;
   }
   // CPT domain uses a different ordering...
-  double domain[6];
+  double domain[4];
   domain[0] = bounds[0];
   domain[1] = bounds[2];
-  domain[2] = bounds[4];
-  domain[3] = bounds[1];
-  domain[4] = bounds[3];
-  domain[5] = bounds[5];
+  domain[2] = bounds[1];
+  domain[3] = bounds[3];
 
   vtkDebugMacro(<<"Converting to BRep...");
 
@@ -176,28 +174,32 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
   // Extract the BRep from the mesh
   vtkDebugMacro(<<"Collecting points...");
   vtkIdType numVerts = mesh->GetNumberOfPoints();
-  double *verts = new double[3 * numVerts];
+  double *verts = new double[2 * numVerts];
   for (vtkIdType i = 0; i < numVerts; ++i)
   {
+    double v[3];
     // Copy the point
-    mesh->GetPoint(i, verts + (i * 3));
+    mesh->GetPoint(i, v);
+    verts[i * 2] = v[0];
+    verts[i * 2 + 1] = v[1];
+    // Drop the z value
   }
   vtkDebugMacro(<<"Collecting faces...");
   vtkIdType numFaces = mesh->GetNumberOfCells();
-  unsigned int *faces = new unsigned int[3 * numFaces];
+  unsigned int *faces = new unsigned int[2 * numFaces];
   for (vtkIdType i = 0; i < numFaces; ++i)
   {
     // Get the cell
     vtkCell *cell = mesh->GetCell(i);
-    // Ignore non-triangle cells
-    if (cell->GetCellType() == VTK_TRIANGLE)
+    // Ignore non-line cells
+    if (cell->GetCellType() == VTK_LINE)
     {
       // Get and copy the cell points
       vtkIdList *cellPoints = cell->GetPointIds();
-      assert(cellPoints->GetNumberOfIds() == 3);
-      for (int j = 0; j < 3; ++j)
+      assert(cellPoints->GetNumberOfIds() == 2);
+      for (int j = 0; j < 2; ++j)
       {
-        faces[i * 3 + j] = cellPoints->GetId(j);
+        faces[i * 2 + j] = cellPoints->GetId(j);
       }
     }
   }
@@ -209,14 +211,13 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
   AllocateOutputData(output, outInfo);
 
   // Set up the CPT module
-  cpt::State<3, double> state;
+  cpt::State<2, double> state;
   state.setParameters(domain, this->MaximumDistance);
   state.setLattice(this->Dimensions, domain);
   // We use a single grid covering the entire lattice
-  int zeroes[3] = {0, 0, 0};
+  int zeroes[2] = {0, 0};
   state.insertGrid(zeroes, this->Dimensions,
                    static_cast<double*>(output->GetScalarPointer()), 0, 0, 0);
-
   //state.setBRepWithNoClipping(numVerts, verts, numFaces, faces);
   state.setBRep(numVerts, verts, numFaces, faces);
 
