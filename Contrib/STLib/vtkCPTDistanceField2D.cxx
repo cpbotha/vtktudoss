@@ -31,6 +31,7 @@ vtkCPTDistanceField2D::vtkCPTDistanceField2D()
 {
   Dimensions[0] = Dimensions[1] = 64;
   Dimensions[2] = 1;
+  Domain[0] = Domain[1] = Domain[2] = Domain[3] = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -159,25 +160,33 @@ int vtkCPTDistanceField2D::RequestData(vtkInformation *vtkNotUsed(request),
   }
   // CPT domain uses a different ordering...
   double domain[4];
-  switch (UnusedAxis) {
+  if (Domain[0] != 0 || Domain[1] != 0 || Domain[2] != 0 || Domain[3] != 0) {
+    domain[0] = Domain[0];
+    domain[1] = Domain[1];
+    domain[2] = Domain[2];
+    domain[3] = Domain[3];
+  }
+  else {
+    switch (UnusedAxis) {
     case 0:
-    domain[0] = bounds[2];
-    domain[1] = bounds[4];
-    domain[2] = bounds[3];
-    domain[3] = bounds[5];
-    break;
+      domain[0] = bounds[2];
+      domain[1] = bounds[4];
+      domain[2] = bounds[3];
+      domain[3] = bounds[5];
+      break;
     case 1:
-    domain[0] = bounds[0];
-    domain[1] = bounds[4];
-    domain[2] = bounds[1];
-    domain[3] = bounds[5];
-    break;
+      domain[0] = bounds[0];
+      domain[1] = bounds[4];
+      domain[2] = bounds[1];
+      domain[3] = bounds[5];
+      break;
     case 2:
-    domain[0] = bounds[0];
-    domain[1] = bounds[2];
-    domain[2] = bounds[1];
-    domain[3] = bounds[3];
-    break;
+      domain[0] = bounds[0];
+      domain[1] = bounds[2];
+      domain[2] = bounds[1];
+      domain[3] = bounds[3];
+      break;
+    }
   }
 
   vtkDebugMacro(<<"Converting to BRep...");

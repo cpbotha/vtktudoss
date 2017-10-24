@@ -32,6 +32,12 @@ public:
   vtkGetMacro(UnusedAxis, int);
   vtkSetMacro(UnusedAxis, int);
 
+  // Manually set the domain of the distance field
+  // Note: If this is not set, the bounds of the input
+  // polydata is used to set the domain
+  vtkSetVector4Macro(Domain, double);
+  vtkGetVector4Macro(Domain, double);
+
 protected:
   vtkCPTDistanceField2D();
   ~vtkCPTDistanceField2D();
@@ -47,6 +53,7 @@ protected:
   int Dimensions[3];
   double Bounds[6];
   int UnusedAxis;
+  double Domain[4];
 
 private:
   vtkCPTDistanceField2D(const vtkCPTDistanceField2D&);        // Not implemented.
