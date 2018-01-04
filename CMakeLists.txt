@@ -51,8 +51,8 @@ IF (VTKTUDOSS_CAN_BUILD)
   # Core (non-optional kits)
   SET(VTKTUDOSS_KITS_CORE
     Graphics
+    Widgets
 # FIXME: Disabling most kits so we can get up and running!
-#    Widgets
 #    CompVis
 #    Filtering
 #    Rendering
