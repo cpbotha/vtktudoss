@@ -62,14 +62,14 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 	this->axis_length = 0.8;
 	this->mirrorfonts = 1.0;
 	this->piechart = true;
-	
+
 	this->innerArcA = vtkActor::New();
 	this->innerArcB = vtkActor::New();
 	this->outerArcA = vtkActor::New();
 	this->outerArcB = vtkActor::New();
 	this->outer2ArcA = vtkActor::New();
 	this->outer2ArcB = vtkActor::New();
-	
+
 	this->nudgeactor = vtkActor::New();
 
 
@@ -86,7 +86,7 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 	this->HandlePropertyDarkBlue = vtkProperty::New();
 	this->HandlePropertyBlue = vtkProperty::New();
 	this->HandlePropertyLightBlue = vtkProperty::New();
-	
+
 	this->HandlePropertyDarkYellow = vtkProperty::New();
 	this->HandlePropertyYellow = vtkProperty::New();
 	this->HandlePropertyLightYellow = vtkProperty::New();
@@ -152,7 +152,7 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 	this->HandlePicker = vtkCellPicker::New();
 	//this->HandlePicker = vtkPointPicker::New();
 	this->HandlePicker->SetTolerance(0.001);
-	this->HandlePicker->AddPickList(this->innerArcA);	
+	this->HandlePicker->AddPickList(this->innerArcA);
 	this->HandlePicker->AddPickList(this->nudgeactor);
 	this->HandlePicker->PickFromListOn();
 
@@ -167,9 +167,9 @@ vtkAdvancedAngleWidget::vtkAdvancedAngleWidget()
 
 // Destructor
 vtkAdvancedAngleWidget::~vtkAdvancedAngleWidget()
-{	
+{
     // thank you cpbotha, segfault preventor!
-	
+
     // instantiated in CreatePrimaryArc
     if (this->innerArcMapA)
         this->innerArcMapA->Delete();
@@ -211,7 +211,7 @@ vtkAdvancedAngleWidget::~vtkAdvancedAngleWidget()
 
 
 //	Range Indicator 1
-void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max) 
+void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 {
 	//arcZ
 	float Pi;
@@ -286,13 +286,13 @@ void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 	////printf("%f %f %f\n", this->minArcPoint[0], this->minArcPoint[1], this->minArcPoint[2]);
 	////printf("%f %f %f\n", this->maxArcPoint[0], this->maxArcPoint[1], this->maxArcPoint[2]);
 
-	vtkCellArray *cells2A = vtkCellArray::New();	
-	vtkCellArray *cells2B = vtkCellArray::New();	
+	vtkCellArray *cells2A = vtkCellArray::New();
+	vtkCellArray *cells2B = vtkCellArray::New();
 	j=1;
 	for(i=0; i<arcparts1; i++)
-	{	
-		cells2A->InsertNextCell(4);		
-		cells2A->InsertCellPoint(j*2);			
+	{
+		cells2A->InsertNextCell(4);
+		cells2A->InsertCellPoint(j*2);
 		cells2A->InsertCellPoint(j*2+1);
 		cells2A->InsertCellPoint(j*2+3);
 		cells2A->InsertCellPoint(j*2+2);
@@ -301,9 +301,9 @@ void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 	j=j+1;
 
 	for(i=0; i<arcparts2; i++)
-	{	
-		cells2B->InsertNextCell(4);		
-		cells2B->InsertCellPoint(j*2);			
+	{
+		cells2B->InsertNextCell(4);
+		cells2B->InsertCellPoint(j*2);
 		cells2B->InsertCellPoint(j*2+1);
 		cells2B->InsertCellPoint(j*2+3);
 		cells2B->InsertCellPoint(j*2+2);
@@ -312,9 +312,9 @@ void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 	j=j+1;
 
 	for(i=0; i<arcparts3; i++)
-	{	
-		cells2A->InsertNextCell(4);		
-		cells2A->InsertCellPoint(j*2);			
+	{
+		cells2A->InsertNextCell(4);
+		cells2A->InsertCellPoint(j*2);
 		cells2A->InsertCellPoint(j*2+1);
 		cells2A->InsertCellPoint(j*2+3);
 		cells2A->InsertCellPoint(j*2+2);
@@ -325,15 +325,15 @@ void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 
 
 	this->outerboogje1 = vtkPolyData::New();
-	this->outerboogje1->SetPolys(cells2A);	
+	this->outerboogje1->SetPolys(cells2A);
 	this->outerboogje1->SetPoints(this->outerArcPoints);
 	cells2A->Delete();
 
 	this->outerboogje2 = vtkPolyData::New();
-	this->outerboogje2->SetPolys(cells2B);	
+	this->outerboogje2->SetPolys(cells2B);
 	this->outerboogje2->SetPoints(this->outerArcPoints);
 	cells2B->Delete();
-	
+
 	this->outerArcMapA = vtkDataSetMapper::New();
 	this->outerArcMapA->SetInput(this->outerboogje1);
 	this->outerArcA->SetMapper(this->outerArcMapA);
@@ -354,7 +354,7 @@ void vtkAdvancedAngleWidget::DestroyArcRange1()
 }
 
 //	Range Indicator 1
-void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max) 
+void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 {
 	//arcZ
 	float Pi;
@@ -431,13 +431,13 @@ void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 	////printf("%f %f %f\n", this->minArcPoint[0], this->minArcPoint[1], this->minArcPoint[2]);
 	////printf("%f %f %f\n", this->maxArcPoint[0], this->maxArcPoint[1], this->maxArcPoint[2]);
 
-	vtkCellArray *cells2A = vtkCellArray::New();	
-	vtkCellArray *cells2B = vtkCellArray::New();	
+	vtkCellArray *cells2A = vtkCellArray::New();
+	vtkCellArray *cells2B = vtkCellArray::New();
 	j=1;
 	for(i=0; i<arcparts1; i++)
-	{	
-		cells2A->InsertNextCell(4);		
-		cells2A->InsertCellPoint(j*2);			
+	{
+		cells2A->InsertNextCell(4);
+		cells2A->InsertCellPoint(j*2);
 		cells2A->InsertCellPoint(j*2+1);
 		cells2A->InsertCellPoint(j*2+3);
 		cells2A->InsertCellPoint(j*2+2);
@@ -446,9 +446,9 @@ void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 	j=j+1;
 
 	for(i=0; i<arcparts2; i++)
-	{	
-		cells2B->InsertNextCell(4);		
-		cells2B->InsertCellPoint(j*2);			
+	{
+		cells2B->InsertNextCell(4);
+		cells2B->InsertCellPoint(j*2);
 		cells2B->InsertCellPoint(j*2+1);
 		cells2B->InsertCellPoint(j*2+3);
 		cells2B->InsertCellPoint(j*2+2);
@@ -457,9 +457,9 @@ void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 	j=j+1;
 
 	for(i=0; i<arcparts3; i++)
-	{	
-		cells2A->InsertNextCell(4);		
-		cells2A->InsertCellPoint(j*2);			
+	{
+		cells2A->InsertNextCell(4);
+		cells2A->InsertCellPoint(j*2);
 		cells2A->InsertCellPoint(j*2+1);
 		cells2A->InsertCellPoint(j*2+3);
 		cells2A->InsertCellPoint(j*2+2);
@@ -470,15 +470,15 @@ void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 
 
 	this->outer2boogje1 = vtkPolyData::New();
-	this->outer2boogje1->SetPolys(cells2A);	
+	this->outer2boogje1->SetPolys(cells2A);
 	this->outer2boogje1->SetPoints(this->outer2ArcPoints);
 	cells2A->Delete();
 
 	this->outer2boogje2 = vtkPolyData::New();
-	this->outer2boogje2->SetPolys(cells2B);	
+	this->outer2boogje2->SetPolys(cells2B);
 	this->outer2boogje2->SetPoints(this->outer2ArcPoints);
 	cells2B->Delete();
-	
+
 	this->outer2ArcMapA = vtkDataSetMapper::New();
 	this->outer2ArcMapA->SetInput(this->outer2boogje1);
 	this->outer2ArcA->SetMapper(this->outer2ArcMapA);
@@ -600,14 +600,14 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 		this->innerArcPoints->InsertPoint(2+(i*2), v4, 0, v3);
     }
 
-	vtkCellArray *cells2A = vtkCellArray::New();	
-	vtkCellArray *cells2B = vtkCellArray::New();	
+	vtkCellArray *cells2A = vtkCellArray::New();
+	vtkCellArray *cells2B = vtkCellArray::New();
 
 	if (this->piechart){
 		j=0;
 		for(i=0; i<arcparts1; i++)
-		{	
-			cells2B->InsertNextCell(3);		
+		{
+			cells2B->InsertNextCell(3);
 			cells2B->InsertCellPoint(0);
 			cells2B->InsertCellPoint(j*2+1);
 			cells2B->InsertCellPoint(j*2+3);
@@ -616,9 +616,9 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 		j=j+1;
 
 		for(i=0; i<arcparts2; i++)
-		{	
-			cells2A->InsertNextCell(3);		
-			cells2A->InsertCellPoint(0);			
+		{
+			cells2A->InsertNextCell(3);
+			cells2A->InsertCellPoint(0);
 			cells2A->InsertCellPoint(j*2+1);
 			cells2A->InsertCellPoint(j*2+3);
 			j=j+1;
@@ -626,9 +626,9 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 		j=j+1;
 
 		for(i=0; i<arcparts3; i++)
-		{	
-			cells2B->InsertNextCell(3);		
-			cells2B->InsertCellPoint(0);			
+		{
+			cells2B->InsertNextCell(3);
+			cells2B->InsertCellPoint(0);
 			cells2B->InsertCellPoint(j*2+1);
 			cells2B->InsertCellPoint(j*2+3);
 			j=j+1;
@@ -636,8 +636,8 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 	}else{
 		j=0;
 		for(i=0; i<arcparts1; i++)
-		{	
-			cells2B->InsertNextCell(4);		
+		{
+			cells2B->InsertNextCell(4);
 			cells2B->InsertCellPoint(j*2+1);
 			cells2B->InsertCellPoint(j*2+3);
 			cells2B->InsertCellPoint(j*2+4);
@@ -647,8 +647,8 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 		j=j+1;
 
 		for(i=0; i<arcparts2; i++)
-		{	
-			cells2A->InsertNextCell(4);		
+		{
+			cells2A->InsertNextCell(4);
 			cells2A->InsertCellPoint(j*2+1);
 			cells2A->InsertCellPoint(j*2+3);
 			cells2A->InsertCellPoint(j*2+4);
@@ -658,8 +658,8 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 		j=j+1;
 
 		for(i=0; i<arcparts3; i++)
-		{	
-			cells2B->InsertNextCell(4);		
+		{
+			cells2B->InsertNextCell(4);
 			cells2B->InsertCellPoint(j*2+1);
 			cells2B->InsertCellPoint(j*2+3);
 			cells2B->InsertCellPoint(j*2+4);
@@ -672,15 +672,15 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 
 
 	this->innerboogje1 = vtkPolyData::New();
-	this->innerboogje1->SetPolys(cells2A);	
+	this->innerboogje1->SetPolys(cells2A);
 	this->innerboogje1->SetPoints(this->innerArcPoints);
 	cells2A->Delete();
 
 	this->innerboogje2 = vtkPolyData::New();
-	this->innerboogje2->SetPolys(cells2B);	
+	this->innerboogje2->SetPolys(cells2B);
 	this->innerboogje2->SetPoints(this->innerArcPoints);
 	cells2B->Delete();
-	
+
 	this->innerArcMapA = vtkDataSetMapper::New();
 	this->innerArcMapA->SetInput(this->innerboogje1);
 	this->innerArcA->SetMapper(this->innerArcMapA);
@@ -703,19 +703,19 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 			double scalevalue;
 			scalevalue = this->Scale/240.0;
 			vtkTransform *genTransf = vtkTransform::New();
-			if (this->upperlowerbool==0 || this->upperlowerbool==2){	
+			if (this->upperlowerbool==0 || this->upperlowerbool==2){
 				oldpos[0] = (this->axis_length +0.2)*cos( 1.5*Pi - (Pi * filterRangeMin_dec));
 				oldpos[2] = (this->axis_length +0.2)*sin( 1.5*Pi - (Pi * filterRangeMin_dec)) - 0.05;
 				oldpos[1] = 0.0;
 				genTransf->SetMatrix(this->innerArcA->GetUserMatrix());
 				genTransf->TransformPoint(oldpos, newpos);
-				
+
 				this->textActorMin->SetPosition(0,0,0);
 				this->textActorMin->SetOrientation(0,0,0);
 				vtkTransform *temptransform = vtkTransform::New();
 				temptransform->SetMatrix(this->innerArcA->GetUserMatrix());
 				temptransform->PreMultiply();
-				temptransform->RotateX(90);								
+				temptransform->RotateX(90);
 				this->textActorMin->SetScale(-scalevalue * mirrorfonts, scalevalue, scalevalue);
 				this->textActorMin->SetOrientation(temptransform->GetOrientation());
 				this->textActorMin->SetPosition(newpos);
@@ -725,21 +725,21 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
                 snprintf(buf, 10, "%d", int(this->filterRangeMin));
 				this->textActorMin->SetInput(buf);
 			}
-			if (this->upperlowerbool==1 || this->upperlowerbool==2){	
+			if (this->upperlowerbool==1 || this->upperlowerbool==2){
 				oldpos[0] = (this->axis_length +0.2)*cos( 1.5*Pi - (Pi * filterRangeMax_dec));
 				oldpos[2] = (this->axis_length +0.2)*sin( 1.5*Pi - (Pi * filterRangeMax_dec)) - 0.05;
 				//oldpos[0] = this->maxArcPoint[0];// - 0.2*this->Scale;
 				oldpos[1] = 0.0;
-				//oldpos[2] = this->maxArcPoint[2];// - 0.05*this->Scale;				
+				//oldpos[2] = this->maxArcPoint[2];// - 0.05*this->Scale;
 				genTransf->SetMatrix(this->innerArcA->GetUserMatrix());
 				genTransf->TransformPoint(oldpos, newpos);
-				
+
 				this->textActorMax->SetPosition(0,0,0);
 				this->textActorMax->SetOrientation(0,0,0);
 				vtkTransform *temptransform = vtkTransform::New();
 				temptransform->SetMatrix(this->innerArcA->GetUserMatrix());
 				temptransform->PreMultiply();
-				temptransform->RotateX(90);								
+				temptransform->RotateX(90);
 				this->textActorMax->SetScale(-scalevalue * mirrorfonts, scalevalue, scalevalue);
 				this->textActorMax->SetOrientation(temptransform->GetOrientation());
 				this->textActorMax->SetPosition(newpos);
@@ -749,9 +749,9 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
                 snprintf(buf, 10, "%d", int(this->filterRangeMax));
 				this->textActorMax->SetInput(buf);
 			}
-		}			
+		}
 	}
-	
+
 }
 
 void vtkAdvancedAngleWidget::DestroyPrimaryArc()
@@ -765,7 +765,7 @@ void vtkAdvancedAngleWidget::DestroyPrimaryArc()
 
 
 void vtkAdvancedAngleWidget::CreateDefaultProperties()
-{  
+{
   //this->widgetcolor[0], this->widgetcolor[1], this->widgetcolor[2]);
 
   this->HandlePropertyBlue->SetColor(0.0, 0.0, 1.0);
@@ -778,7 +778,7 @@ void vtkAdvancedAngleWidget::CreateDefaultProperties()
   this->HandlePropertyLightBlue->SetAmbient(1);
   this->HandlePropertyLightBlue->SetDiffuse(0);
 
-  this->HandlePropertyYellow->SetColor(1.0, 1.0, 0.0);  
+  this->HandlePropertyYellow->SetColor(1.0, 1.0, 0.0);
   this->HandlePropertyYellow->SetAmbient(1);
   this->HandlePropertyYellow->SetDiffuse(0);
   this->HandlePropertyDarkYellow->SetColor(0.5, 0.5, 0.0);
@@ -788,21 +788,21 @@ void vtkAdvancedAngleWidget::CreateDefaultProperties()
   this->HandlePropertyLightYellow->SetAmbient(1);
   this->HandlePropertyLightYellow->SetDiffuse(0);
 
-  this->HandlePropertyOrange->SetColor(1.0, 0.5, 0.0);  
+  this->HandlePropertyOrange->SetColor(1.0, 0.5, 0.0);
   this->HandlePropertyOrange->SetAmbient(1);
   this->HandlePropertyOrange->SetDiffuse(0);
 
-  this->HandlePropertyNudge->SetColor(1.0, 1.0, 1.0);  
+  this->HandlePropertyNudge->SetColor(1.0, 1.0, 1.0);
 
   double widgetcolorbright[3];
   widgetcolorbright[0] = this->widgetcolor[0]+0.5;
   widgetcolorbright[1] = this->widgetcolor[1]+0.5;
   widgetcolorbright[2] = this->widgetcolor[2]+0.5;
-  
+
   for (int i=0; i<3; i++)
 	  if (widgetcolorbright[i]>1.0)
 		  widgetcolorbright[i] = 1.0;
-  
+
 
   this->HandlePropertyHighlight->SetColor(1,1,0);
   this->HandlePropertyHighlight->SetAmbient(1);
@@ -811,7 +811,7 @@ void vtkAdvancedAngleWidget::CreateDefaultProperties()
 
 void vtkAdvancedAngleWidget::SetColor(double color[3])
 {
-	this->HandlePropertyNudge->SetColor(color);  
+	this->HandlePropertyNudge->SetColor(color);
 }
 
 
@@ -840,7 +840,7 @@ void vtkAdvancedAngleWidget::SetEnabled(int enabling)
 		  {
 		  return;
 		  }
-	    
+
 		if ( ! this->CurrentRenderer )
 		  {this->SetCurrentRenderer((vtkRenderer *)(this->Interactor->GetRenderWindow()->GetRenderers()->GetItemAsObject(1)));
 		  /*this->SetCurrentRenderer(this->Interactor->FindPokedRenderer(
@@ -869,11 +869,11 @@ void vtkAdvancedAngleWidget::SetEnabled(int enabling)
 
 		// listen to the following events
 		vtkRenderWindowInteractor *i = this->Interactor;
-		i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand, 
+		i->AddObserver(vtkCommand::MouseMoveEvent, this->EventCallbackCommand,
 					   this->Priority);
-		i->AddObserver(vtkCommand::LeftButtonPressEvent, 
+		i->AddObserver(vtkCommand::LeftButtonPressEvent,
 					   this->EventCallbackCommand, this->Priority);
-		i->AddObserver(vtkCommand::LeftButtonReleaseEvent, 
+		i->AddObserver(vtkCommand::LeftButtonReleaseEvent,
 					   this->EventCallbackCommand, this->Priority);
 
 		// Add the various actors
@@ -886,7 +886,7 @@ void vtkAdvancedAngleWidget::SetEnabled(int enabling)
 		this->CurrentRenderer->AddActor(this->innerArcA);
 		if (this->showContext){
 			this->CurrentRenderer->AddActor(this->innerArcB);
-		}		
+		}
 		this->CurrentRenderer->AddActor(this->nudgeactor);
 		this->CurrentRenderer->AddActor(this->textActorMin);
 		this->CurrentRenderer->AddActor(this->textActorMax);
@@ -923,9 +923,9 @@ void vtkAdvancedAngleWidget::SetEnabled(int enabling)
   this->Interactor->Render();
 }
 
-void vtkAdvancedAngleWidget::ProcessEvents(vtkObject* vtkNotUsed(object), 
+void vtkAdvancedAngleWidget::ProcessEvents(vtkObject* vtkNotUsed(object),
                                  unsigned long event,
-                                 void* clientdata, 
+                                 void* clientdata,
                                  void* vtkNotUsed(calldata))
 {
   vtkAdvancedAngleWidget* self = reinterpret_cast<vtkAdvancedAngleWidget *>( clientdata );
@@ -954,7 +954,7 @@ void vtkAdvancedAngleWidget::ProcessEvents(vtkObject* vtkNotUsed(object),
 
 void vtkAdvancedAngleWidget::PlaceWidget(double bds[6])
 {
-	double bounds[6], centertemp[3];  
+	double bounds[6], centertemp[3];
 	double s1,s2,s3, p;
 	this->AdjustBounds(bds,bounds,centertemp);
 	VTK_AVERAGE(bds[0],bds[1],this->center[0])
@@ -964,7 +964,7 @@ void vtkAdvancedAngleWidget::PlaceWidget(double bds[6])
 	VTK_AVSIZE(bds[0],bds[1],s1);
 	VTK_AVSIZE(bds[2],bds[3],s2);
 	VTK_AVSIZE(bds[4],bds[5],s3);
-	p = ((s1 + s2 + s3)/3);   
+	p = ((s1 + s2 + s3)/3);
 	this->WidgetScale = p;
 	//reset the translation and rotation data
 	this->pos[0]=0;
@@ -975,8 +975,8 @@ void vtkAdvancedAngleWidget::PlaceWidget(double bds[6])
 
 	this->CreateNudge();
 	this->CreatePrimaryArc(this->filterRangeMin, this->filterRangeMax);
-	this->CreateArcRange1(this->absoluteRangeMin1, this->absoluteRangeMax1);	
-	this->CreateArcRange2(this->absoluteRangeMin2, this->absoluteRangeMax2);	
+	this->CreateArcRange1(this->absoluteRangeMin1, this->absoluteRangeMax1);
+	this->CreateArcRange2(this->absoluteRangeMin2, this->absoluteRangeMax2);
 
 	this->Realign();
 }
@@ -986,7 +986,7 @@ void vtkAdvancedAngleWidget::CreateNudge()
 	this->stlreader = vtkSTLReader::New();
 	this->stlreader->SetFileName(this->FileName);
 	this->stlreader->Update();
-	
+
 	this->nudgemapper = vtkDataSetMapper::New();
 	this->nudgemapper->SetInput(this->stlreader->GetOutput());
 	this->nudgeactor->SetMapper(this->nudgemapper);
@@ -1017,7 +1017,7 @@ void vtkAdvancedAngleWidget::SetInitialAxis(double primaryAxis[3])
 	this->widgetaxis[2] = primaryAxis[2];
 
 	a = vtkMath::Normalize(this->widgetaxis);
-	vtkMath::Cross(beginas, this->widgetaxis, N1);     
+	vtkMath::Cross(beginas, this->widgetaxis, N1);
 	dottie = acos(vtkMath::Dot(beginas,this->widgetaxis) / (sqrt(pow(beginas[0],2) + pow(beginas[1],2) + pow(beginas[2],2))*sqrt(pow(this->widgetaxis[0],2) + pow(this->widgetaxis[1],2) + pow(this->widgetaxis[2],2))));
 	dottie = vtkMath::DegreesFromRadians(dottie);
 	//printf("orientatie-as verschil RotationArcWidget %f %f %f", N1[0], N1[1], N1[2]);
@@ -1027,7 +1027,7 @@ void vtkAdvancedAngleWidget::SetInitialAxis(double primaryAxis[3])
 	this->initialaxis[1] = N1[2]; //Het gaat overigens over het verschil met de initiele as.
 	this->initialaxis[2] = N1[0];
 
-	this->widgetorientation->Identity();	
+	this->widgetorientation->Identity();
 	this->widgetorientation->RotateWXYZ(dottie,N1[0],N1[1],N1[2]);
 	this->Realign();
 }
@@ -1073,7 +1073,7 @@ void vtkAdvancedAngleWidget::ToggleSize()
 			/*this->posoffset[0] = this->posoffset[0] * 1.1764705882352941176470588235294;
 			this->posoffset[1] = this->posoffset[1] * 1.1764705882352941176470588235294;
 			this->posoffset[2] = this->posoffset[2] * 1.1764705882352941176470588235294;*/
-			this->axis_length = this->axis_length + increment;	
+			this->axis_length = this->axis_length + increment;
 			this->UpdateRangeIndicators();
 			this->GetCurrentRenderer()->GetRenderWindow()->Render();
 			this->nudgeactor->SetScale(0.5+(i+1)*0.1, 1.0, 0.5+(i+1)*0.1);
@@ -1088,16 +1088,16 @@ void vtkAdvancedAngleWidget::ToggleSize()
 			this->center[0] = this->center[0] - this->posoffset[0]/7.0;
 			this->center[1] = this->center[1] - this->posoffset[1]/7.0;
 			this->center[2] = this->center[2] - this->posoffset[2]/7.0;
-			this->axis_length = this->axis_length - increment;	
+			this->axis_length = this->axis_length - increment;
 			this->UpdateRangeIndicators();
 			this->GetCurrentRenderer()->GetRenderWindow()->Render();
 			this->nudgeactor->SetScale(1.0-(i+1)*0.1, 1.0, 1.0-(i+1)*0.1);
 			this->Realign();
 		}
-		this->axis_length = 0.3;		
+		this->axis_length = 0.3;
 	}
 	//this->UpdateRangeIndicators();
-	
+
 }
 
 
@@ -1113,7 +1113,7 @@ void vtkAdvancedAngleWidget::OnLeftButtonDown()
     this->State = vtkAdvancedAngleWidget::Outside;
     return;
     }
-  
+
   vtkAssemblyPath *path;
   this->HandlePicker->Pick(X,Y,0.0,this->CurrentRenderer);
   path = this->HandlePicker->GetPath();
@@ -1129,7 +1129,7 @@ void vtkAdvancedAngleWidget::OnLeftButtonDown()
 			genTransf->SetMatrix(this->innerArcA->GetUserMatrix());
 			genTransf->TransformPoint(this->minArcPoint, transformed_minArcPoint);
 			genTransf->TransformPoint(this->maxArcPoint, transformed_maxArcPoint);
-			
+
 			//get pick position
 			//determine absolute angle between center-pick and center-midvector
 			//see if this is larger than crossangle1
@@ -1144,11 +1144,11 @@ void vtkAdvancedAngleWidget::OnLeftButtonDown()
 			yaxis[0] = 0.0;
 			yaxis[1] = 1.0;
 			yaxis[2] = 0.0;
-			
+
 
 			//printf("v1: %f %f %f\n", *v1, *(v1+1), *(v1+2));
 
-			
+
 			//v1 = this->LastPickPosition - this->center;
 			this->SubtractVectors(this->LastPickPosition, this->center, v1);
 			vtkMath::Normalize(v1);
@@ -1161,12 +1161,12 @@ void vtkAdvancedAngleWidget::OnLeftButtonDown()
 			vtkMath::Normalize(v2);
 			//printf("v2: %f %f %f\n", *v2, *(v2+1), *(v2+2));
 
-			dottie = vtkMath::Dot(v1, v2); 
+			dottie = vtkMath::Dot(v1, v2);
 			//printf("dottie: %f\n", dottie);
 			//controlehoek = vtkMath::Round( vtkMath::Dot(v1, transform(this->center+[0,0,1]) - this->center) );
 			//this->AddVectors(this->center, yaxis, tmpvec2);
 			//genTransf->TransformPoint(tmpvec2, transformed_tmpvec2);
-			
+
 			genTransf->TransformPoint(yaxis, transformed_tmpvec2);
 			this->SubtractVectors(transformed_tmpvec2, this->center, y_transformed);
 			vtkMath::Normalize(y_transformed);
@@ -1182,12 +1182,12 @@ void vtkAdvancedAngleWidget::OnLeftButtonDown()
 				pickedangle = 180.0 + (180.0+pickedangle);
 			if (pickedangle > this->absoluteRangeMax1 && pickedangle > this->absoluteRangeMax2)
 				pickedangle = -180.0 - (180.0 -pickedangle);
-			
+
 			/*printf("angle: %f\n", pickedangle);
 			printf("this->filterRangeMin %f\n", this->filterRangeMin);
 			printf("this->filterRangeMax: %f\n", this->filterRangeMax);*/
 
-			
+
 			minor = this->filterRangeMin + (this->filterRangeMax - this->filterRangeMin)/3.0;
 			major = this->filterRangeMin + 2.0*(this->filterRangeMax - this->filterRangeMin)/3.0;
 
@@ -1256,7 +1256,7 @@ void vtkAdvancedAngleWidget::OnLeftButtonUp()
   this->EventCallbackCommand->SetAbortFlag(1);
   this->EndInteraction();
   this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
-  this->Interactor->Render(); 
+  this->Interactor->Render();
 }
 
 void vtkAdvancedAngleWidget::OnMouseMove()
@@ -1264,7 +1264,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
   int i,j=0;
 
 	// See whether we're active
-  if ( this->State == vtkAdvancedAngleWidget::Outside || 
+  if ( this->State == vtkAdvancedAngleWidget::Outside ||
        this->State == vtkAdvancedAngleWidget::Start )
     {
     return;
@@ -1278,9 +1278,9 @@ void vtkAdvancedAngleWidget::OnMouseMove()
   double focalPoint[4], pickPointOld[4], prevPickPointOld[4], prev[4], pick[4];
   double u, *as, beginas[4], temp[4], temp2[4], temppoint[4], temppoint2[4], temppoint3[3], temppoint4[3], temppoint5, temppoint6, point_on_pickline1[3], point_on_pickline2[3], point_on_pickingplane1[4], point_on_pickingplane2[4];
   double *pickPoint,*prevPickPoint;
-  double z; 
+  double z;
   double vpn[3];
-  
+
   // Process the motion
   if ( this->State == vtkAdvancedAngleWidget::Moving )
     {
@@ -1306,10 +1306,10 @@ void vtkAdvancedAngleWidget::OnMouseMove()
   windowsize = this->CurrentRenderer->GetRenderWindow()->GetSize();
   aspect = windowsize[0]/windowsize[1];
   clippingplanes = camera->GetClippingRange();
-	  
+
   // Compute the two points defining the motion vector
   this->ComputeWorldToDisplay(this->LastPickPosition[0], this->LastPickPosition[1],
-                              this->LastPickPosition[2], focalPoint);  
+                              this->LastPickPosition[2], focalPoint);
   z = focalPoint[2];
 
   if (this->CurrentHandle == this->innerArcA)
@@ -1334,7 +1334,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 	point_on_pickline1[2] = temppoint[2];
 	point_on_pickline2[0] = camera->GetPosition()[0];
 	point_on_pickline2[1] = camera->GetPosition()[1];
-	point_on_pickline2[2] = camera->GetPosition()[2];  
+	point_on_pickline2[2] = camera->GetPosition()[2];
 	temppoint3[0] = this->pos[0] + this->center[0] - point_on_pickline2[0];
 	temppoint3[1] = this->pos[1] + this->center[1] - point_on_pickline2[1];
 	temppoint3[2] = this->pos[2] + this->center[2] - point_on_pickline2[2];
@@ -1346,7 +1346,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 	u = temppoint5 / temppoint6;
 	temppoint2[0] = u*(point_on_pickline2[0] - point_on_pickline1[0]);
 	temppoint2[1] = u*(point_on_pickline2[1] - point_on_pickline1[1]);
-	temppoint2[2] = u*(point_on_pickline2[2] - point_on_pickline1[2]);  
+	temppoint2[2] = u*(point_on_pickline2[2] - point_on_pickline1[2]);
 	point_on_pickingplane1[0] = point_on_pickline2[0] - temppoint2[0];
 	point_on_pickingplane1[1] = point_on_pickline2[1] - temppoint2[1];
 	point_on_pickingplane1[2] = point_on_pickline2[2] - temppoint2[2];
@@ -1357,7 +1357,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 	point_on_pickline1[2] = temppoint[2];
 	point_on_pickline2[0] = camera->GetPosition()[0];
 	point_on_pickline2[1] = camera->GetPosition()[1];
-	point_on_pickline2[2] = camera->GetPosition()[2];  
+	point_on_pickline2[2] = camera->GetPosition()[2];
 	temppoint3[0] = this->pos[0] + this->center[0] - point_on_pickline2[0];
 	temppoint3[1] = this->pos[1] + this->center[1] - point_on_pickline2[1];
 	temppoint3[2] = this->pos[2] + this->center[2] - point_on_pickline2[2];
@@ -1369,12 +1369,12 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 	u = temppoint5 / temppoint6;
 	temppoint2[0] = u*(point_on_pickline2[0] - point_on_pickline1[0]);
 	temppoint2[1] = u*(point_on_pickline2[1] - point_on_pickline1[1]);
-	temppoint2[2] = u*(point_on_pickline2[2] - point_on_pickline1[2]);   
+	temppoint2[2] = u*(point_on_pickline2[2] - point_on_pickline1[2]);
 	point_on_pickingplane2[0] = point_on_pickline2[0] - temppoint2[0];
 	point_on_pickingplane2[1] = point_on_pickline2[1] - temppoint2[1];
 	point_on_pickingplane2[2] = point_on_pickline2[2] - temppoint2[2];
-    
-	
+
+
 
 
 	/*vtkSphereSource *spheertje = vtkSphereSource::New();
@@ -1388,7 +1388,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
   }
 
   double added_angle;
-  
+
 
   // Process the motion
   if ( this->State == vtkAdvancedAngleWidget::Moving )
@@ -1412,7 +1412,7 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 			else if (this->upperlowerbool==0){
 				this->filterRangeMin = this->filterRangeMin + added_angle;
 				if (this->filterRangeMin > this->filterRangeMax-2)
-					this->filterRangeMin = this->filterRangeMax-2;			
+					this->filterRangeMin = this->filterRangeMax-2;
 				if (this->filterRangeMin < this->absoluteRangeMin1 && this->filterRangeMin < this->absoluteRangeMin2)
 					if (this->absoluteRangeMin1 < this->absoluteRangeMin2)
 						this->filterRangeMin = this->absoluteRangeMin1;
@@ -1431,17 +1431,17 @@ void vtkAdvancedAngleWidget::OnMouseMove()
 				}
 				if (this->absoluteRangeMin1 < this->absoluteRangeMin2){
 					if (this->filterRangeMin + added_angle < this->absoluteRangeMin1)
-						added_angle = added_angle-((this->filterRangeMin + added_angle) - this->absoluteRangeMin1);					
+						added_angle = added_angle-((this->filterRangeMin + added_angle) - this->absoluteRangeMin1);
 				}
 				else{
 					if (this->filterRangeMin + added_angle < this->absoluteRangeMin2)
-						added_angle = added_angle-((this->filterRangeMin + added_angle) - this->absoluteRangeMin2);					
+						added_angle = added_angle-((this->filterRangeMin + added_angle) - this->absoluteRangeMin2);
 				}
 				this->filterRangeMin = this->filterRangeMin + added_angle;
 				this->filterRangeMax = this->filterRangeMax + added_angle;
 			}
-			
-		  	
+
+
   			this->DestroyPrimaryArc();
 			this->CreatePrimaryArc(this->filterRangeMin, this->filterRangeMax);
 			this->CurrentRenderer->AddActor(this->innerArcA);
@@ -1487,8 +1487,8 @@ int vtkAdvancedAngleWidget::HighlightHandle(vtkProp *prop)
 		{
 			this->CurrentHandle->SetProperty(this->HandlePropertyHighlight);
 		}
-    
-	
+
+
 
 	/*if(this->IsFlat())
 	{
@@ -1498,7 +1498,7 @@ int vtkAdvancedAngleWidget::HighlightHandle(vtkProp *prop)
     */
 	if ( this->CurrentHandle == this->innerArcA )
 		return 1;
-    }  
+    }
   return -1;
 }
 
@@ -1521,7 +1521,7 @@ void vtkAdvancedAngleWidget::GetDirection(const double Nx[3],const double Ny[3],
     dir[1] = Nx[1];
     dir[2] = Nx[2];
     }
-  else 
+  else
     {
     dotNy = vtkMath::Dot(Ny,Ny);
     dotNz = vtkMath::Dot(Nz,Nz);
@@ -1531,7 +1531,7 @@ void vtkAdvancedAngleWidget::GetDirection(const double Nx[3],const double Ny[3],
       }
     else if(dotNy != 0)
       {
-      //dir must have been initialized to the 
+      //dir must have been initialized to the
       //corresponding coordinate direction before calling
       //this method
       vtkMath::Cross(Ny,dir,y);
@@ -1539,7 +1539,7 @@ void vtkAdvancedAngleWidget::GetDirection(const double Nx[3],const double Ny[3],
       }
     else if(dotNz != 0)
       {
-      //dir must have been initialized to the 
+      //dir must have been initialized to the
       //corresponding coordinate direction before calling
       //this method
       vtkMath::Cross(Nz,dir,y);
@@ -1553,7 +1553,7 @@ void vtkAdvancedAngleWidget::AxisTranslate(int axis, double *p1, double *p2)
 	int i;
 	double v[3];
 	double temp[4];
-	double dir[3] = { 0,0,0};	
+	double dir[3] = { 0,0,0};
 	double axisdirection[3];
 
 	if (axis==0){
@@ -1625,12 +1625,12 @@ bool vtkAdvancedAngleWidget::IllegalPosition()
 		return true;
 	else if (sqrt(pow((this->pos[0]),2)+pow((this->pos[2]),2))>2.5)
 		return true;
-	else 
+	else
 		return false;
 }
 
 double vtkAdvancedAngleWidget::AxisRotate(int axisconstraint, double *p1, double *p2)
-{     
+{
 	double x_as[3], y_as[3], z_as[3], beginas[3], temp[4], *new_x_as, *new_y_as, *new_z_as, normal1[3], normal2[3], crossie[3], dottie;
 
 	if (axisconstraint == 0)
@@ -1639,7 +1639,7 @@ double vtkAdvancedAngleWidget::AxisRotate(int axisconstraint, double *p1, double
 		{beginas[0]=1;beginas[1]=0;beginas[2]=0;}
 	else
 		{beginas[0]=0;beginas[1]=1;beginas[2]=0;}
-	
+
 	vtkTransform *t = vtkTransform::New();
 	this->widgetorientation->GetOrientationWXYZ(temp);
 	t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);
@@ -1692,9 +1692,9 @@ double vtkAdvancedAngleWidget::AxisRotate(int axisconstraint, double *p1, double
 			dottie = abs(dottie);
 		else
 			dottie = abs(dottie)*-1;
-			
+
 	return dottie;
-	
+
 }
 
 double vtkAdvancedAngleWidget::GetXOffset()
@@ -1723,7 +1723,7 @@ void vtkAdvancedAngleWidget::GetRotationTransform(vtkTransform *t)
 	t->Identity();
 	double temp[4];
 	this->orientation->GetOrientationWXYZ(temp);
-	t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);	
+	t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);
 }
 
 void vtkAdvancedAngleWidget::GetInitialOrientationTransform(vtkTransform *t)
@@ -1731,7 +1731,7 @@ void vtkAdvancedAngleWidget::GetInitialOrientationTransform(vtkTransform *t)
 	t->Identity();
 	double temp[4];
 	this->widgetorientation->GetOrientationWXYZ(temp);
-	t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);	
+	t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);
 }
 
 void vtkAdvancedAngleWidget::Rotate(double angle, double axis[3])
@@ -1759,7 +1759,7 @@ void vtkAdvancedAngleWidget::GetTransform(vtkTransform *t)
     t->Translate(this->center[0],this->center[1],this->center[2]);
     t->Scale(this->Scale,this->Scale,this->Scale);
     t->Translate(-this->center[0],-this->center[1],-this->center[2]);
- 
+
   this->widgetorientation->GetOrientationWXYZ(temp);
   //t->RotateWXYZ(temp[0],temp[1],temp[2],temp[3]);
   // Translation
