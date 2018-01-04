@@ -92,7 +92,7 @@ vtkEllipseRepresentation::vtkEllipseRepresentation()
   this->LinePolyData->SetPoints(this->LinePoints);
   this->LinePolyData->SetLines(this->LineCells);
   this->LineMapper = vtkPolyDataMapper2D::New();
-  this->LineMapper->SetInput(this->LinePolyData);
+  this->LineMapper->SetInputData(this->LinePolyData);
   this->LineProperty = vtkProperty2D::New();
   this->LineActor = vtkActor2D::New();
   this->LineActor->SetProperty(this->LineProperty);
@@ -121,9 +121,9 @@ vtkEllipseRepresentation::vtkEllipseRepresentation()
   this->EllipseTrfmFilter = vtkTransformPolyDataFilter::New();
   this->EllipseTrfm = vtkTransform::New();
   this->EllipseTrfmFilter->SetTransform(this->EllipseTrfm);
-  this->EllipseTrfmFilter->SetInput(this->EllipseSource->GetOutput());
+  this->EllipseTrfmFilter->SetInputData(this->EllipseSource->GetOutput());
   this->EllipseMapper = vtkPolyDataMapper2D::New();
-  this->EllipseMapper->SetInput(this->EllipseTrfmFilter->GetOutput());
+  this->EllipseMapper->SetInputData(this->EllipseTrfmFilter->GetOutput());
   this->EllipseActor = vtkActor2D::New();
   this->EllipseActor->SetMapper(this->EllipseMapper);
 
