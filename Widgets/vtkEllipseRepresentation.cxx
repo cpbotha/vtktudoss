@@ -12,6 +12,8 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
+#include <strstream>
+
 #include "vtkEllipseRepresentation.h"
 #include "vtkEllipseSource.h"
 #include "vtkHandleRepresentation.h"
@@ -941,7 +943,7 @@ void vtkEllipseRepresentation::BuildRepresentation()
       {
       line2Dist = sqrt(vtkMath::Distance2BetweenPoints(wp3, wp4));
       }
-    ostrstream label;
+    std::ostrstream label;
     if (this->IDInitialized)
       {
       label << this->ID << ": ";
