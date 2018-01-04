@@ -55,12 +55,12 @@ vtkEllipseRepresentation::vtkEllipseRepresentation()
   cursor2D->AllOff();
   //cursor2D->AxesOn();
   cursor2D->PointOn();
-  
+
   ((vtkPointHandleRepresentation2D *)(this->HandleRepresentation))->SetCursorShape(cursor2D->GetOutput());
   cursor2D->GetOutput()->Register(this->HandleRepresentation);
 
   // end of hoop-jumping ==========================================
-  
+
   this->Point1Representation = NULL;
   this->Point2Representation = NULL;
   this->Point3Representation = NULL;
@@ -184,12 +184,12 @@ void vtkEllipseRepresentation
     {
     return;
     }
-  
+
   this->Modified();
   this->HandleRepresentation->Delete();
   this->HandleRepresentation = handle;
   this->HandleRepresentation->Register(this);
-  
+
   this->Point1Representation->Delete();
   this->Point2Representation->Delete();
   this->Point3Representation->Delete();
@@ -315,7 +315,7 @@ void vtkEllipseRepresentation::GetPoint4DisplayPosition(double pos[3])
   pos[2] = 0.0;
 }
 
-  
+
 //----------------------------------------------------------------------
 void vtkEllipseRepresentation::InstantiateHandleRepresentation()
 {
@@ -324,7 +324,7 @@ void vtkEllipseRepresentation::InstantiateHandleRepresentation()
     this->Point1Representation = this->HandleRepresentation->NewInstance();
     this->Point1Representation->ShallowCopy(this->HandleRepresentation);
     }
-  
+
   if ( ! this->Point2Representation )
     {
     this->Point2Representation = this->HandleRepresentation->NewInstance();
@@ -336,14 +336,14 @@ void vtkEllipseRepresentation::InstantiateHandleRepresentation()
     this->Point3Representation = this->HandleRepresentation->NewInstance();
     this->Point3Representation->ShallowCopy(this->HandleRepresentation);
     }
-  
+
   if ( ! this->Point4Representation )
     {
     this->Point4Representation = this->HandleRepresentation->NewInstance();
     this->Point4Representation->ShallowCopy(this->HandleRepresentation);
     }
 }
-  
+
 //----------------------------------------------------------------------
 int vtkEllipseRepresentation::ComputeInteractionState(int X, int Y, int modify)
 {
@@ -355,7 +355,7 @@ int vtkEllipseRepresentation::ComputeInteractionState(int X, int Y, int modify)
   this->GetPoint2DisplayPosition(pos2);
   this->GetPoint3DisplayPosition(pos3);
   this->GetPoint4DisplayPosition(pos4);
-  
+
   double p1[3], p2[3], p3[3], p4[3], xyz[3];
   double t, closest[3];
   xyz[0] = static_cast<double>(X);
@@ -420,7 +420,7 @@ int vtkEllipseRepresentation::ComputeInteractionState(int X, int Y, int modify)
     this->InteractionState = vtkEllipseRepresentation::Outside;
     this->Modifier = 0;
     }
-  
+
   return this->InteractionState;
 }
 
@@ -472,7 +472,7 @@ void vtkEllipseRepresentation::StartWidgetDefinition(double e[2])
   //this->SetPoint2DisplayPosition(pos);
   //this->SetPoint3DisplayPosition(pos);
   //this->SetPoint4DisplayPosition(pos);
-  
+
   this->StartEventPosition[0] = c[0];
   this->StartEventPosition[1] = c[1];
   this->StartEventPosition[2] = c[2];
@@ -490,7 +490,7 @@ void vtkEllipseRepresentation::Point2WidgetInteraction(double e[2])
   pos[0] = e[0];
   pos[1] = e[1];
   pos[2] = 0.0;
-  
+
   // Make sure that the two points are not coincident
   // cpbotha: magic number 2 appearing here... oi.
   this->GetPoint1DisplayPosition(p1);
@@ -510,7 +510,7 @@ void vtkEllipseRepresentation::Point3WidgetInteraction(double e[2])
   double p1[3], p2[3], p3[3], p4[3];
   double slope1[3], slope2[3];
 
-  // Start by getting the coordinates (P1,P2) defining Line1. Also get 
+  // Start by getting the coordinates (P1,P2) defining Line1. Also get
   // characterisitics of Line1 including its slope, etc.
   this->GetPoint1WorldPosition(p1);
   this->GetPoint2WorldPosition(p2);
@@ -520,7 +520,7 @@ void vtkEllipseRepresentation::Point3WidgetInteraction(double e[2])
   slope2[1] =  slope1[0];
   slope2[2] = 0.0;
   vtkMath::Normalize(slope2);
-  
+
   // The current position of P3 is constrained to lie along Line1. Also,
   // P4 is placed on the opposite side of Line1.
   double pw[4], t, closest[3];
@@ -531,7 +531,7 @@ void vtkEllipseRepresentation::Point3WidgetInteraction(double e[2])
     this->Renderer->GetWorldPoint(pw);
     }
   double dist = sqrt(vtkLine::DistanceToLine(pw,p1,p2,t,closest));
-  
+
   // Set the positions of P3 and P4.
   p3[0] = closest[0] + dist*slope2[0];
   p3[1] = closest[1] + dist*slope2[1];
@@ -573,11 +573,11 @@ void vtkEllipseRepresentation::StartWidgetManipulation(double e[2])
   vtkLine::Intersection(this->P1World,this->P2World,
                         this->P3World,this->P4World,
                         this->T21,this->T43);
-  
+
   // Compute the center point
   for (i=0; i<3; i++)
     {
-    this->CenterWorld[i] = ((this->P1World[i] + this->T21*this->P21World[i]) + 
+    this->CenterWorld[i] = ((this->P1World[i] + this->T21*this->P21World[i]) +
                             (this->P3World[i] + this->T43*this->P43World[i]))/2.0;
     }
 }
@@ -594,11 +594,11 @@ void vtkEllipseRepresentation::StartWidgetManipulation(double e[2])
 // version did, but it also moves the opposite handle in the opposite
 // direction, so that the axes always remain symmetric
 void vtkEllipseRepresentation::ProjectOrthogonalPoint(
-  double x[4], double y[3], double x1[3], double x2[3], 
+  double x[4], double y[3], double x1[3], double x2[3],
   double x21[3], double dir, double xP[3], double yP[3])
 {
   double t, closest[3], slope[3], dist;
-  
+
   // determine the distance from the other (orthogonal) line
   // DistanceToLine computes the squared distance of point x to the
   // line (x1,x2).  closest is the point on the line itself, t is
@@ -608,13 +608,13 @@ void vtkEllipseRepresentation::ProjectOrthogonalPoint(
   // get the closest point on the other line, use its "mate" point to
   // define the projection point, this keeps everything orthogonal.
   vtkLine::DistanceToLine(y,x1,x2,t,closest);
-  
-  // Project the point "dist" orthogonal to ray x21. 
+
+  // Project the point "dist" orthogonal to ray x21.
   // Define an orthogonal line.
   slope[0] = -x21[1];
   slope[1] =  x21[0];
   slope[2] = 0.0;
-  
+
   // Project out the right distance along the calculated slope
   vtkMath::Normalize(slope);
   xP[0] = closest[0] + dist*slope[0];
@@ -661,8 +661,8 @@ void vtkEllipseRepresentation::ProjectOrthogonalPoint(
     {
     yP[i] = closest[i] - (xP[i] - closest[i]);
     }
-  
-  
+
+
 }
 
 //----------------------------------------------------------------------
@@ -682,7 +682,7 @@ void vtkEllipseRepresentation::WidgetInteraction(double e[2])
   this->Renderer->SetDisplayPoint(e[0],e[1],0.0);
   this->Renderer->DisplayToWorld();
   this->Renderer->GetWorldPoint(pw);
-  
+
   // depending on the state, perform different operations
   if ( this->InteractionState == OnCenter )
     {
@@ -721,7 +721,7 @@ void vtkEllipseRepresentation::WidgetInteraction(double e[2])
     double theta2 = atan2(p2c[1],p2c[0]);
     double theta3 = atan2(p3c[1],p3c[0]);
     double theta4 = atan2(p4c[1],p4c[0]);
-    
+
     //rotate the four points
     p1[0] = this->CenterWorld[0] + r1*cos(theta+theta1);
     p1[1] = this->CenterWorld[1] + r1*sin(theta+theta1);
@@ -741,7 +741,7 @@ void vtkEllipseRepresentation::WidgetInteraction(double e[2])
     this->SetPoint3WorldPosition(p3);
     this->SetPoint4WorldPosition(p4);
     }
-  
+
   // pw is e (display coordinate of event) converted to world coords
   // ProjectOrthogonalPoint takes pw, does stuff, and spits out new p
   // we'll change this to spit out two points and not only one...
@@ -790,7 +790,7 @@ double vtkEllipseRepresentation::GetSemiMajorAxisLength()
 {
 	double v[3];
 	this->GetSemiMajorAxisVector(v);
-	
+
 	double len = 0.0;
 
 	for (int i = 0; i < 3; i++)
@@ -820,7 +820,7 @@ double vtkEllipseRepresentation::GetSemiMinorAxisLength()
 {
 	double v[3];
 	this->GetSemiMinorAxisVector(v);
-	
+
 	double len = 0.0;
 
 	for (int i = 0; i < 3; i++)
@@ -881,7 +881,7 @@ void vtkEllipseRepresentation::UpdateEllipse(double p1[3], double p2[3], double 
 
 void vtkEllipseRepresentation::BuildRepresentation()
 {
-  if ( this->GetMTime() > this->BuildTime || 
+  if ( this->GetMTime() > this->BuildTime ||
        this->Point1Representation->GetMTime() > this->BuildTime ||
        this->Point2Representation->GetMTime() > this->BuildTime ||
        this->Point3Representation->GetMTime() > this->BuildTime ||
@@ -962,7 +962,7 @@ void vtkEllipseRepresentation::BuildRepresentation()
 
     // Adjust the font size
     int stringSize[2], *winSize = this->Renderer->GetSize();
-    vtkTextMapper::SetRelativeFontSize(this->TextMapper, this->Renderer, winSize, 
+    vtkTextMapper::SetRelativeFontSize(this->TextMapper, this->Renderer, winSize,
                                        stringSize, 0.015);
 
     int maxX = VTK_INT_MIN, maxY = VTK_INT_MIN;
@@ -1017,7 +1017,7 @@ void vtkEllipseRepresentation::BuildRepresentation()
       {
       this->TextActor->SetPosition(minX - textSize[0]/2, minY-(textSize[1]+9));
       }
-    
+
     this->BuildTime.Modified();
     }
 }
@@ -1044,10 +1044,10 @@ void vtkEllipseRepresentation::GetLabelPosition(double pos[3])
 double vtkEllipseRepresentation::GetLength1()
 {
   double x1[3], x2[3];
-  
+
   this->GetPoint1WorldPosition(x1);
   this->GetPoint2WorldPosition(x2);
-  
+
   return sqrt(vtkMath::Distance2BetweenPoints(x1,x2));
 }
 
@@ -1056,10 +1056,10 @@ double vtkEllipseRepresentation::GetLength1()
 double vtkEllipseRepresentation::GetLength2()
 {
   double x3[3], x4[3];
-  
+
   this->GetPoint3WorldPosition(x3);
   this->GetPoint4WorldPosition(x4);
-  
+
   return sqrt(vtkMath::Distance2BetweenPoints(x3,x4));
 }
 
@@ -1115,7 +1115,7 @@ void vtkEllipseRepresentation::PrintSelf(ostream& os, vtkIndent indent)
 {
   //Superclass typedef defined in vtkTypeMacro() found in vtkSetGet.h
   this->Superclass::PrintSelf(os,indent);
-  
+
   os << indent << "Tolerance: " << this->Tolerance << "\n";
 
   os << indent << "Length1: " << this->GetLength1() << "\n";
@@ -1156,4 +1156,3 @@ void vtkEllipseRepresentation::PrintSelf(ostream& os, vtkIndent indent)
 
   os << indent << "Handle Representation: " << this->HandleRepresentation << "\n";
 }
-
