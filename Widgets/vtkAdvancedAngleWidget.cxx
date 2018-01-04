@@ -335,11 +335,11 @@ void vtkAdvancedAngleWidget::CreateArcRange1(float min, float max)
 	cells2B->Delete();
 
 	this->outerArcMapA = vtkDataSetMapper::New();
-	this->outerArcMapA->SetInput(this->outerboogje1);
+	this->outerArcMapA->SetInputData(this->outerboogje1);
 	this->outerArcA->SetMapper(this->outerArcMapA);
 	this->outerArcA->SetProperty(this->HandlePropertyDarkBlue);
 	this->outerArcMapB = vtkDataSetMapper::New();
-	this->outerArcMapB->SetInput(this->outerboogje2);
+	this->outerArcMapB->SetInputData(this->outerboogje2);
 	this->outerArcB->SetMapper(this->outerArcMapB);
 	this->outerArcB->SetProperty(this->HandlePropertyLightBlue);
 }
@@ -480,11 +480,11 @@ void vtkAdvancedAngleWidget::CreateArcRange2(float min, float max)
 	cells2B->Delete();
 
 	this->outer2ArcMapA = vtkDataSetMapper::New();
-	this->outer2ArcMapA->SetInput(this->outer2boogje1);
+	this->outer2ArcMapA->SetInputData(this->outer2boogje1);
 	this->outer2ArcA->SetMapper(this->outer2ArcMapA);
 	this->outer2ArcA->SetProperty(this->HandlePropertyDarkYellow);
 	this->outer2ArcMapB = vtkDataSetMapper::New();
-	this->outer2ArcMapB->SetInput(this->outer2boogje2);
+	this->outer2ArcMapB->SetInputData(this->outer2boogje2);
 	this->outer2ArcB->SetMapper(this->outer2ArcMapB);
 	this->outer2ArcB->SetProperty(this->HandlePropertyYellow);
 }
@@ -682,11 +682,11 @@ void vtkAdvancedAngleWidget::CreatePrimaryArc(float min, float max)
 	cells2B->Delete();
 
 	this->innerArcMapA = vtkDataSetMapper::New();
-	this->innerArcMapA->SetInput(this->innerboogje1);
+	this->innerArcMapA->SetInputData(this->innerboogje1);
 	this->innerArcA->SetMapper(this->innerArcMapA);
 	this->innerArcA->SetProperty(this->HandlePropertyOrange);
 	this->innerArcMapB = vtkDataSetMapper::New();
-	this->innerArcMapB->SetInput(this->innerboogje2);
+	this->innerArcMapB->SetInputData(this->innerboogje2);
 	this->innerArcB->SetMapper(this->innerArcMapB);
 	this->innerArcB->SetProperty(this->HandlePropertyDarkBlue);
 
@@ -988,7 +988,7 @@ void vtkAdvancedAngleWidget::CreateNudge()
 	this->stlreader->Update();
 
 	this->nudgemapper = vtkDataSetMapper::New();
-	this->nudgemapper->SetInput(this->stlreader->GetOutput());
+	this->nudgemapper->SetInputData(this->stlreader->GetOutput());
 	this->nudgeactor->SetMapper(this->nudgemapper);
 	this->nudgeactor->SetProperty(this->HandlePropertyNudge);
 }
