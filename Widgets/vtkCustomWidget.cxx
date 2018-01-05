@@ -1,6 +1,8 @@
 #include "vtkCustomWidget.h"
 
 #include "vtkActor.h"
+#include "vtkCallbackCommand.h"
+#include "vtkCellPicker.h"
 #include "vtkDataSetMapper.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
@@ -20,8 +22,15 @@ vtkStandardNewMacro(vtkCustomWidget);
 
 // Constructor
 vtkCustomWidget::vtkCustomWidget() :
-  TranslationHandle(vtkActor::New())
+  TranslationHandle(vtkActor::New()),
+  HandlePicker(vtkCellPicker::New()),
+  State(vtkCustomWidget::Start)
 {
+  this->EventCallbackCommand->SetCallback(vtkCustomWidget::ProcessEvents);
+
+  this->HandlePicker->SetTolerance(0.001);
+  this->HandlePicker->AddPickList(this->TranslationHandle);
+  this->HandlePicker->PickFromListOn();
 }
 
 // Destructor
@@ -107,6 +116,14 @@ void vtkCustomWidget::SetEnabled(int enabled)
     // Set enabled to true
     this->Enabled = 1;
 
+    // Listen to the following events
+    this->Interactor->AddObserver(vtkCommand::MouseMoveEvent,
+                                  this->EventCallbackCommand, this->Priority);
+    this->Interactor->AddObserver(vtkCommand::LeftButtonPressEvent,
+                                  this->EventCallbackCommand, this->Priority);
+    this->Interactor->AddObserver(vtkCommand::LeftButtonReleaseEvent,
+                                  this->EventCallbackCommand, this->Priority);
+
     this->CurrentRenderer->AddActor(this->TranslationHandle);
 
     this->InvokeEvent(vtkCommand::EnableEvent, NULL);
@@ -123,11 +140,76 @@ void vtkCustomWidget::SetEnabled(int enabled)
     // Set enabled to false
     this->Enabled = 0;
 
-    this->CurrentRenderer->RemoveActor(this->translationHandle);
+    // Don't listen for events any more
+    this->Interactor->RemoveObserver(this->EventCallbackCommand);
+
+    this->CurrentRenderer->RemoveActor(this->TranslationHandle);
 
     this->InvokeEvent(vtkCommand::DisableEvent, NULL);
     this->SetCurrentRenderer(NULL);
   }
 
   this->Interactor->Render();
+}
+
+void vtkCustomWidget::ProcessEvents(vtkObject* object,
+                                    unsigned long event,
+                                    void* clientdata,
+                                    void* calldata)
+{
+  vtkCustomWidget* self = reinterpret_cast<vtkCustomWidget*>(clientdata);
+
+  //okay, let's do the right thing
+  switch(event)
+  {
+  case vtkCommand::LeftButtonPressEvent:
+    self->OnLeftButtonDown();
+    break;
+  case vtkCommand::LeftButtonReleaseEvent:
+    self->OnLeftButtonUp();
+    break;
+  case vtkCommand::MouseMoveEvent:
+    self->OnMouseMove();
+    break;
+  }
+}
+
+void vtkCustomWidget::OnLeftButtonDown()
+{
+  int x = this->Interactor->GetEventPosition()[0];
+  int y = this->Interactor->GetEventPosition()[1];
+
+  this->HandlePicker->Pick(x, y, 0.0, this->CurrentRenderer);
+  vtkAssemblyPath* path = this->HandlePicker->GetPath();
+
+  // Return if the handle wasn't clicked
+  if ( path == NULL )
+  {
+    this->State = vtkCustomWidget::Start;
+    return;
+  }
+
+  this->State = vtkCustomWidget::Moving;
+  this->EventCallbackCommand->SetAbortFlag(1);
+}
+
+void vtkCustomWidget::OnLeftButtonUp()
+{
+  if (this->State != vtkCustomWidget::Moving) {
+    return;
+  }
+
+  this->State = vtkCustomWidget::Start;
+  this->EventCallbackCommand->SetAbortFlag(1);
+  this->InvokeEvent(vtkCommand::EndInteractionEvent, NULL);
+}
+
+void vtkCustomWidget::OnMouseMove()
+{
+  if (this->State != vtkCustomWidget::Moving) {
+    return;
+  }
+
+  this->EventCallbackCommand->SetAbortFlag(1);
+  this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
 }
