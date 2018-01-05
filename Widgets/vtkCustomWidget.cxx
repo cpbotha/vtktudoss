@@ -50,19 +50,39 @@ void vtkCustomWidget::CreateDefaultRepresentation()
 
 void vtkCustomWidget::CreateTranslationHandle()
 {
-  vtkCellArray *cells = vtkCellArray::New();
+  vtkCellArray* cells = vtkCellArray::New();
   cells->InsertNextCell(4);
   cells->InsertCellPoint(0);
   cells->InsertCellPoint(1);
   cells->InsertCellPoint(2);
   cells->InsertCellPoint(3);
+  cells->InsertNextCell(4);
+  cells->InsertCellPoint(0);
+  cells->InsertCellPoint(3);
+  cells->InsertCellPoint(4);
+  cells->InsertCellPoint(5);
+  cells->InsertNextCell(4);
+  cells->InsertCellPoint(0);
+  cells->InsertCellPoint(5);
+  cells->InsertCellPoint(6);
+  cells->InsertCellPoint(7);
+  cells->InsertNextCell(4);
+  cells->InsertCellPoint(0);
+  cells->InsertCellPoint(7);
+  cells->InsertCellPoint(8);
+  cells->InsertCellPoint(1);
 
   vtkPoints* points = vtkPoints::New();
-  points->SetNumberOfPoints(4);
-  points->InsertPoint(0, 1, 1, 0);
-  points->InsertPoint(1, -1, 1, 0);
-  points->InsertPoint(2, -1, -1, 0);
-  points->InsertPoint(3, 1, -1, 0);
+  points->SetNumberOfPoints(8);
+  points->InsertPoint(0, 0, 0, 0);
+  points->InsertPoint(1, 0.2, 0.2, 0);
+  points->InsertPoint(2, 0, 1, 0);
+  points->InsertPoint(3, -0.2, 0.2, 0);
+  points->InsertPoint(4, -1, 0, 0);
+  points->InsertPoint(5, -0.2, -0.2, 0);
+  points->InsertPoint(6, 0, -1, 0);
+  points->InsertPoint(7, 0.2, -0.2, 0);
+  points->InsertPoint(8, 1, 0, 0);
 
   vtkPolyData* polyData = vtkPolyData::New();
   polyData->SetPolys(cells);
