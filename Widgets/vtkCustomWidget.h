@@ -2,22 +2,22 @@
    vtkCustomWidget
    =========================================================================*/
 
-#include "vtk3DWidget.h"
+#ifndef __vtkCustomWidget_h
+#define __vtkCustomWidget_h
+
+#include "vtkAbstractWidget.h"
 
 class vtkActor;
 class vtkCellPicker;
 class vtkTransform;
 
-#ifndef __vtkCustomWidget_h
-#define __vtkCustomWidget_h
-
-class VTK_EXPORT vtkCustomWidget : public vtk3DWidget
+class VTK_EXPORT vtkCustomWidget : public vtkAbstractWidget
 {
 public:
   void PrintSelf(ostream& os, vtkIndent indent);
-  vtkTypeMacro(vtkCustomWidget,vtk3DWidget);
+  vtkTypeMacro(vtkCustomWidget, vtkAbstractWidget);
   static vtkCustomWidget *New();
-  virtual void PlaceWidget(double bds[6]);
+  virtual void CreateDefaultRepresentation() VTK_OVERRIDE;
 
   // Override methods from parent
   virtual void SetEnabled(int);
@@ -71,6 +71,7 @@ private:
   // Used to store the center when the user starts to drag the
   // translation handle.
   double StartCenter[3];
+  double StartPick[3];
 };
 
 

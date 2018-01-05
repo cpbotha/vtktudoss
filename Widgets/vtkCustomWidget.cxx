@@ -28,6 +28,7 @@ vtkCustomWidget::vtkCustomWidget() :
 {
   this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
   this->CopyVector(this->Center, this->StartCenter);
+  this->CopyVector(this->Center, this->StartPick);
   this->EventCallbackCommand->SetCallback(vtkCustomWidget::ProcessEvents);
 
   this->HandlePicker->SetTolerance(0.001);
@@ -42,7 +43,7 @@ vtkCustomWidget::~vtkCustomWidget()
   this->TranslationHandle->Delete();
 }
 
-void vtkCustomWidget::PlaceWidget(double bds[6])
+void vtkCustomWidget::CreateDefaultRepresentation()
 {
   this->CreateTranslationHandle();
 }
@@ -193,7 +194,7 @@ void vtkCustomWidget::OnLeftButtonDown()
   }
 
   this->State = vtkCustomWidget::Moving;
-  this->HandlePicker->GetPickPosition(this->LastPickPosition);
+  this->HandlePicker->GetPickPosition(this->StartPick);
   this->CopyVector(this->Center, this->StartCenter);
   this->EventCallbackCommand->SetAbortFlag(1);
 }
@@ -219,9 +220,9 @@ void vtkCustomWidget::OnMouseMove()
   double y = (double)this->Interactor->GetEventPosition()[1];
 
   double lastPos[4];
-  this->ComputeWorldToDisplay(this->LastPickPosition[0],
-                              this->LastPickPosition[1],
-                              this->LastPickPosition[2],
+  this->ComputeWorldToDisplay(this->StartPick[0],
+                              this->StartPick[1],
+                              this->StartPick[2],
                               lastPos);
 
   // Compute the two points defining the motion
@@ -231,7 +232,7 @@ void vtkCustomWidget::OnMouseMove()
   double offset[3];
   // Get the offset between the pick position when dragging started and the
   // current pick position.
-  this->SubtractVectors(currentPickPosition, this->LastPickPosition, offset);
+  this->SubtractVectors(currentPickPosition, this->StartPick, offset);
   // Set the center to the center when dragging started plus the offset of
   // the current pick position. This is done so the dragged object is always
   // under the mouse and doesn't drift because of rounding errors.
