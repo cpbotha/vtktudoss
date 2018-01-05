@@ -4,6 +4,7 @@
 
 #include "vtk3DWidget.h"
 
+class vtkActor;
 class vtkTransform;
 
 #ifndef __vtkCustomWidget_h
@@ -23,6 +24,11 @@ public:
 protected:
   vtkCustomWidget(void);
   ~vtkCustomWidget(void);
+
+  vtkActor* TranslationHandle;
+
+private:
+  void CreateTranslationHandle();
 };
 
 
