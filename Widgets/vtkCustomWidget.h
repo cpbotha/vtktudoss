@@ -9,6 +9,7 @@
 
 class vtkActor;
 class vtkCellPicker;
+class vtkPolyData;
 class vtkTransform;
 
 class VTK_EXPORT vtkCustomWidget : public vtkAbstractWidget
@@ -24,10 +25,13 @@ public:
 
   // Public member variables
   double Center[3];
+  double Scale;
 
   // Getters and setters
   vtkSetVectorMacro(Center, double, 3);
   vtkGetVectorMacro(Center, double, 3);
+  void SetScale(double value);
+  vtkGetMacro(Scale, double);
 
 protected:
   vtkCustomWidget(void);
@@ -53,6 +57,7 @@ protected:
 
 private:
   void CreateTranslationHandle();
+  vtkPolyData* CreateTranslationHandlePolydata();
 
   // ProcessEvents() dispatches to these methods.
   void OnLeftButtonDown();

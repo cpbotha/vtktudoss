@@ -48,7 +48,7 @@ void vtkCustomWidget::CreateDefaultRepresentation()
   this->CreateTranslationHandle();
 }
 
-void vtkCustomWidget::CreateTranslationHandle()
+vtkPolyData* vtkCustomWidget::CreateTranslationHandlePolydata()
 {
   vtkCellArray* cells = vtkCellArray::New();
   cells->InsertNextCell(4);
@@ -72,25 +72,32 @@ void vtkCustomWidget::CreateTranslationHandle()
   cells->InsertCellPoint(8);
   cells->InsertCellPoint(1);
 
+  double scale = this->Scale;
+
   vtkPoints* points = vtkPoints::New();
   points->SetNumberOfPoints(8);
-  points->InsertPoint(0, 0, 0, 0);
-  points->InsertPoint(1, 0.2, 0.2, 0);
-  points->InsertPoint(2, 0, 1, 0);
-  points->InsertPoint(3, -0.2, 0.2, 0);
-  points->InsertPoint(4, -1, 0, 0);
-  points->InsertPoint(5, -0.2, -0.2, 0);
-  points->InsertPoint(6, 0, -1, 0);
-  points->InsertPoint(7, 0.2, -0.2, 0);
-  points->InsertPoint(8, 1, 0, 0);
+  points->InsertPoint(0, scale * 0,     scale * 0,    0);
+  points->InsertPoint(1, scale * 0.2,   scale * 0.2,  0);
+  points->InsertPoint(2, scale * 0,     scale * 1,    0);
+  points->InsertPoint(3, scale * -0.2,  scale * 0.2,  0);
+  points->InsertPoint(4, scale * -1,    scale * 0,    0);
+  points->InsertPoint(5, scale * -0.2,  scale * -0.2, 0);
+  points->InsertPoint(6, scale * 0,     scale * -1,   0);
+  points->InsertPoint(7, scale * 0.2,   scale * -0.2, 0);
+  points->InsertPoint(8, scale * 1,     scale * 0,    0);
 
   vtkPolyData* polyData = vtkPolyData::New();
   polyData->SetPolys(cells);
   polyData->SetPoints(points);
   cells->Delete();
   points->Delete();
+  return polyData;
+}
 
+void vtkCustomWidget::CreateTranslationHandle()
+{
   vtkDataSetMapper* mapper = vtkDataSetMapper::New();
+  vtkPolyData* polyData = this->CreateTranslationHandlePolydata();
   mapper->SetInputData(polyData);
   polyData->Delete();
 
@@ -103,6 +110,18 @@ void vtkCustomWidget::CreateTranslationHandle()
   this->TranslationHandle->SetPosition(this->Center);
   mapper->Delete();
   orangeProperty->Delete();
+}
+
+void vtkCustomWidget::SetScale(double value)
+{
+  this->Scale = value;
+  if (this->TranslationHandle != NULL) {
+    vtkDataSetMapper* mapper = vtkDataSetMapper::New();
+    vtkPolyData* polyData = this->CreateTranslationHandlePolydata();
+    mapper->SetInputData(polyData);
+    polyData->Delete();
+    this->TranslationHandle->SetMapper(mapper);
+  }
 }
 
 void vtkCustomWidget::PrintSelf(ostream& os, vtkIndent indent)
