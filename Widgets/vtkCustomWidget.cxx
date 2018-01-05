@@ -37,4 +37,46 @@ void vtkCustomWidget::SetEnabled(int enabled)
     vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
     return;
   }
+
+  if (enabled)
+  {
+    vtkDebugMacro(<<"Enabling widget")
+    if (this->Enabled)
+    {
+      vtkDebugMacro(<<"Widget already enabled")
+      return;
+    }
+
+    if (!this->CurrentRenderer)
+    {
+      this->SetCurrentRenderer((vtkRenderer *)(this->Interactor->GetRenderWindow()->GetRenderers()->GetFirstRenderer()));
+      if (this->CurrentRenderer == NULL)
+      {
+        vtkDebugMacro(<<"Widget has no renderer")
+        return;
+      }
+    }
+
+    // Set enabled to true
+    this->Enabled = 1;
+
+    this->InvokeEvent(vtkCommand::EnableEvent, NULL);
+  }
+  else
+  {
+    vtkDebugMacro(<<"Disabling widget")
+    if (!this->Enabled)
+    {
+      vtkDebugMacro(<<"Widget already disabled")
+      return;
+    }
+
+    // Set enabled to false
+    this->Enabled = 0;
+
+    this->InvokeEvent(vtkCommand::DisableEvent, NULL);
+    this->SetCurrentRenderer(NULL);
+  }
+
+  this->Interactor->Render();
 }
