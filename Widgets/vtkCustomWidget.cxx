@@ -29,3 +29,12 @@ void vtkCustomWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os, indent);
 }
+
+void vtkCustomWidget::SetEnabled(int enabled)
+{
+  if (!this->Interactor)
+  {
+    vtkErrorMacro(<<"The interactor must be set prior to enabling/disabling widget");
+    return;
+  }
+}

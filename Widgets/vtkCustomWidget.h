@@ -17,6 +17,9 @@ public:
   static vtkCustomWidget *New();
   virtual void PlaceWidget(double bds[6]);
 
+  // Override methods from parent
+  virtual void SetEnabled(int);
+
 protected:
   vtkCustomWidget(void);
   ~vtkCustomWidget(void);
