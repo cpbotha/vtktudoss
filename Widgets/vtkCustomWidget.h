@@ -15,13 +15,18 @@ class vtkTransform;
 class VTK_EXPORT vtkCustomWidget : public vtkAbstractWidget
 {
 public:
+  // Instantiate the class
+  static vtkCustomWidget *New();
+
+  // Standard methods for a VTK class
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkTypeMacro(vtkCustomWidget, vtkAbstractWidget);
-  static vtkCustomWidget *New();
-  virtual void CreateDefaultRepresentation() VTK_OVERRIDE;
 
-  // Override methods from parent
+  // The method for activating and deactivating this widget
   virtual void SetEnabled(int);
+
+  // Create the default widget representation if one is not set
+  virtual void CreateDefaultRepresentation() VTK_OVERRIDE;
 
   // Public member variables
   double Center[3];
