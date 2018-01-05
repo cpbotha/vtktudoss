@@ -210,6 +210,22 @@ void vtkCustomWidget::OnMouseMove()
     return;
   }
 
+  double x = (double)this->Interactor->GetEventPosition()[0];
+  double y = (double)this->Interactor->GetEventPosition()[1];
+
+  double lastPos[4];
+  this->ComputeWorldToDisplay(this->LastPickPosition[0],
+                              this->LastPickPosition[1],
+                              this->LastPickPosition[2],
+                              lastPos);
+
+  // Compute the two points defining the motion
+  double movePos[4];
+  this->ComputeDisplayToWorld(x, y, lastPos[2], movePos);
+
+  this->TranslationHandle->SetPosition(movePos[0], movePos[1], 0);
+
   this->EventCallbackCommand->SetAbortFlag(1);
   this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
+  this->Interactor->Render();
 }
