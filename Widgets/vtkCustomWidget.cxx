@@ -26,6 +26,8 @@ vtkCustomWidget::vtkCustomWidget() :
   HandlePicker(vtkCellPicker::New()),
   State(vtkCustomWidget::Start)
 {
+  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+  this->CopyVector(this->Center, this->StartCenter);
   this->EventCallbackCommand->SetCallback(vtkCustomWidget::ProcessEvents);
 
   this->HandlePicker->SetTolerance(0.001);
@@ -77,6 +79,7 @@ void vtkCustomWidget::CreateTranslationHandle()
   orangeProperty->SetDiffuse(0);
   this->TranslationHandle->SetMapper(mapper);
   this->TranslationHandle->SetProperty(orangeProperty);
+  this->TranslationHandle->SetPosition(this->Center);
   mapper->Delete();
   orangeProperty->Delete();
 }
@@ -190,6 +193,8 @@ void vtkCustomWidget::OnLeftButtonDown()
   }
 
   this->State = vtkCustomWidget::Moving;
+  this->HandlePicker->GetPickPosition(this->LastPickPosition);
+  this->CopyVector(this->Center, this->StartCenter);
   this->EventCallbackCommand->SetAbortFlag(1);
 }
 
@@ -220,12 +225,40 @@ void vtkCustomWidget::OnMouseMove()
                               lastPos);
 
   // Compute the two points defining the motion
-  double movePos[4];
-  this->ComputeDisplayToWorld(x, y, lastPos[2], movePos);
+  double currentPickPosition[4];
+  this->ComputeDisplayToWorld(x, y, lastPos[2], currentPickPosition);
 
-  this->TranslationHandle->SetPosition(movePos[0], movePos[1], 0);
+  double offset[3];
+  // Get the offset between the pick position when dragging started and the
+  // current pick position.
+  this->SubtractVectors(currentPickPosition, this->LastPickPosition, offset);
+  // Set the center to the center when dragging started plus the offset of
+  // the current pick position. This is done so the dragged object is always
+  // under the mouse and doesn't drift because of rounding errors.
+  this->AddVectors(this->StartCenter, offset, this->Center);
+  this->TranslationHandle->SetPosition(this->Center);
 
   this->EventCallbackCommand->SetAbortFlag(1);
   this->InvokeEvent(vtkCommand::InteractionEvent, NULL);
   this->Interactor->Render();
+}
+
+void vtkCustomWidget::SubtractVectors(double vector1[3], double vector2[3],
+                                      double* resultvector)
+{
+  for (int i = 0; i < 3; i++)
+    resultvector[i] = vector1[i] - vector2[i];
+}
+
+void vtkCustomWidget::AddVectors(double vector1[3], double vector2[3],
+                                 double* resultvector)
+{
+  for (int i = 0; i < 3; i++)
+    resultvector[i] = vector1[i] + vector2[i];
+}
+
+void vtkCustomWidget::CopyVector(double inputVector[3], double outputVector[3])
+{
+  for (int i = 0; i < 3; i++)
+    outputVector[i] = inputVector[i];
 }

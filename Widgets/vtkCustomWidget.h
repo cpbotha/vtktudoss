@@ -22,6 +22,13 @@ public:
   // Override methods from parent
   virtual void SetEnabled(int);
 
+  // Public member variables
+  double Center[3];
+
+  // Getters and setters
+  vtkSetVectorMacro(Center, double, 3);
+  vtkGetVectorMacro(Center, double, 3);
+
 protected:
   vtkCustomWidget(void);
   ~vtkCustomWidget(void);
@@ -51,6 +58,19 @@ private:
   void OnLeftButtonDown();
   void OnLeftButtonUp();
   void OnMouseMove();
+
+  void SubtractVectors(double vector1[3],
+                       double vector2[3],
+                       double* resultvector);
+  void AddVectors(double vector1[3],
+                  double vector2[3],
+                  double* resultvector);
+  void CopyVector(double inputVector[3],
+                  double outputVector[3]);
+
+  // Used to store the center when the user starts to drag the
+  // translation handle.
+  double StartCenter[3];
 };
 
 
