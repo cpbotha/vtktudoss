@@ -76,15 +76,15 @@ vtkPolyData* vtkCustomWidget::CreateTranslationHandlePolydata()
 
   vtkPoints* points = vtkPoints::New();
   points->SetNumberOfPoints(8);
-  points->InsertPoint(0, scale * 0,     scale * 0,    0);
-  points->InsertPoint(1, scale * 0.2,   scale * 0.2,  0);
-  points->InsertPoint(2, scale * 0,     scale * 1,    0);
-  points->InsertPoint(3, scale * -0.2,  scale * 0.2,  0);
-  points->InsertPoint(4, scale * -1,    scale * 0,    0);
-  points->InsertPoint(5, scale * -0.2,  scale * -0.2, 0);
-  points->InsertPoint(6, scale * 0,     scale * -1,   0);
-  points->InsertPoint(7, scale * 0.2,   scale * -0.2, 0);
-  points->InsertPoint(8, scale * 1,     scale * 0,    0);
+  points->InsertPoint(0, scale * 0,     0, scale * 0   );
+  points->InsertPoint(1, scale * 0.2,   0, scale * 0.2 );
+  points->InsertPoint(2, scale * 0,     0, scale * 1   );
+  points->InsertPoint(3, scale * -0.2,  0, scale * 0.2 );
+  points->InsertPoint(4, scale * -1,    0, scale * 0   );
+  points->InsertPoint(5, scale * -0.2,  0, scale * -0.2);
+  points->InsertPoint(6, scale * 0,     0, scale * -1  );
+  points->InsertPoint(7, scale * 0.2,   0, scale * -0.2);
+  points->InsertPoint(8, scale * 1,     0, scale * 0   );
 
   vtkPolyData* polyData = vtkPolyData::New();
   polyData->SetPolys(cells);
