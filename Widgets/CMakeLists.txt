@@ -5,6 +5,7 @@
 #
 
 SET (KIT_SRCS
+   vtkCustomRepresentation.cxx
    vtkCustomWidget.cxx
    vtkAdvancedAngleWidget.cxx
    vtkEllipseRepresentation.cxx
