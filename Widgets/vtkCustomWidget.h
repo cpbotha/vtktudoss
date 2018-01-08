@@ -7,7 +7,7 @@
 
 #include "vtkAbstractWidget.h"
 
-class vtkBoxRepresentation;
+class vtkCustomRepresentation;
 
 class VTK_EXPORT vtkCustomWidget : public vtkAbstractWidget
 {
@@ -19,25 +19,24 @@ public:
   vtkTypeMacro(vtkCustomWidget,vtkAbstractWidget);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
-  void SetRepresentation(vtkBoxRepresentation *r)
+  void SetRepresentation(vtkCustomRepresentation *r)
     {this->Superclass::SetWidgetRepresentation(reinterpret_cast<vtkWidgetRepresentation*>(r));}
 
   // Create the default widget representation if one is not set
-  void CreateDefaultRepresentation() VTK_OVERRIDE;
-  
+  void CreateDefaultRepresentation() VTK_OVERRIDE;  
 
 protected:
   vtkCustomWidget();
   ~vtkCustomWidget() VTK_OVERRIDE;
 
-  enum WidgetState {Start=0, Moving};
+  // The states the widget can be in
+  enum _WidgetState {Start=0, Active};
+  int WidgetState;
 
   // Action callback functions
   static void SelectAction(vtkAbstractWidget*);
   static void EndSelectAction(vtkAbstractWidget*);
   static void MoveAction(vtkAbstractWidget*);
-
-  WidgetState State;
 
 private:
   vtkCustomWidget(const vtkCustomWidget&) VTK_DELETE_FUNCTION;
