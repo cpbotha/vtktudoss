@@ -9,6 +9,8 @@ class vtkPolyDataMapper;
 class vtkSphereSource;
 class vtkCellPicker;
 class vtkProperty;
+class vtkPoints;
+class vtkPolyData;
 
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkCustomRepresentation : public vtkWidgetRepresentation
@@ -38,6 +40,11 @@ public:
   vtkSetVector3Macro(Center, double);
   vtkGetVector3Macro(Center, double);
 
+  bool ShowOutline;
+  void SetShowOutline(bool);
+  vtkGetMacro(ShowOutline, bool);
+  vtkBooleanMacro(ShowOutline, bool);
+
   // The interaction state may be set from a widget (e.g., vtkCustomWidget) or
   // other object. This controls how the interaction with the widget
   // proceeds. Normally this method is used as part of a handshaking
@@ -57,6 +64,9 @@ protected:
   // Manage how the representation appears.
   double LastEventPosition[3];
 
+  // Important points on the widget.
+  vtkPoints* Points;
+
   // The translation handle.
   vtkActor* Handle;
   vtkPolyDataMapper* HandleMapper;
@@ -75,7 +85,14 @@ protected:
   vtkProperty* OutlineProperty;
   virtual void CreateDefaultProperties();
 
-  // Helper methods
+  // wireframe outline
+  vtkActor* Outline;
+  vtkPolyDataMapper* OutlineMapper;
+  vtkPolyData* OutlinePolyData;
+  // Generate an outline on the bounds of the widget
+  void GenerateOutline();
+
+  // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
 
 private:

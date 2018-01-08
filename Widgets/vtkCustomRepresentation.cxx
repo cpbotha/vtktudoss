@@ -9,12 +9,16 @@
 #include "vtkCamera.h"
 #include "vtkAssemblyPath.h"
 #include "vtkWindow.h"
+#include "vtkPoints.h"
+#include "vtkPolyData.h"
+#include "vtkDoubleArray.h"
 
 
 vtkStandardNewMacro(vtkCustomRepresentation);
 
 //----------------------------------------------------------------------------
-vtkCustomRepresentation::vtkCustomRepresentation()
+vtkCustomRepresentation::vtkCustomRepresentation() :
+  ShowOutline(true)
 {
   // The initial state
   this->InteractionState = vtkCustomRepresentation::Outside;
@@ -35,10 +39,30 @@ vtkCustomRepresentation::vtkCustomRepresentation()
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
 
+  // Construct initial points
+  this->Points = vtkPoints::New(VTK_DOUBLE);
+  this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
+
+  // Create the outline for the hex
+  this->OutlinePolyData = vtkPolyData::New();
+  this->OutlinePolyData->SetPoints(this->Points);
+  this->OutlineMapper = vtkPolyDataMapper::New();
+  this->OutlineMapper->SetInputData(this->OutlinePolyData);
+  this->Outline = vtkActor::New();
+  this->Outline->SetMapper(this->OutlineMapper);
+  this->Outline->SetProperty(this->OutlineProperty);
+  vtkCellArray* cells = vtkCellArray::New();
+  cells->Allocate(cells->EstimateSize(15,2));
+  this->OutlinePolyData->SetLines(cells);
+  cells->Delete();
+
+  // Create the outline
+  this->GenerateOutline();
+
   // Define the point coordinates
-  double bounds[6] = {-0.5, 0.5, 
-                      -0.5, 0.5,
-                      -0.5, 0.5};
+  double bounds[6] = {-1.0, 1.0, 
+                      -1.0, 1.0,
+                      -1.0, 1.0};
   this->PlaceWidget(bounds);
 
   //Manage the picking stuff
@@ -57,6 +81,14 @@ vtkCustomRepresentation::~vtkCustomRepresentation()
   this->HandlePicker->Delete();
   this->HandleProperty->Delete();
   this->SelectedHandleProperty->Delete();
+  this->Points = vtkPoints::New(VTK_DOUBLE);
+  this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
+
+  this->OutlinePolyData->Delete();
+  this->OutlineMapper->Delete();
+  this->Outline->Delete();
+
+  this->Points->Delete();
 }
 
 //----------------------------------------------------------------------
@@ -119,10 +151,20 @@ void vtkCustomRepresentation::Translate(double *p1, double *p2)
   v[1] = p2[1] - p1[1];
   v[2] = p2[2] - p1[2];
 
-  // Move the corners
+  // Move the center point
   this->Center[0] += v[0];
   this->Center[1] += v[1];
   this->Center[2] += v[2];
+
+  // Move the corners
+  double* pts =
+    static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  for (int i = 0; i < 8; i++) {
+    *pts++ += v[0];
+    *pts++ += v[1];
+    *pts++ += v[2];
+  }
+
   this->PositionHandles();
 }
 
@@ -150,7 +192,16 @@ void vtkCustomRepresentation::PlaceWidget(double bds[6])
   int i;
   double bounds[6], center[3];
 
-  this->AdjustBounds(bds,bounds,center);
+  this->AdjustBounds(bds, bounds, center);
+
+  this->Points->SetPoint(0, bounds[0], bounds[2], bounds[4]);
+  this->Points->SetPoint(1, bounds[1], bounds[2], bounds[4]);
+  this->Points->SetPoint(2, bounds[1], bounds[3], bounds[4]);
+  this->Points->SetPoint(3, bounds[0], bounds[3], bounds[4]);
+  this->Points->SetPoint(4, bounds[0], bounds[2], bounds[5]);
+  this->Points->SetPoint(5, bounds[1], bounds[2], bounds[5]);
+  this->Points->SetPoint(6, bounds[1], bounds[3], bounds[5]);
+  this->Points->SetPoint(7, bounds[0], bounds[3], bounds[5]);
 
   for (i=0; i<6; i++)
   {
@@ -210,6 +261,7 @@ void vtkCustomRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 {
   // render the handles
   this->Handle->ReleaseGraphicsResources(w);
+  this->Outline->ReleaseGraphicsResources(w);
 }
 
 //----------------------------------------------------------------------------
@@ -217,6 +269,7 @@ int vtkCustomRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 {
   int count=0;
   this->BuildRepresentation();
+  count += this->Outline->RenderOpaqueGeometry(v);
   // render the handles
   if(this->Handle->GetVisibility())
   {
@@ -232,6 +285,7 @@ int vtkCustomRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *v)
   int count=0;
   this->BuildRepresentation();
 
+  count += this->Outline->RenderTranslucentPolygonalGeometry(v);
   // render the handles
   if(this->Handle->GetVisibility())
   {
@@ -247,7 +301,7 @@ int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
   int result=0;
   this->BuildRepresentation();
 
-  // render the handles
+  result |= this->Outline->HasTranslucentPolygonalGeometry();
   result |= this->Handle->HasTranslucentPolygonalGeometry();
 
   return result;
@@ -257,6 +311,7 @@ int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
 void vtkCustomRepresentation::PositionHandles()
 {
   this->HandleGeometry->SetCenter(this->Center);
+  this->GenerateOutline();
 }
 
 //----------------------------------------------------------------------------
@@ -304,5 +359,54 @@ void vtkCustomRepresentation::SetInteractionState(int state)
     case vtkCustomRepresentation::Scaling:
     default:
       this->HighlightHandle(NULL);
+  }
+}
+
+void vtkCustomRepresentation::SetShowOutline(bool show) {
+  if (this->ShowOutline != show) {
+    this->ShowOutline = show;
+    this->GenerateOutline();
+  }
+}
+
+void vtkCustomRepresentation::GenerateOutline()
+{
+  // Whatever the case may be, we have to reset the Lines of the
+  // OutlinePolyData (i.e. nuke all current line data)
+  vtkCellArray* cells = this->OutlinePolyData->GetLines();
+  cells->Reset();
+
+  if (this->ShowOutline)
+  {
+    vtkIdType pts[2];
+    pts[0] = 0; pts[1] = 1;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 1; pts[1] = 2;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 2; pts[1] = 3;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 3; pts[1] = 0;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 4; pts[1] = 5;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 5; pts[1] = 6;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 6; pts[1] = 7;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 7; pts[1] = 4;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 0; pts[1] = 4;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 1; pts[1] = 5;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 2; pts[1] = 6;
+    cells->InsertNextCell(2, pts);
+    pts[0] = 3; pts[1] = 7;
+    cells->InsertNextCell(2, pts);
+    this->OutlinePolyData->Modified();
+  }
+  if (this->OutlineProperty)
+  {
+    this->OutlineProperty->SetRepresentationToWireframe();
   }
 }
