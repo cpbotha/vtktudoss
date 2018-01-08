@@ -72,6 +72,7 @@ protected:
   // the manipulator in general.
   vtkProperty* HandleProperty;
   vtkProperty* SelectedHandleProperty;
+  vtkProperty* OutlineProperty;
   virtual void CreateDefaultProperties();
 
   // Helper methods

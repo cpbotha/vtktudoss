@@ -135,6 +135,13 @@ void vtkCustomRepresentation::CreateDefaultProperties()
 
   this->SelectedHandleProperty = vtkProperty::New();
   this->SelectedHandleProperty->SetColor(1, 0, 0);
+
+  // Outline properties
+  this->OutlineProperty = vtkProperty::New();
+  this->OutlineProperty->SetRepresentationToWireframe();
+  this->OutlineProperty->SetAmbient(1.0);
+  this->OutlineProperty->SetAmbientColor(1.0, 1.0, 1.0);
+  this->OutlineProperty->SetLineWidth(1.0);
 }
 
 //----------------------------------------------------------------------------
