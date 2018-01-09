@@ -504,3 +504,9 @@ void vtkProsthesisRepresentation::GenerateOutline()
     this->OutlineProperty->SetRepresentationToWireframe();
   }
 }
+
+double* vtkProsthesisRepresentation::GetBounds()
+{
+  this->BuildRepresentation();
+  return this->Outline->GetBounds();
+}

@@ -46,6 +46,8 @@ public:
   vtkGetMacro(ShowOutline, bool);
   vtkBooleanMacro(ShowOutline, bool);
 
+  double* GetBounds();
+
   // The interaction state may be set from a widget (e.g., vtkCustomWidget) or
   // other object. This controls how the interaction with the widget
   // proceeds. Normally this method is used as part of a handshaking
