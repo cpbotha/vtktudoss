@@ -16,6 +16,7 @@
 #include "vtkPolyData.h"
 #include "vtkDoubleArray.h"
 #include "vtkTransform.h"
+#include "vtkMath.h"
 
 #define PI 3.14159265358979323846
 
@@ -399,7 +400,15 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
 void vtkProsthesisRepresentation::PositionHandles()
 {
   this->HandleGeometry->SetCenter(this->Center);
-  this->RotateHandleGeometry->SetCenter(this->Points->GetPoint(0));
+  double start[3];
+  double up[3];
+  this->Points->GetPoint(0, start);
+  this->Points->GetPoint(1, up);
+  double handlePos[3];
+  handlePos[0] = this->Center[0] + (up[0] - start[0]) / 2.0;
+  handlePos[1] = this->Center[1] + (up[1] - start[1]) / 2.0;
+  handlePos[2] = this->Center[2] + (up[2] - start[2]) / 2.0;
+  this->RotateHandleGeometry->SetCenter(handlePos);
   this->GenerateOutline();
   // Required so the handles stay the right size on screen during interaction.
   this->SizeHandles();
@@ -527,21 +536,18 @@ void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)
   double* py = pts + 3 * 3;
   double* pz = pts + 3 * 4;
 
-  double N[3][3]; // The normals of the widget
+  double nx[3], ny[3], nz[3]; // The normals vectors
+  vtkMath::Subtract(p0, px, nx);
+  vtkMath::Subtract(p0, py, ny);
+  vtkMath::Subtract(p0, pz, nz);
+  vtkMath::Normalize(nx);
+  vtkMath::Normalize(ny);
+  vtkMath::Normalize(nz);
   for (int i = 0; i < 3; i++)
   {
-    N[0][i] = p0[i] - px[i];
-    N[1][i] = p0[i] - py[i];
-    N[2][i] = p0[i] - pz[i];
-  }
-  vtkMath::Normalize(N[0]);
-  vtkMath::Normalize(N[1]);
-  vtkMath::Normalize(N[2]);
-  for (int i = 0; i < 3; i++)
-  {
-    matrix->SetElement(i, 0, -N[0][i]);
-    matrix->SetElement(i, 1, -N[1][i]);
-    matrix->SetElement(i, 2, -N[2][i]);
+    matrix->SetElement(i, 0, -nx[i]);
+    matrix->SetElement(i, 1, -ny[i]);
+    matrix->SetElement(i, 2, -nz[i]);
   }
   t->Concatenate(matrix);
   matrix->Delete();
