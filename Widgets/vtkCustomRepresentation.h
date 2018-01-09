@@ -40,6 +40,7 @@ public:
   vtkSetVector3Macro(Center, double);
   vtkGetVector3Macro(Center, double);
 
+  // Flag used to show/hide the outline of the widget
   bool ShowOutline;
   void SetShowOutline(bool);
   vtkGetMacro(ShowOutline, bool);

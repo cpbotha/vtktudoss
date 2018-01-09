@@ -26,7 +26,7 @@ vtkCustomRepresentation::vtkCustomRepresentation() :
   this->InteractionState = vtkCustomRepresentation::Outside;
 
   // Handle size is in pixels for this widget
-  this->HandleSize = 5.0;
+  this->HandleSize = 7.5;
 
   // Set up the initial properties
   this->CreateDefaultProperties();
@@ -401,15 +401,19 @@ void vtkCustomRepresentation::PositionHandles()
   this->HandleGeometry->SetCenter(this->Center);
   this->RotateHandleGeometry->SetCenter(this->Points->GetPoint(0));
   this->GenerateOutline();
+  // Required so the handles stay the right size on screen during interaction.
+  this->SizeHandles();
 }
 
 //----------------------------------------------------------------------------
 void vtkCustomRepresentation::SizeHandles()
 {
-  double radius =
-      this->vtkWidgetRepresentation::SizeHandlesInPixels(1.5, this->Center);
-  this->HandleGeometry->SetRadius(radius);
-  this->RotateHandleGeometry->SetRadius(radius);
+  this->HandleGeometry->SetRadius(
+    this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
+                                                       this->Center));
+  this->RotateHandleGeometry->SetRadius(
+    this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
+                                                       this->RotateHandle->GetCenter()));
 }
 
 //----------------------------------------------------------------------------
