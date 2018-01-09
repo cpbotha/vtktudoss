@@ -1,4 +1,7 @@
 #include "vtkCustomRepresentation.h"
+
+#include <cmath>
+
 #include "vtkActor.h"
 #include "vtkSphereSource.h"
 #include "vtkPolyDataMapper.h"
@@ -14,6 +17,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkTransform.h"
 
+#define PI 3.14159265358979323846
 
 vtkStandardNewMacro(vtkCustomRepresentation);
 
@@ -139,6 +143,7 @@ void vtkCustomRepresentation::WidgetInteraction(double e[2])
 
   // Compute the two points defining the motion vector
   double pos[3];
+  // NOTE: This position is always the original pick position
   this->HandlePicker->GetPickPosition(pos);
   vtkInteractorObserver::ComputeWorldToDisplay(this->Renderer,
                                                pos[0], pos[1], pos[2],
@@ -154,8 +159,8 @@ void vtkCustomRepresentation::WidgetInteraction(double e[2])
   }
   else if (this->InteractionState == vtkCustomRepresentation::Rotating)
   {
-    this->Rotate(static_cast<int>(e[0]), static_cast<int>(e[1]),
-                 prevPickPoint, pickPoint, vpn);
+    this->Rotate(this->LastEventPosition[0], this->LastEventPosition[1],
+                 e[0], e[1], vpn);
   }
 
   // Store the start position
@@ -191,46 +196,37 @@ void vtkCustomRepresentation::Translate(double *p1, double *p2)
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::Rotate(int X,
-                                     int Y,
-                                     double *p1,
-                                     double *p2,
+void vtkCustomRepresentation::Rotate(double previousX, double previousY,
+                                     double X, double Y,
                                      double *vpn)
 {
-  double* pts = 
-    static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
-  double v[3]; //vector of motion
-  double axis[3]; //axis of rotation
-  double theta; //rotation angle
-  int i;
+  double displayCenter[4];
+  vtkInteractorObserver::ComputeWorldToDisplay(this->Renderer,
+                                               this->Center[0],
+                                               this->Center[1],
+                                               this->Center[2],
+                                               displayCenter);
 
-  v[0] = p2[0] - p1[0];
-  v[1] = p2[1] - p1[1];
-  v[2] = p2[2] - p1[2];
+  double angle = atan2(Y - displayCenter[1], X - displayCenter[0]);
+  double previousAngle = atan2(previousY - displayCenter[1], previousX - displayCenter[0]);
 
-  // Create axis of rotation and angle of rotation
-  vtkMath::Cross(vpn, v, axis);
-  if ( vtkMath::Normalize(axis) == 0.0 )
-  {
-    return;
-  }
-  int *size = this->Renderer->GetSize();
-  double l2 = (X - this->LastEventPosition[0]) * (X - this->LastEventPosition[0])
-            + (Y - this->LastEventPosition[1]) * (Y - this->LastEventPosition[1]);
-  theta = 360.0 * sqrt(l2 / (size[0] * size[0] + size[1] * size[1]));
+  // The widget will have to be rotated by the change in the angle since the previous event.
+  double difference = (angle - previousAngle) * 180.0 / PI;
 
   //Manipulate the transform to reflect the rotation
   vtkTransform* transform = vtkTransform::New();
   transform->Identity();
   transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
-  transform->RotateWXYZ(theta, axis);
+  transform->RotateWXYZ(difference, vpn);
   transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
 
   //Set the corners
   vtkPoints* newPts = vtkPoints::New(VTK_DOUBLE);
   transform->TransformPoints(this->Points, newPts);
 
-  for (i=0; i<8; i++, pts+=3)
+  double* pts = 
+    static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  for (int i = 0; i < 8; i++, pts += 3)
   {
     this->Points->SetPoint(i, newPts->GetPoint(i));
   }

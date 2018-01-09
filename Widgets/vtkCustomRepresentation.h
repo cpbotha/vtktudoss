@@ -98,7 +98,7 @@ protected:
 
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
-  virtual void Rotate(int X, int Y, double *p1, double *p2, double *vpn);
+  virtual void Rotate(double previousX, double previousY, double X, double Y, double *vpn);
 
 private:
   vtkCustomRepresentation(const vtkCustomRepresentation&) VTK_DELETE_FUNCTION;
