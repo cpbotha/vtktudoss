@@ -1,22 +1,22 @@
 /*=========================================================================
-   vtkCustomWidget
+   vtkProsthesisWidget
    =========================================================================*/
 
-#ifndef __vtkCustomWidget_h
-#define __vtkCustomWidget_h
+#ifndef __vtkProsthesisWidget_h
+#define __vtkProsthesisWidget_h
 
 #include "vtkAbstractWidget.h"
 
 class vtkCustomRepresentation;
 
-class VTK_EXPORT vtkCustomWidget : public vtkAbstractWidget
+class VTK_EXPORT vtkProsthesisWidget : public vtkAbstractWidget
 {
 public:
   // Instantiate the class
-  static vtkCustomWidget *New();
+  static vtkProsthesisWidget *New();
 
   // Standard methods for a VTK class
-  vtkTypeMacro(vtkCustomWidget,vtkAbstractWidget);
+  vtkTypeMacro(vtkProsthesisWidget,vtkAbstractWidget);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   void SetRepresentation(vtkCustomRepresentation *r)
@@ -26,8 +26,8 @@ public:
   void CreateDefaultRepresentation() VTK_OVERRIDE;  
 
 protected:
-  vtkCustomWidget();
-  ~vtkCustomWidget() VTK_OVERRIDE;
+  vtkProsthesisWidget();
+  ~vtkProsthesisWidget() VTK_OVERRIDE;
 
   // The states the widget can be in
   enum _WidgetState {Start=0, Active};
@@ -39,8 +39,8 @@ protected:
   static void MoveAction(vtkAbstractWidget*);
 
 private:
-  vtkCustomWidget(const vtkCustomWidget&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCustomWidget&) VTK_DELETE_FUNCTION;
+  vtkProsthesisWidget(const vtkProsthesisWidget&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkProsthesisWidget&) VTK_DELETE_FUNCTION;
 };
 
 #endif

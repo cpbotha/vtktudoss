@@ -1,6 +1,6 @@
-#include "vtkCustomWidget.h"
+#include "vtkProsthesisWidget.h"
 
-#include "vtkCustomRepresentation.h"
+#include "vtkProsthesisRepresentation.h"
 #include "vtkCommand.h"
 #include "vtkCallbackCommand.h"
 #include "vtkRenderWindowInteractor.h"
@@ -11,47 +11,47 @@
 #include "vtkRenderer.h"
 
 
-vtkStandardNewMacro(vtkCustomWidget);
+vtkStandardNewMacro(vtkProsthesisWidget);
 
 // Constructor
-vtkCustomWidget::vtkCustomWidget()
+vtkProsthesisWidget::vtkProsthesisWidget()
 {
-  this->WidgetState = vtkCustomWidget::Start;
+  this->WidgetState = vtkProsthesisWidget::Start;
   // Define widget events
   this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonPressEvent,
                                           vtkEvent::NoModifier,
                                           0, 0, NULL,
                                           vtkWidgetEvent::Select,
-                                          this, vtkCustomWidget::SelectAction);
+                                          this, vtkProsthesisWidget::SelectAction);
   this->CallbackMapper->SetCallbackMethod(vtkCommand::LeftButtonReleaseEvent,
                                           vtkEvent::NoModifier,
                                           0, 0, NULL,
                                           vtkWidgetEvent::EndSelect,
-                                          this, vtkCustomWidget::EndSelectAction);
+                                          this, vtkProsthesisWidget::EndSelectAction);
   this->CallbackMapper->SetCallbackMethod(vtkCommand::MouseMoveEvent,
                                           vtkWidgetEvent::Move,
-                                          this, vtkCustomWidget::MoveAction);
+                                          this, vtkProsthesisWidget::MoveAction);
 }
 
 // Destructor
-vtkCustomWidget::~vtkCustomWidget()
+vtkProsthesisWidget::~vtkProsthesisWidget()
 {
 }
 
-void vtkCustomWidget::CreateDefaultRepresentation()
+void vtkProsthesisWidget::CreateDefaultRepresentation()
 {
   if (!this->WidgetRep)
   {
-    this->WidgetRep = vtkCustomRepresentation::New();
+    this->WidgetRep = vtkProsthesisRepresentation::New();
   }
 }
 
-void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
+void vtkProsthesisWidget::SelectAction(vtkAbstractWidget* w)
 {
   std::cout << "↓" << std::endl;
 
   // We are in a static method, cast to ourself
-  vtkCustomWidget* self = reinterpret_cast<vtkCustomWidget*>(w);
+  vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
   // Get the event position
   int X = self->Interactor->GetEventPosition()[0];
@@ -60,11 +60,11 @@ void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
   // Okay, make sure that the pick is in the current renderer
   if (!self->CurrentRenderer || !self->CurrentRenderer->IsInViewport(X,Y))
   {
-    self->WidgetState = vtkCustomWidget::Start;
+    self->WidgetState = vtkProsthesisWidget::Start;
     return;
   }
 
-  self->WidgetState = vtkCustomWidget::Active;
+  self->WidgetState = vtkProsthesisWidget::Active;
   // Begin the widget interaction which has the side effect of setting the
   // interaction state.
   double e[2];
@@ -72,7 +72,7 @@ void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
   e[1] = static_cast<double>(Y);
   self->WidgetRep->StartWidgetInteraction(e);
   int interactionState = self->WidgetRep->GetInteractionState();
-  if (interactionState == vtkCustomRepresentation::Outside)
+  if (interactionState == vtkProsthesisRepresentation::Outside)
   {
     return;
   }
@@ -80,7 +80,7 @@ void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
   self->GrabFocus(self->EventCallbackCommand);
 
   // The SetInteractionState has the side effect of highlighting the widget
-  reinterpret_cast<vtkCustomRepresentation*>(self->WidgetRep)->
+  reinterpret_cast<vtkProsthesisRepresentation*>(self->WidgetRep)->
     SetInteractionState(interactionState);
 
   // start the interaction
@@ -90,21 +90,21 @@ void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
   self->Render();
 }
 
-void vtkCustomWidget::EndSelectAction(vtkAbstractWidget* w)
+void vtkProsthesisWidget::EndSelectAction(vtkAbstractWidget* w)
 {
   std::cout << "↑" << std::endl;
-  vtkCustomWidget* self = reinterpret_cast<vtkCustomWidget*>(w);
+  vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
   // If interaction has started, the widget will be in the active state
-  if (self->WidgetState == vtkCustomWidget::Start)
+  if (self->WidgetState == vtkProsthesisWidget::Start)
   {
     return;
   }
 
   // Return the widget and representation's states to their defaults
-  self->WidgetState = vtkCustomWidget::Start;
-  reinterpret_cast<vtkCustomRepresentation*>(self->WidgetRep)->
-    SetInteractionState(vtkCustomRepresentation::Outside);
+  self->WidgetState = vtkProsthesisWidget::Start;
+  reinterpret_cast<vtkProsthesisRepresentation*>(self->WidgetRep)->
+    SetInteractionState(vtkProsthesisRepresentation::Outside);
   self->ReleaseFocus();
 
   self->EventCallbackCommand->SetAbortFlag(1);
@@ -113,13 +113,13 @@ void vtkCustomWidget::EndSelectAction(vtkAbstractWidget* w)
   self->Render();
 }
 
-void vtkCustomWidget::MoveAction(vtkAbstractWidget* w)
+void vtkProsthesisWidget::MoveAction(vtkAbstractWidget* w)
 {
   std::cout << "↔";
-  vtkCustomWidget* self = reinterpret_cast<vtkCustomWidget*>(w);
+  vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
   // See whether we're active
-  if (self->WidgetState == vtkCustomWidget::Start)
+  if (self->WidgetState == vtkProsthesisWidget::Start)
   {
     return;
   }
@@ -140,7 +140,7 @@ void vtkCustomWidget::MoveAction(vtkAbstractWidget* w)
   self->Render();
 }
 
-void vtkCustomWidget::PrintSelf(ostream& os, vtkIndent indent)
+void vtkProsthesisWidget::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }

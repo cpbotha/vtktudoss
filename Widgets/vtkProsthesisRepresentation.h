@@ -1,5 +1,5 @@
-#ifndef vtkCustomRepresentation_h
-#define vtkCustomRepresentation_h
+#ifndef vtkProsthesisRepresentation_h
+#define vtkProsthesisRepresentation_h
 
 #include "vtkInteractionWidgetsModule.h" // For export macro
 #include "vtkWidgetRepresentation.h"
@@ -13,14 +13,14 @@ class vtkPoints;
 class vtkPolyData;
 
 
-class VTKINTERACTIONWIDGETS_EXPORT vtkCustomRepresentation : public vtkWidgetRepresentation
+class VTKINTERACTIONWIDGETS_EXPORT vtkProsthesisRepresentation : public vtkWidgetRepresentation
 {
 public:
   // Instantiate the class.
-  static vtkCustomRepresentation *New();
+  static vtkProsthesisRepresentation *New();
 
   // Standard methods for the class.
-  vtkTypeMacro(vtkCustomRepresentation,vtkWidgetRepresentation);
+  vtkTypeMacro(vtkProsthesisRepresentation,vtkWidgetRepresentation);
   void PrintSelf(ostream& os, vtkIndent indent) VTK_OVERRIDE;
 
   // These are methods that satisfy vtkWidgetRepresentation's API.
@@ -59,8 +59,8 @@ public:
 
 protected:
   // Constructor and destructor.
-  vtkCustomRepresentation();
-  ~vtkCustomRepresentation() VTK_OVERRIDE;
+  vtkProsthesisRepresentation();
+  ~vtkProsthesisRepresentation() VTK_OVERRIDE;
 
   // Manage how the representation appears.
   double LastEventPosition[3];
@@ -101,8 +101,8 @@ protected:
   virtual void Rotate(double previousX, double previousY, double X, double Y, double *vpn);
 
 private:
-  vtkCustomRepresentation(const vtkCustomRepresentation&) VTK_DELETE_FUNCTION;
-  void operator=(const vtkCustomRepresentation&) VTK_DELETE_FUNCTION;
+  vtkProsthesisRepresentation(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
+  void operator=(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
 };
 
 #endif

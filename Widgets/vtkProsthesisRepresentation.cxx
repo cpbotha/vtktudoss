@@ -1,4 +1,4 @@
-#include "vtkCustomRepresentation.h"
+#include "vtkProsthesisRepresentation.h"
 
 #include <cmath>
 
@@ -19,15 +19,15 @@
 
 #define PI 3.14159265358979323846
 
-vtkStandardNewMacro(vtkCustomRepresentation);
+vtkStandardNewMacro(vtkProsthesisRepresentation);
 
 //----------------------------------------------------------------------------
-vtkCustomRepresentation::vtkCustomRepresentation() :
+vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
   ShowOutline(true)
 {
   // The initial state
-  this->InteractionState = vtkCustomRepresentation::Outside;
+  this->InteractionState = vtkProsthesisRepresentation::Outside;
 
   // Handle size is in pixels for this widget
   this->HandleSize = 7.5;
@@ -88,7 +88,7 @@ vtkCustomRepresentation::vtkCustomRepresentation() :
 }
 
 //----------------------------------------------------------------------------
-vtkCustomRepresentation::~vtkCustomRepresentation()
+vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
 {
   this->HandleGeometry->Delete();
   this->HandleMapper->Delete();
@@ -113,7 +113,7 @@ vtkCustomRepresentation::~vtkCustomRepresentation()
 }
 
 //----------------------------------------------------------------------
-void vtkCustomRepresentation::StartWidgetInteraction(double e[2])
+void vtkProsthesisRepresentation::StartWidgetInteraction(double e[2])
 {
   // Store the start position
   this->StartEventPosition[0] = e[0];
@@ -129,7 +129,7 @@ void vtkCustomRepresentation::StartWidgetInteraction(double e[2])
 }
 
 //----------------------------------------------------------------------
-void vtkCustomRepresentation::WidgetInteraction(double e[2])
+void vtkProsthesisRepresentation::WidgetInteraction(double e[2])
 {
   // Convert events to appropriate coordinate systems
   vtkCamera* camera = this->Renderer->GetActiveCamera();
@@ -153,11 +153,11 @@ void vtkCustomRepresentation::WidgetInteraction(double e[2])
                                                this->LastEventPosition[1], z, prevPickPoint);
   vtkInteractorObserver::ComputeDisplayToWorld(this->Renderer, e[0], e[1], z, pickPoint);
 
-  if (this->InteractionState == vtkCustomRepresentation::Translating)
+  if (this->InteractionState == vtkProsthesisRepresentation::Translating)
   {
     this->Translate(prevPickPoint, pickPoint);
   }
-  else if (this->InteractionState == vtkCustomRepresentation::Rotating)
+  else if (this->InteractionState == vtkProsthesisRepresentation::Rotating)
   {
     this->Rotate(this->LastEventPosition[0], this->LastEventPosition[1],
                  e[0], e[1], vpn);
@@ -170,7 +170,7 @@ void vtkCustomRepresentation::WidgetInteraction(double e[2])
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::Translate(double *p1, double *p2)
+void vtkProsthesisRepresentation::Translate(double *p1, double *p2)
 {
   double v[3];
 
@@ -196,7 +196,7 @@ void vtkCustomRepresentation::Translate(double *p1, double *p2)
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::Rotate(double previousX, double previousY,
+void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
                                      double X, double Y,
                                      double *vpn)
 {
@@ -236,7 +236,7 @@ void vtkCustomRepresentation::Rotate(double previousX, double previousY,
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::CreateDefaultProperties()
+void vtkProsthesisRepresentation::CreateDefaultProperties()
 {
   // Handle properties
   this->HandleProperty = vtkProperty::New();
@@ -254,7 +254,7 @@ void vtkCustomRepresentation::CreateDefaultProperties()
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::PlaceWidget(double bds[6])
+void vtkProsthesisRepresentation::PlaceWidget(double bds[6])
 {
   int i;
   double bounds[6], center[3];
@@ -284,13 +284,13 @@ void vtkCustomRepresentation::PlaceWidget(double bds[6])
 }
 
 //----------------------------------------------------------------------------
-int vtkCustomRepresentation::ComputeInteractionState(int X, int Y, int modify)
+int vtkProsthesisRepresentation::ComputeInteractionState(int X, int Y, int modify)
 {
   // Okay, we can process this. Try to pick handles first;
   // if no handles picked, then pick the bounding box.
   if (!this->Renderer || !this->Renderer->IsInViewport(X, Y))
   {
-    this->InteractionState = vtkCustomRepresentation::Outside;
+    this->InteractionState = vtkProsthesisRepresentation::Outside;
     return this->InteractionState;
   }
 
@@ -302,21 +302,21 @@ int vtkCustomRepresentation::ComputeInteractionState(int X, int Y, int modify)
     vtkActor* pickedHandle = reinterpret_cast<vtkActor*>(path->GetFirstNode()->GetViewProp());
     if (pickedHandle == this->Handle)
     {
-      this->InteractionState = vtkCustomRepresentation::Translating;
+      this->InteractionState = vtkProsthesisRepresentation::Translating;
     }
     else if (pickedHandle == this->RotateHandle) {
-      this->InteractionState = vtkCustomRepresentation::Rotating;
+      this->InteractionState = vtkProsthesisRepresentation::Rotating;
     }
   }
   else {
-    this->InteractionState = vtkCustomRepresentation::Outside;
+    this->InteractionState = vtkProsthesisRepresentation::Outside;
   }
 
   return this->InteractionState;
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::BuildRepresentation()
+void vtkProsthesisRepresentation::BuildRepresentation()
 {
   // Rebuild only if necessary
   if ( this->GetMTime() > this->BuildTime ||
@@ -330,7 +330,7 @@ void vtkCustomRepresentation::BuildRepresentation()
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::ReleaseGraphicsResources(vtkWindow *w)
+void vtkProsthesisRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 {
   // Release the graphics resources associated with the actors of the widget
   this->Handle->ReleaseGraphicsResources(w);
@@ -339,7 +339,7 @@ void vtkCustomRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 }
 
 //----------------------------------------------------------------------------
-int vtkCustomRepresentation::RenderOpaqueGeometry(vtkViewport *v)
+int vtkProsthesisRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 {
   int count=0;
   this->BuildRepresentation();
@@ -359,7 +359,7 @@ int vtkCustomRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 }
 
 //----------------------------------------------------------------------------
-int vtkCustomRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *v)
+int vtkProsthesisRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *v)
 {
   int count=0;
   this->BuildRepresentation();
@@ -379,7 +379,7 @@ int vtkCustomRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *v)
 }
 
 //----------------------------------------------------------------------------
-int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
+int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
 {
   int result=0;
   this->BuildRepresentation();
@@ -392,7 +392,7 @@ int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::PositionHandles()
+void vtkProsthesisRepresentation::PositionHandles()
 {
   this->HandleGeometry->SetCenter(this->Center);
   this->RotateHandleGeometry->SetCenter(this->Points->GetPoint(0));
@@ -402,7 +402,7 @@ void vtkCustomRepresentation::PositionHandles()
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::SizeHandles()
+void vtkProsthesisRepresentation::SizeHandles()
 {
   this->HandleGeometry->SetRadius(
     this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
@@ -413,7 +413,7 @@ void vtkCustomRepresentation::SizeHandles()
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::HighlightHandle(vtkProp* prop)
+void vtkProsthesisRepresentation::HighlightHandle(vtkProp* prop)
 {
   // Unhighlight all
   this->Handle->SetProperty(this->HandleProperty);
@@ -427,35 +427,35 @@ void vtkCustomRepresentation::HighlightHandle(vtkProp* prop)
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::PrintSelf(ostream& os, vtkIndent indent)
+void vtkProsthesisRepresentation::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::SetInteractionState(int state)
+void vtkProsthesisRepresentation::SetInteractionState(int state)
 {
   // Clamp to allowable values
-  state = (state < vtkCustomRepresentation::Outside ? vtkCustomRepresentation::Outside :
-          (state > vtkCustomRepresentation::Scaling ? vtkCustomRepresentation::Scaling : state));
+  state = (state < vtkProsthesisRepresentation::Outside ? vtkProsthesisRepresentation::Outside :
+          (state > vtkProsthesisRepresentation::Scaling ? vtkProsthesisRepresentation::Scaling : state));
 
   this->InteractionState = state;
   switch (state)
   {
-    case vtkCustomRepresentation::Translating:
+    case vtkProsthesisRepresentation::Translating:
       this->HighlightHandle(this->Handle);
       break;
-    case vtkCustomRepresentation::Rotating:
+    case vtkProsthesisRepresentation::Rotating:
       this->HighlightHandle(this->RotateHandle);
       break;
-    case vtkCustomRepresentation::Scaling:
+    case vtkProsthesisRepresentation::Scaling:
     default:
       this->HighlightHandle(NULL);
   }
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::SetShowOutline(bool show) {
+void vtkProsthesisRepresentation::SetShowOutline(bool show) {
   if (this->ShowOutline != show) {
     this->ShowOutline = show;
     this->GenerateOutline();
@@ -463,7 +463,7 @@ void vtkCustomRepresentation::SetShowOutline(bool show) {
 }
 
 //----------------------------------------------------------------------------
-void vtkCustomRepresentation::GenerateOutline()
+void vtkProsthesisRepresentation::GenerateOutline()
 {
   // Whatever the case may be, we have to reset the Lines of the
   // OutlinePolyData (i.e. nuke all current line data)
