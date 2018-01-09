@@ -81,7 +81,7 @@ void vtkCustomWidget::SelectAction(vtkAbstractWidget* w)
 
   // The SetInteractionState has the side effect of highlighting the widget
   reinterpret_cast<vtkCustomRepresentation*>(self->WidgetRep)->
-    SetInteractionState(self->WidgetState);
+    SetInteractionState(interactionState);
 
   // start the interaction
   self->EventCallbackCommand->SetAbortFlag(1);

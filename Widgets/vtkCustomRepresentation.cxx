@@ -12,12 +12,14 @@
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
 #include "vtkDoubleArray.h"
+#include "vtkTransform.h"
 
 
 vtkStandardNewMacro(vtkCustomRepresentation);
 
 //----------------------------------------------------------------------------
 vtkCustomRepresentation::vtkCustomRepresentation() :
+  vtkWidgetRepresentation(),
   ShowOutline(true)
 {
   // The initial state
@@ -38,6 +40,14 @@ vtkCustomRepresentation::vtkCustomRepresentation() :
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
+  this->RotateHandleGeometry = vtkSphereSource::New();
+  this->RotateHandleGeometry->SetThetaResolution(16);
+  this->RotateHandleGeometry->SetPhiResolution(8);
+  this->RotateHandleMapper = vtkPolyDataMapper::New();
+  this->RotateHandleMapper->SetInputConnection(this->RotateHandleGeometry->GetOutputPort());
+  this->RotateHandle = vtkActor::New();
+  this->RotateHandle->SetMapper(this->RotateHandleMapper);
+  this->RotateHandle->SetProperty(this->HandleProperty);
 
   // Construct initial points
   this->Points = vtkPoints::New(VTK_DOUBLE);
@@ -69,6 +79,7 @@ vtkCustomRepresentation::vtkCustomRepresentation() :
   this->HandlePicker = vtkCellPicker::New();
   this->HandlePicker->SetTolerance(0.001);
   this->HandlePicker->AddPickList(this->Handle);
+  this->HandlePicker->AddPickList(this->RotateHandle);
   this->HandlePicker->PickFromListOn();
 }
 
@@ -78,9 +89,15 @@ vtkCustomRepresentation::~vtkCustomRepresentation()
   this->HandleGeometry->Delete();
   this->HandleMapper->Delete();
   this->Handle->Delete();
+
+  this->RotateHandleGeometry->Delete();
+  this->RotateHandleMapper->Delete();
+  this->RotateHandle->Delete();
+
   this->HandlePicker->Delete();
   this->HandleProperty->Delete();
   this->SelectedHandleProperty->Delete();
+
   this->Points = vtkPoints::New(VTK_DOUBLE);
   this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
 
@@ -135,6 +152,11 @@ void vtkCustomRepresentation::WidgetInteraction(double e[2])
   {
     this->Translate(prevPickPoint, pickPoint);
   }
+  else if (this->InteractionState == vtkCustomRepresentation::Rotating)
+  {
+    this->Rotate(static_cast<int>(e[0]), static_cast<int>(e[1]),
+                 prevPickPoint, pickPoint, vpn);
+  }
 
   // Store the start position
   this->LastEventPosition[0] = e[0];
@@ -165,6 +187,55 @@ void vtkCustomRepresentation::Translate(double *p1, double *p2)
     *pts++ += v[2];
   }
 
+  this->PositionHandles();
+}
+
+//----------------------------------------------------------------------------
+void vtkCustomRepresentation::Rotate(int X,
+                                     int Y,
+                                     double *p1,
+                                     double *p2,
+                                     double *vpn)
+{
+  double* pts = 
+    static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  double v[3]; //vector of motion
+  double axis[3]; //axis of rotation
+  double theta; //rotation angle
+  int i;
+
+  v[0] = p2[0] - p1[0];
+  v[1] = p2[1] - p1[1];
+  v[2] = p2[2] - p1[2];
+
+  // Create axis of rotation and angle of rotation
+  vtkMath::Cross(vpn, v, axis);
+  if ( vtkMath::Normalize(axis) == 0.0 )
+  {
+    return;
+  }
+  int *size = this->Renderer->GetSize();
+  double l2 = (X - this->LastEventPosition[0]) * (X - this->LastEventPosition[0])
+            + (Y - this->LastEventPosition[1]) * (Y - this->LastEventPosition[1]);
+  theta = 360.0 * sqrt(l2 / (size[0] * size[0] + size[1] * size[1]));
+
+  //Manipulate the transform to reflect the rotation
+  vtkTransform* transform = vtkTransform::New();
+  transform->Identity();
+  transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
+  transform->RotateWXYZ(theta, axis);
+  transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
+
+  //Set the corners
+  vtkPoints* newPts = vtkPoints::New(VTK_DOUBLE);
+  transform->TransformPoints(this->Points, newPts);
+
+  for (i=0; i<8; i++, pts+=3)
+  {
+    this->Points->SetPoint(i, newPts->GetPoint(i));
+  }
+
+  newPts->Delete();
   this->PositionHandles();
 }
 
@@ -229,11 +300,17 @@ int vtkCustomRepresentation::ComputeInteractionState(int X, int Y, int modify)
 
   vtkAssemblyPath* path = this->GetAssemblyPath(X, Y, 0., this->HandlePicker);
 
-  if ( path != NULL )
+  if (path != NULL)
   {
     this->ValidPick = 1;
-    this->Handle = reinterpret_cast<vtkActor*>(path->GetFirstNode()->GetViewProp());
-    this->InteractionState = vtkCustomRepresentation::Translating;
+    vtkActor* pickedHandle = reinterpret_cast<vtkActor*>(path->GetFirstNode()->GetViewProp());
+    if (pickedHandle == this->Handle)
+    {
+      this->InteractionState = vtkCustomRepresentation::Translating;
+    }
+    else if (pickedHandle == this->RotateHandle) {
+      this->InteractionState = vtkCustomRepresentation::Rotating;
+    }
   }
   else {
     this->InteractionState = vtkCustomRepresentation::Outside;
@@ -259,8 +336,9 @@ void vtkCustomRepresentation::BuildRepresentation()
 //----------------------------------------------------------------------------
 void vtkCustomRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 {
-  // render the handles
+  // Release the graphics resources associated with the actors of the widget
   this->Handle->ReleaseGraphicsResources(w);
+  this->RotateHandle->ReleaseGraphicsResources(w);
   this->Outline->ReleaseGraphicsResources(w);
 }
 
@@ -269,11 +347,16 @@ int vtkCustomRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 {
   int count=0;
   this->BuildRepresentation();
+
+  // Render all the actors of the widget
   count += this->Outline->RenderOpaqueGeometry(v);
-  // render the handles
-  if(this->Handle->GetVisibility())
+  if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderOpaqueGeometry(v);
+  }
+  if (this->RotateHandle->GetVisibility())
+  {
+    count += this->RotateHandle->RenderOpaqueGeometry(v);
   }
 
   return count;
@@ -285,11 +368,15 @@ int vtkCustomRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport *v)
   int count=0;
   this->BuildRepresentation();
 
+  // Render all transparent actors of the widget
   count += this->Outline->RenderTranslucentPolygonalGeometry(v);
-  // render the handles
-  if(this->Handle->GetVisibility())
+  if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderTranslucentPolygonalGeometry(v);
+  }
+  if (this->RotateHandle->GetVisibility())
+  {
+    count += this->RotateHandle->RenderTranslucentPolygonalGeometry(v);
   }
 
   return count;
@@ -303,6 +390,7 @@ int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
 
   result |= this->Outline->HasTranslucentPolygonalGeometry();
   result |= this->Handle->HasTranslucentPolygonalGeometry();
+  result |= this->RotateHandle->HasTranslucentPolygonalGeometry();
 
   return result;
 }
@@ -311,6 +399,7 @@ int vtkCustomRepresentation::HasTranslucentPolygonalGeometry()
 void vtkCustomRepresentation::PositionHandles()
 {
   this->HandleGeometry->SetCenter(this->Center);
+  this->RotateHandleGeometry->SetCenter(this->Points->GetPoint(0));
   this->GenerateOutline();
 }
 
@@ -320,20 +409,20 @@ void vtkCustomRepresentation::SizeHandles()
   double radius =
       this->vtkWidgetRepresentation::SizeHandlesInPixels(1.5, this->Center);
   this->HandleGeometry->SetRadius(radius);
+  this->RotateHandleGeometry->SetRadius(radius);
 }
 
+//----------------------------------------------------------------------------
 void vtkCustomRepresentation::HighlightHandle(vtkProp* prop)
 {
-  if (prop == NULL)
-  {
-    this->Handle->SetProperty(this->HandleProperty);
-    return;
-  }
+  // Unhighlight all
+  this->Handle->SetProperty(this->HandleProperty);
+  this->RotateHandle->SetProperty(this->HandleProperty);
 
-  this->Handle = static_cast<vtkActor*>(prop);
-  if (this->Handle)
+  vtkActor* actorToHighlight = static_cast<vtkActor*>(prop);
+  if (actorToHighlight)
   {
-    this->Handle->SetProperty(this->SelectedHandleProperty);
+    actorToHighlight->SetProperty(this->SelectedHandleProperty);
   }
 }
 
@@ -343,6 +432,7 @@ void vtkCustomRepresentation::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
+//----------------------------------------------------------------------------
 void vtkCustomRepresentation::SetInteractionState(int state)
 {
   // Clamp to allowable values
@@ -356,12 +446,15 @@ void vtkCustomRepresentation::SetInteractionState(int state)
       this->HighlightHandle(this->Handle);
       break;
     case vtkCustomRepresentation::Rotating:
+      this->HighlightHandle(this->RotateHandle);
+      break;
     case vtkCustomRepresentation::Scaling:
     default:
       this->HighlightHandle(NULL);
   }
 }
 
+//----------------------------------------------------------------------------
 void vtkCustomRepresentation::SetShowOutline(bool show) {
   if (this->ShowOutline != show) {
     this->ShowOutline = show;
@@ -369,6 +462,7 @@ void vtkCustomRepresentation::SetShowOutline(bool show) {
   }
 }
 
+//----------------------------------------------------------------------------
 void vtkCustomRepresentation::GenerateOutline()
 {
   // Whatever the case may be, we have to reset the Lines of the

@@ -71,6 +71,9 @@ protected:
   vtkActor* Handle;
   vtkPolyDataMapper* HandleMapper;
   vtkSphereSource* HandleGeometry;
+  vtkActor* RotateHandle;
+  vtkPolyDataMapper* RotateHandleMapper;
+  vtkSphereSource* RotateHandleGeometry;
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();
   virtual void SizeHandles();
@@ -94,6 +97,7 @@ protected:
 
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
+  virtual void Rotate(int X, int Y, double *p1, double *p2, double *vpn);
 
 private:
   vtkCustomRepresentation(const vtkCustomRepresentation&) VTK_DELETE_FUNCTION;
