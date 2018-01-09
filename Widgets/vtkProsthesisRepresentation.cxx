@@ -24,7 +24,8 @@ vtkStandardNewMacro(vtkProsthesisRepresentation);
 //----------------------------------------------------------------------------
 vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
-  ShowOutline(true)
+  ShowOutline(true),
+  Transform(vtkTransform::New())
 {
   // The initial state
   this->InteractionState = vtkProsthesisRepresentation::Outside;
@@ -101,9 +102,6 @@ vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
   this->HandlePicker->Delete();
   this->HandleProperty->Delete();
   this->SelectedHandleProperty->Delete();
-
-  this->Points = vtkPoints::New(VTK_DOUBLE);
-  this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
 
   this->OutlinePolyData->Delete();
   this->OutlineMapper->Delete();
@@ -183,10 +181,12 @@ void vtkProsthesisRepresentation::Translate(double *p1, double *p2)
   this->Center[1] += v[1];
   this->Center[2] += v[2];
 
+  this->Transform->Translate(v);
+
   // Move the corners
   double* pts =
     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < this->Points->GetNumberOfPoints(); i++) {
     *pts++ += v[0];
     *pts++ += v[1];
     *pts++ += v[2];
@@ -219,6 +219,10 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
   transform->RotateWXYZ(difference, vpn);
   transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
+  
+  this->Transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
+  this->Transform->RotateWXYZ(difference, vpn);
+  this->Transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
 
   //Set the corners
   vtkPoints* newPts = vtkPoints::New(VTK_DOUBLE);
@@ -226,7 +230,7 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
 
   double* pts = 
     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
-  for (int i = 0; i < 8; i++, pts += 3)
+  for (int i = 0; i < this->Points->GetNumberOfPoints(); i++, pts += 3)
   {
     this->Points->SetPoint(i, newPts->GetPoint(i));
   }
@@ -274,9 +278,9 @@ void vtkProsthesisRepresentation::PlaceWidget(double bds[6])
   {
     this->InitialBounds[i] = bounds[i];
   }
-  this->InitialLength = sqrt((bounds[1]-bounds[0])*(bounds[1]-bounds[0]) +
-                             (bounds[3]-bounds[2])*(bounds[3]-bounds[2]) +
-                             (bounds[5]-bounds[4])*(bounds[5]-bounds[4]));
+  this->InitialLength = sqrt((bounds[1] - bounds[0]) * (bounds[1] - bounds[0]) +
+                             (bounds[3] - bounds[2]) * (bounds[3] - bounds[2]) +
+                             (bounds[5] - bounds[4]) * (bounds[5] - bounds[4]));
 
   this->PositionHandles();
   this->ValidPick = 1; //since we have set up widget
@@ -503,6 +507,44 @@ void vtkProsthesisRepresentation::GenerateOutline()
   {
     this->OutlineProperty->SetRepresentationToWireframe();
   }
+}
+
+void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)
+{
+  t->Identity();
+  t->Translate(this->Center);
+
+  // Orientation
+  vtkMatrix4x4* matrix = vtkMatrix4x4::New();
+  matrix->Identity();
+  this->PositionHandles();
+  
+  // Compute normals
+  double* pts =
+     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  double* p0 = pts;
+  double* px = pts + 3 * 1;
+  double* py = pts + 3 * 3;
+  double* pz = pts + 3 * 4;
+
+  double N[3][3]; // The normals of the widget
+  for (int i = 0; i < 3; i++)
+  {
+    N[0][i] = p0[i] - px[i];
+    N[1][i] = p0[i] - py[i];
+    N[2][i] = p0[i] - pz[i];
+  }
+  vtkMath::Normalize(N[0]);
+  vtkMath::Normalize(N[1]);
+  vtkMath::Normalize(N[2]);
+  for (int i = 0; i < 3; i++)
+  {
+    matrix->SetElement(i, 0, -N[0][i]);
+    matrix->SetElement(i, 1, -N[1][i]);
+    matrix->SetElement(i, 2, -N[2][i]);
+  }
+  t->Concatenate(matrix);
+  matrix->Delete();
 }
 
 double* vtkProsthesisRepresentation::GetBounds()

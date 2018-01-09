@@ -11,6 +11,7 @@ class vtkCellPicker;
 class vtkProperty;
 class vtkPoints;
 class vtkPolyData;
+class vtkTransform;
 
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkProsthesisRepresentation : public vtkWidgetRepresentation
@@ -36,9 +37,11 @@ public:
   int  RenderTranslucentPolygonalGeometry(vtkViewport*) VTK_OVERRIDE;
   int  HasTranslucentPolygonalGeometry() VTK_OVERRIDE;
 
+  virtual void GetTransform(vtkTransform *t);
+
   double Center[3];
-  vtkSetVector3Macro(Center, double);
-  vtkGetVector3Macro(Center, double);
+  vtkSetVectorMacro(Center, double, 3);
+  vtkGetVectorMacro(Center, double, 3);
 
   // Flag used to show/hide the outline of the widget
   bool ShowOutline;
@@ -101,6 +104,8 @@ protected:
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
   virtual void Rotate(double previousX, double previousY, double X, double Y, double *vpn);
+
+  vtkTransform* Transform;
 
 private:
   vtkProsthesisRepresentation(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
