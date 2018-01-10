@@ -593,9 +593,8 @@ void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
   double tipSize = 3 * shaftWidth;
   // Angle where the arrow starts
   double startAngle = PI / 2.0;
-  // Angle where the arrow stops. If this value is smaller than the 
-  // start value the arrow will point clockwise, else counter-clockwise.
-  double endAngle = PI / 2.0 + 0.8;
+  // The length of the arrow.
+  double arrowLength = 10 * shaftWidth;
   // The center of the circle the arrow is drawn on.
   double center[3];
   center[0] = center[1] = center[2] = 0.0;
@@ -604,10 +603,14 @@ void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
 
   // Usefull variables deduced from the parameters.
 
+  // Angle where the arrow stops. If this value is smaller than the start value
+  // the arrow will point clockwise, else counter-clockwise.
+  // Note: To calculate a angle for a distance on the circumference of a circle
+  // the distance must be divided by the circumference and the mutiplied by 2 
+  // radians to get the angle; the equation can be simplified to distance 
+  // divided by radius, though.
+  double endAngle = startAngle + arrowLength / radius;
   // The angle between the start and end of the tip.
-  // Calculate it as the tip size divided by the circumference
-  // and the mutiplied by 2 radians to get the angle; the
-  // equation can be simplified to the following though.
   double tipAngle = tipSize / radius;
   // The points include the outside curve's (segments + 1),
   // inside curve's (segments + 1) and 3 points for the tip.
