@@ -106,16 +106,18 @@ protected:
   void GenerateOutline();
 
   // Arrow polydata
-  vtkPolyData* ArrowPolyData;
-  vtkPoints* ArrowPoints;
-  vtkTransformPolyDataFilter* ArrowTransformer;
+  vtkPolyData* LeftArrowPolyData;
+  vtkPolyData* RightArrowPolyData;
+  vtkTransformPolyDataFilter* LeftArrowTransformer;
+  vtkTransformPolyDataFilter* RightArrowTransformer;
   vtkTransform* ArrowTransform;
   // GenerateArrow parameters:
   // shaftWidth : The thickness of the shaft.
-  void GenerateArrow(double shaftWidth = 0.05);
-  // UpdateArrow parameters:
+  // clockwise : Determines which way the arrow points.
   // outline : If true, only draws the arrow's outline.
-  void UpdateArrow(bool outline = false);
+  void GenerateArrow(vtkPolyData* arrowPolyData,
+                     double shaftWidth = 0.05, bool clockwise = true, 
+                     bool outline = false);
 
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
