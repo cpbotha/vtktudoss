@@ -83,9 +83,6 @@ protected:
   vtkActor* RotateHandle;
   vtkPolyDataMapper* RotateHandleMapper;
   vtkSphereSource* RotateHandleGeometry;
-  vtkArrowSource* RotateArrowGeometry;
-  vtkTransformPolyDataFilter* RotateArrowTransformer;
-  vtkTransform* RotateArrowTransform;
   vtkAppendPolyData* RotateGeometryCombiner;
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();
@@ -108,9 +105,7 @@ protected:
   // Generate an outline on the bounds of the widget
   void GenerateOutline();
 
-  // Arrow outline
-  vtkActor* Arrow;
-  vtkPolyDataMapper* ArrowMapper;
+  // Arrow polydata
   vtkPolyData* ArrowPolyData;
   vtkPoints* ArrowPoints;
   vtkTransformPolyDataFilter* ArrowTransformer;

@@ -55,23 +55,26 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->RotateHandleGeometry->SetThetaResolution(16);
   this->RotateHandleGeometry->SetPhiResolution(8);
 
-  this->RotateArrowGeometry = vtkArrowSource::New();
-  this->RotateArrowGeometry->SetTipRadius(0.2);
-  this->RotateArrowGeometry->SetTipLength(0.3);
-  this->RotateArrowGeometry->SetTipResolution(20);
-  this->RotateArrowGeometry->SetShaftRadius(0.1);
-  this->RotateArrowGeometry->SetShaftResolution(20);
+  // Create the custom arrow
+  this->ArrowPolyData = vtkPolyData::New();
+  this->ArrowPoints = vtkPoints::New();
+  {
+    vtkCellArray* cells = vtkCellArray::New();
+    cells->Allocate(cells->EstimateSize(15,2));
+    this->ArrowPolyData->SetLines(cells);
+    cells->Delete();
+  }
 
-  this->RotateArrowTransformer = vtkTransformPolyDataFilter::New();
-  this->RotateArrowTransformer->SetInputConnection(this->RotateArrowGeometry->GetOutputPort());
-  this->RotateArrowTransform = vtkTransform::New();
-  this->RotateArrowTransform->Identity();
-  this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
+  this->ArrowTransformer = vtkTransformPolyDataFilter::New();
+  this->ArrowTransformer->SetInputData(this->ArrowPolyData);
+  this->ArrowTransform = vtkTransform::New();
+  this->ArrowTransform->Identity();
+  this->ArrowTransformer->SetTransform(this->ArrowTransform);
 
   // Combine the marker and arrows
   this->RotateGeometryCombiner = vtkAppendPolyData::New();
   this->RotateGeometryCombiner->AddInputConnection(this->RotateHandleGeometry->GetOutputPort());
-  this->RotateGeometryCombiner->AddInputConnection(this->RotateArrowTransformer->GetOutputPort());
+  this->RotateGeometryCombiner->AddInputConnection(this->ArrowTransformer->GetOutputPort());
 
   this->RotateHandleMapper = vtkPolyDataMapper::New();
   this->RotateHandleMapper->SetInputConnection(this->RotateGeometryCombiner->GetOutputPort());
@@ -97,27 +100,6 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
     this->OutlinePolyData->SetLines(cells);
     cells->Delete();
   }
-
-  // Create the custom arrow
-  this->ArrowPolyData = vtkPolyData::New();
-  this->ArrowPoints = vtkPoints::New();
-  {
-    vtkCellArray* cells = vtkCellArray::New();
-    cells->Allocate(cells->EstimateSize(15,2));
-    this->ArrowPolyData->SetLines(cells);
-    cells->Delete();
-  }
-
-  this->ArrowTransformer = vtkTransformPolyDataFilter::New();
-  this->ArrowTransformer->SetInputData(this->ArrowPolyData);
-  this->ArrowTransform = vtkTransform::New();
-  this->ArrowTransform->Identity();
-  this->ArrowTransformer->SetTransform(this->ArrowTransform);
-  this->ArrowMapper = vtkPolyDataMapper::New();
-  this->ArrowMapper->SetInputConnection(this->ArrowTransformer->GetOutputPort());
-  this->Arrow = vtkActor::New();
-  this->Arrow->SetMapper(this->ArrowMapper);
-  this->Arrow->SetProperty(this->HandleProperty);
 
   // Create the outline
   this->GenerateOutline();
@@ -145,9 +127,6 @@ vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
   this->Handle->Delete();
 
   this->RotateHandleGeometry->Delete();
-  this->RotateArrowGeometry->Delete();
-  this->RotateArrowTransformer->Delete();
-  this->RotateArrowTransform->Delete();
   this->RotateHandleMapper->Delete();
   this->RotateHandle->Delete();
 
@@ -387,7 +366,7 @@ void vtkProsthesisRepresentation::ReleaseGraphicsResources(vtkWindow *w)
   this->Handle->ReleaseGraphicsResources(w);
   this->RotateHandle->ReleaseGraphicsResources(w);
   this->Outline->ReleaseGraphicsResources(w);
-  this->Arrow->ReleaseGraphicsResources(w);
+  // this->Arrow->ReleaseGraphicsResources(w);
 }
 
 //----------------------------------------------------------------------------
@@ -398,7 +377,7 @@ int vtkProsthesisRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 
   // Render all the actors of the widget
   count += this->Outline->RenderOpaqueGeometry(v);
-  count += this->Arrow->RenderOpaqueGeometry(v);
+  // count += this->Arrow->RenderOpaqueGeometry(v);
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderOpaqueGeometry(v);
@@ -419,7 +398,7 @@ int vtkProsthesisRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport 
 
   // Render all transparent actors of the widget
   count += this->Outline->RenderTranslucentPolygonalGeometry(v);
-  count += this->Arrow->RenderTranslucentPolygonalGeometry(v);
+  // count += this->Arrow->RenderTranslucentPolygonalGeometry(v);
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderTranslucentPolygonalGeometry(v);
@@ -439,7 +418,7 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
   this->BuildRepresentation();
 
   result |= this->Outline->HasTranslucentPolygonalGeometry();
-  result |= this->Arrow->HasTranslucentPolygonalGeometry();
+  // result |= this->Arrow->HasTranslucentPolygonalGeometry();
   result |= this->Handle->HasTranslucentPolygonalGeometry();
   result |= this->RotateHandle->HasTranslucentPolygonalGeometry();
 
@@ -463,7 +442,6 @@ void vtkProsthesisRepresentation::PositionHandles()
   // Required so the handles stay the right size on screen during interaction.
   this->SizeHandles();
   this->UpdateTransform();
-  this->GetTransform(this->RotateArrowTransform);
   this->GetTransform(this->ArrowTransform);
 }
 
@@ -476,11 +454,6 @@ void vtkProsthesisRepresentation::SizeHandles()
   double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
   this->RotateHandleGeometry->SetRadius(rotateRadius);
   this->GenerateArrow(rotateRadius);
-
-  // double inv = rotateRadius / this->RotateArrowGeometry->GetShaftRadius();
-  // this->RotateArrowTransform->Identity();
-  // this->RotateArrowTransform->Scale(inv, inv, inv);
-  // this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
 }
 
 //----------------------------------------------------------------------------
