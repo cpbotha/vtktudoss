@@ -3,8 +3,12 @@
 #include <cmath>
 
 #include "vtkActor.h"
+#include "vtkSmartPointer.h"
 #include "vtkSphereSource.h"
 #include "vtkPolyDataMapper.h"
+#include "vtkArrowSource.h"
+#include "vtkAppendPolyData.h"
+#include "vtkTransformPolyDataFilter.h"
 #include "vtkProperty.h"
 #include "vtkRenderer.h"
 #include "vtkInteractorObserver.h"
@@ -46,11 +50,31 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
+
   this->RotateHandleGeometry = vtkSphereSource::New();
   this->RotateHandleGeometry->SetThetaResolution(16);
   this->RotateHandleGeometry->SetPhiResolution(8);
+
+  this->RotateArrowGeometry = vtkArrowSource::New();
+  this->RotateArrowGeometry->SetTipRadius(0.2);
+  this->RotateArrowGeometry->SetTipLength(0.3);
+  this->RotateArrowGeometry->SetTipResolution(20);
+  this->RotateArrowGeometry->SetShaftRadius(0.1);
+  this->RotateArrowGeometry->SetShaftResolution(20);
+
+  this->RotateArrowTransformer = vtkTransformPolyDataFilter::New();
+  this->RotateArrowTransformer->SetInputConnection(this->RotateArrowGeometry->GetOutputPort());
+  this->RotateArrowTransform = vtkTransform::New();
+  this->RotateArrowTransform->Identity();
+  this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
+
+  // Combine the marker and arrows
+  this->RotateGeometryCombiner = vtkAppendPolyData::New();
+  this->RotateGeometryCombiner->AddInputConnection(this->RotateHandleGeometry->GetOutputPort());
+  this->RotateGeometryCombiner->AddInputConnection(this->RotateArrowTransformer->GetOutputPort());
+
   this->RotateHandleMapper = vtkPolyDataMapper::New();
-  this->RotateHandleMapper->SetInputConnection(this->RotateHandleGeometry->GetOutputPort());
+  this->RotateHandleMapper->SetInputConnection(this->RotateGeometryCombiner->GetOutputPort());
   this->RotateHandle = vtkActor::New();
   this->RotateHandle->SetMapper(this->RotateHandleMapper);
   this->RotateHandle->SetProperty(this->HandleProperty);
@@ -97,6 +121,9 @@ vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
   this->Handle->Delete();
 
   this->RotateHandleGeometry->Delete();
+  this->RotateArrowGeometry->Delete();
+  this->RotateArrowTransformer->Delete();
+  this->RotateArrowTransform->Delete();
   this->RotateHandleMapper->Delete();
   this->RotateHandle->Delete();
 
@@ -420,9 +447,14 @@ void vtkProsthesisRepresentation::SizeHandles()
   this->HandleGeometry->SetRadius(
     this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
                                                        this->Center));
-  this->RotateHandleGeometry->SetRadius(
-    this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
-                                                       this->RotateHandle->GetCenter()));
+  double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
+  this->RotateHandleGeometry->SetRadius(rotateRadius);
+
+  double inv = rotateRadius / this->RotateArrowGeometry->GetShaftRadius();
+  this->RotateArrowTransform->Identity();
+  this->RotateArrowTransform->Translate(this->RotateHandleGeometry->GetCenter());
+  this->RotateArrowTransform->Scale(inv, inv, inv);
+  this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
 }
 
 //----------------------------------------------------------------------------

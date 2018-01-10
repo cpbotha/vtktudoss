@@ -7,11 +7,14 @@
 class vtkActor;
 class vtkPolyDataMapper;
 class vtkSphereSource;
+class vtkArrowSource;
 class vtkCellPicker;
 class vtkProperty;
 class vtkPoints;
 class vtkPolyData;
 class vtkTransform;
+class vtkAppendPolyData;
+class vtkTransformPolyDataFilter;
 
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkProsthesisRepresentation : public vtkWidgetRepresentation
@@ -80,6 +83,10 @@ protected:
   vtkActor* RotateHandle;
   vtkPolyDataMapper* RotateHandleMapper;
   vtkSphereSource* RotateHandleGeometry;
+  vtkArrowSource* RotateArrowGeometry;
+  vtkTransformPolyDataFilter* RotateArrowTransformer;
+  vtkTransform* RotateArrowTransform;
+  vtkAppendPolyData* RotateGeometryCombiner;
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();
   virtual void SizeHandles();
