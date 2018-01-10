@@ -113,6 +113,8 @@ protected:
   vtkPolyDataMapper* ArrowMapper;
   vtkPolyData* ArrowPolyData;
   vtkPoints* ArrowPoints;
+  vtkTransformPolyDataFilter* ArrowTransformer;
+  vtkTransform* ArrowTransform;
   void GenerateArrow();
   void UpdateArrow();
 
@@ -121,6 +123,7 @@ protected:
   virtual void Rotate(double previousX, double previousY, double X, double Y, double *vpn);
 
   vtkTransform* Transform;
+  void UpdateTransform();
 
 private:
   vtkProsthesisRepresentation(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;

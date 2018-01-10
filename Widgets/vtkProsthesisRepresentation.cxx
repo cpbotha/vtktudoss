@@ -100,17 +100,23 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
 
   // Create the custom arrow
   this->ArrowPolyData = vtkPolyData::New();
-  this->ArrowMapper = vtkPolyDataMapper::New();
-  this->ArrowMapper->SetInputData(this->ArrowPolyData);
-  this->Arrow = vtkActor::New();
-  this->Arrow->SetMapper(this->ArrowMapper);
-  this->Arrow->SetProperty(this->HandleProperty);
   {
     vtkCellArray* cells = vtkCellArray::New();
     cells->Allocate(cells->EstimateSize(15,2));
     this->ArrowPolyData->SetLines(cells);
     cells->Delete();
   }
+
+  this->ArrowTransformer = vtkTransformPolyDataFilter::New();
+  this->ArrowTransformer->SetInputData(this->ArrowPolyData);
+  this->ArrowTransform = vtkTransform::New();
+  this->ArrowTransform->Identity();
+  this->ArrowTransformer->SetTransform(this->ArrowTransform);
+  this->ArrowMapper = vtkPolyDataMapper::New();
+  this->ArrowMapper->SetInputConnection(this->ArrowTransformer->GetOutputPort());
+  this->Arrow = vtkActor::New();
+  this->Arrow->SetMapper(this->ArrowMapper);
+  this->Arrow->SetProperty(this->HandleProperty);
 
   // Create the outline
   this->GenerateOutline();
@@ -227,8 +233,6 @@ void vtkProsthesisRepresentation::Translate(double *p1, double *p2)
   this->Center[1] += v[1];
   this->Center[2] += v[2];
 
-  this->Transform->Translate(v);
-
   // Move the corners
   double* pts =
     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
@@ -265,10 +269,6 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
   transform->RotateWXYZ(difference, vpn);
   transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
-  
-  this->Transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
-  this->Transform->RotateWXYZ(difference, vpn);
-  this->Transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
 
   //Set the corners
   vtkPoints* newPts = vtkPoints::New(VTK_DOUBLE);
@@ -461,6 +461,9 @@ void vtkProsthesisRepresentation::PositionHandles()
   this->GenerateOutline();
   // Required so the handles stay the right size on screen during interaction.
   this->SizeHandles();
+  this->UpdateTransform();
+  this->GetTransform(this->RotateArrowTransform);
+  this->GetTransform(this->ArrowTransform);
 }
 
 //----------------------------------------------------------------------------
@@ -472,11 +475,10 @@ void vtkProsthesisRepresentation::SizeHandles()
   double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
   this->RotateHandleGeometry->SetRadius(rotateRadius);
 
-  double inv = rotateRadius / this->RotateArrowGeometry->GetShaftRadius();
-  this->RotateArrowTransform->Identity();
-  this->RotateArrowTransform->Translate(this->RotateHandleGeometry->GetCenter());
-  this->RotateArrowTransform->Scale(inv, inv, inv);
-  this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
+  // double inv = rotateRadius / this->RotateArrowGeometry->GetShaftRadius();
+  // this->RotateArrowTransform->Identity();
+  // this->RotateArrowTransform->Scale(inv, inv, inv);
+  // this->RotateArrowTransformer->SetTransform(this->RotateArrowTransform);
 }
 
 //----------------------------------------------------------------------------
@@ -650,15 +652,14 @@ void vtkProsthesisRepresentation::GenerateArrow()
   this->UpdateArrow();
 }
 
-void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)
+void vtkProsthesisRepresentation::UpdateTransform()
 {
-  t->Identity();
-  t->Translate(this->Center);
+  this->Transform->Identity();
+  this->Transform->Translate(this->Center);
 
   // Orientation
   vtkMatrix4x4* matrix = vtkMatrix4x4::New();
   matrix->Identity();
-  this->PositionHandles();
   
   // Compute normals
   double* pts =
@@ -681,8 +682,13 @@ void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)
     matrix->SetElement(i, 1, -ny[i]);
     matrix->SetElement(i, 2, -nz[i]);
   }
-  t->Concatenate(matrix);
+  this->Transform->Concatenate(matrix);
   matrix->Delete();
+}
+
+void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)
+{
+  t->DeepCopy(this->Transform);
 }
 
 double* vtkProsthesisRepresentation::GetBounds()
