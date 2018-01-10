@@ -91,13 +91,30 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Outline = vtkActor::New();
   this->Outline->SetMapper(this->OutlineMapper);
   this->Outline->SetProperty(this->OutlineProperty);
-  vtkCellArray* cells = vtkCellArray::New();
-  cells->Allocate(cells->EstimateSize(15,2));
-  this->OutlinePolyData->SetLines(cells);
-  cells->Delete();
+  {
+    vtkCellArray* cells = vtkCellArray::New();
+    cells->Allocate(cells->EstimateSize(15,2));
+    this->OutlinePolyData->SetLines(cells);
+    cells->Delete();
+  }
+
+  // Create the custom arrow
+  this->ArrowPolyData = vtkPolyData::New();
+  this->ArrowMapper = vtkPolyDataMapper::New();
+  this->ArrowMapper->SetInputData(this->ArrowPolyData);
+  this->Arrow = vtkActor::New();
+  this->Arrow->SetMapper(this->ArrowMapper);
+  this->Arrow->SetProperty(this->HandleProperty);
+  {
+    vtkCellArray* cells = vtkCellArray::New();
+    cells->Allocate(cells->EstimateSize(15,2));
+    this->ArrowPolyData->SetLines(cells);
+    cells->Delete();
+  }
 
   // Create the outline
   this->GenerateOutline();
+  this->GenerateArrow();
 
   // Define the point coordinates
   double bounds[6] = {-1.0, 1.0, 
@@ -136,6 +153,7 @@ vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
   this->Outline->Delete();
 
   this->Points->Delete();
+  this->ArrowPoints->Delete();
 }
 
 //----------------------------------------------------------------------
@@ -368,6 +386,7 @@ void vtkProsthesisRepresentation::ReleaseGraphicsResources(vtkWindow *w)
   this->Handle->ReleaseGraphicsResources(w);
   this->RotateHandle->ReleaseGraphicsResources(w);
   this->Outline->ReleaseGraphicsResources(w);
+  this->Arrow->ReleaseGraphicsResources(w);
 }
 
 //----------------------------------------------------------------------------
@@ -378,6 +397,7 @@ int vtkProsthesisRepresentation::RenderOpaqueGeometry(vtkViewport *v)
 
   // Render all the actors of the widget
   count += this->Outline->RenderOpaqueGeometry(v);
+  count += this->Arrow->RenderOpaqueGeometry(v);
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderOpaqueGeometry(v);
@@ -398,6 +418,7 @@ int vtkProsthesisRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport 
 
   // Render all transparent actors of the widget
   count += this->Outline->RenderTranslucentPolygonalGeometry(v);
+  count += this->Arrow->RenderTranslucentPolygonalGeometry(v);
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderTranslucentPolygonalGeometry(v);
@@ -417,6 +438,7 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
   this->BuildRepresentation();
 
   result |= this->Outline->HasTranslucentPolygonalGeometry();
+  result |= this->Arrow->HasTranslucentPolygonalGeometry();
   result |= this->Handle->HasTranslucentPolygonalGeometry();
   result |= this->RotateHandle->HasTranslucentPolygonalGeometry();
 
@@ -548,6 +570,84 @@ void vtkProsthesisRepresentation::GenerateOutline()
   {
     this->OutlineProperty->SetRepresentationToWireframe();
   }
+}
+
+void vtkProsthesisRepresentation::UpdateArrow()
+{
+  vtkCellArray* cells = vtkCellArray::New();
+  cells->Reset();
+  vtkIdType pts[2];
+  int maxPointId = this->ArrowPoints->GetNumberOfPoints() - 1;
+  for (double i = 0; i < maxPointId; i++)
+  {
+    pts[0] = i; pts[1] = i+1;
+    cells->InsertNextCell(2, pts);
+  }
+  pts[0] = maxPointId; pts[1] = 0;
+  cells->InsertNextCell(2, pts);
+  this->ArrowPolyData->SetLines(cells);
+  this->ArrowPolyData->Modified();
+}
+
+void vtkProsthesisRepresentation::GenerateArrow()
+{
+  // Parameters needed to generate an arrow
+  // The radius the arrow is drawn from the center.
+  double radius = 0.5;
+  // The thickness of the shaft.
+  double shaftWidth = 0.05;
+  // The thickness of the tip.
+  double tipWidth = 2 * shaftWidth;
+  // Angle where the arrow starts
+  double startAngle = PI / 2.0;
+  // Angle where the arrow stops. If this value is smaller than the 
+  // start value the arrow will point clockwise, else counter-clockwise.
+  double endAngle = PI / 2.0 + 0.8;
+  // The angle between the start and end of the tip.
+  double tipAngle = 15.0 / 180.0 * PI; // 10 degrees
+  // The center of the circle the arrow is drawn on.
+  double center[3];
+  center[0] = center[1] = center[2] = 0.0;
+  // Number of segments used to build the shaft section.
+  int numSegment = 20;
+
+  // Usefull variables deduced from the parameters.
+
+  // The points include the outside curve's (segments + 1),
+  // inside curve's (segments + 1) and 3 points for the tip.
+  int numPoints = (numSegment + 1) * 2 + 3;
+  // The radius of the outside of the shaft.
+  double outsideRadius = radius + shaftWidth / 2.0;
+  // The radius of the inside of the shaft.
+  double insideRadius = radius - shaftWidth / 2.0;
+  // The exact angle the tip starts at.
+  double tipStartAngle = endAngle - startAngle;
+  // Handle the direction of the arrow correctly...
+  tipStartAngle = tipStartAngle < 0 ? tipStartAngle + tipAngle : tipStartAngle - tipAngle;
+  // ... and add the start angle to the value.
+  tipStartAngle += startAngle;
+
+  this->ArrowPoints = vtkPoints::New();
+  this->ArrowPoints->SetNumberOfPoints(numPoints);
+  // Position the shaft points
+  double angle = startAngle;
+  double angleInc = (tipStartAngle - startAngle) / numSegment;
+  for (double i = 0; i <= numSegment; i++, angle += angleInc)
+  {
+    this->ArrowPoints->SetPoint(i, outsideRadius * sin(angle), 0, outsideRadius * cos(angle));
+    this->ArrowPoints->SetPoint(numPoints - i - 1, insideRadius * sin(angle), 0, insideRadius * cos(angle));
+  }
+
+  // Position the tip points
+  double tipOutsideRadius = radius + tipWidth / 2.0;
+  double tipInsideRadius = radius - tipWidth / 2.0;
+  this->ArrowPoints->SetPoint(numSegment + 1, tipOutsideRadius * sin(tipStartAngle), 0, tipOutsideRadius * cos(tipStartAngle));
+  this->ArrowPoints->SetPoint(numSegment + 2, radius * sin(endAngle), 0, radius * cos(endAngle));
+  this->ArrowPoints->SetPoint(numSegment + 3, tipInsideRadius * sin(tipStartAngle), 0, tipInsideRadius * cos(tipStartAngle));
+  this->ArrowPolyData->SetPoints(this->ArrowPoints);
+
+  // Create the lines of the arrow
+  this->UpdateArrow();
 }
 
 void vtkProsthesisRepresentation::GetTransform(vtkTransform* t)

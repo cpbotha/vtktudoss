@@ -108,6 +108,14 @@ protected:
   // Generate an outline on the bounds of the widget
   void GenerateOutline();
 
+  // wireframe outline
+  vtkActor* Arrow;
+  vtkPolyDataMapper* ArrowMapper;
+  vtkPolyData* ArrowPolyData;
+  vtkPoints* ArrowPoints;
+  void GenerateArrow();
+  void UpdateArrow();
+
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
   virtual void Rotate(double previousX, double previousY, double X, double Y, double *vpn);
