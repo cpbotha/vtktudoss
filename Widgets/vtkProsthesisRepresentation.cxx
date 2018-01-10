@@ -100,6 +100,7 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
 
   // Create the custom arrow
   this->ArrowPolyData = vtkPolyData::New();
+  this->ArrowPoints = vtkPoints::New();
   {
     vtkCellArray* cells = vtkCellArray::New();
     cells->Allocate(cells->EstimateSize(15,2));
@@ -120,7 +121,7 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
 
   // Create the outline
   this->GenerateOutline();
-  this->GenerateArrow();
+  this->GenerateArrow(0.05);
 
   // Define the point coordinates
   double bounds[6] = {-1.0, 1.0, 
@@ -474,6 +475,7 @@ void vtkProsthesisRepresentation::SizeHandles()
                                                        this->Center));
   double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
   this->RotateHandleGeometry->SetRadius(rotateRadius);
+  this->GenerateArrow(rotateRadius);
 
   // double inv = rotateRadius / this->RotateArrowGeometry->GetShaftRadius();
   // this->RotateArrowTransform->Identity();
@@ -591,13 +593,11 @@ void vtkProsthesisRepresentation::UpdateArrow()
   this->ArrowPolyData->Modified();
 }
 
-void vtkProsthesisRepresentation::GenerateArrow()
+void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
 {
   // Parameters needed to generate an arrow
   // The radius the arrow is drawn from the center.
   double radius = 0.5;
-  // The thickness of the shaft.
-  double shaftWidth = 0.05;
   // The thickness of the tip.
   double tipWidth = 2 * shaftWidth;
   // Angle where the arrow starts
@@ -629,7 +629,6 @@ void vtkProsthesisRepresentation::GenerateArrow()
   // ... and add the start angle to the value.
   tipStartAngle += startAngle;
 
-  this->ArrowPoints = vtkPoints::New();
   this->ArrowPoints->SetNumberOfPoints(numPoints);
   // Position the shaft points
   double angle = startAngle;

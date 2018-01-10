@@ -108,14 +108,16 @@ protected:
   // Generate an outline on the bounds of the widget
   void GenerateOutline();
 
-  // wireframe outline
+  // Arrow outline
   vtkActor* Arrow;
   vtkPolyDataMapper* ArrowMapper;
   vtkPolyData* ArrowPolyData;
   vtkPoints* ArrowPoints;
   vtkTransformPolyDataFilter* ArrowTransformer;
   vtkTransform* ArrowTransform;
-  void GenerateArrow();
+  // GenerateArrow parameters:
+  // shaftWidth : The thickness of the shaft.
+  void GenerateArrow(double shaftWidth = 0.05);
   void UpdateArrow();
 
   // Methods to update the widget
