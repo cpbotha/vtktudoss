@@ -118,7 +118,9 @@ protected:
   // GenerateArrow parameters:
   // shaftWidth : The thickness of the shaft.
   void GenerateArrow(double shaftWidth = 0.05);
-  void UpdateArrow();
+  // UpdateArrow parameters:
+  // outline : If true, only draws the arrow's outline.
+  void UpdateArrow(bool outline = false);
 
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);

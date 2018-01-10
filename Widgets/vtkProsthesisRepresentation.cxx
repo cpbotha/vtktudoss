@@ -576,20 +576,38 @@ void vtkProsthesisRepresentation::GenerateOutline()
   }
 }
 
-void vtkProsthesisRepresentation::UpdateArrow()
+void vtkProsthesisRepresentation::UpdateArrow(bool outline)
 {
   vtkCellArray* cells = vtkCellArray::New();
   cells->Reset();
-  vtkIdType pts[2];
   int maxPointId = this->ArrowPoints->GetNumberOfPoints() - 1;
-  for (double i = 0; i < maxPointId; i++)
-  {
-    pts[0] = i; pts[1] = i+1;
+
+  if (outline) {
+    vtkIdType pts[2];
+    for (double i = 0; i < maxPointId; i++)
+    {
+      pts[0] = i; pts[1] = i+1;
+      cells->InsertNextCell(2, pts);
+    }
+    pts[0] = maxPointId; pts[1] = 0;
     cells->InsertNextCell(2, pts);
+    this->ArrowPolyData->SetLines(cells);
   }
-  pts[0] = maxPointId; pts[1] = 0;
-  cells->InsertNextCell(2, pts);
-  this->ArrowPolyData->SetLines(cells);
+  else {
+    vtkIdType pts[3];
+    // Number of segments used to build the shaft section.
+    int numSegment = round((this->ArrowPoints->GetNumberOfPoints() - 3) / 2.0) - 1;
+    for (double i = 0; i < numSegment; i++)
+    {
+      pts[0] = i; pts[1] = i+1; pts[2] = maxPointId - i - 1;
+      cells->InsertNextCell(3, pts);
+      pts[0] = maxPointId - i - 1; pts[1] = i+1; pts[2] = maxPointId - i - 2;
+      cells->InsertNextCell(3, pts);
+    }
+    pts[0] = numSegment + 1; pts[1] = numSegment + 2; pts[2] = numSegment + 3;
+    cells->InsertNextCell(3, pts);
+    this->ArrowPolyData->SetPolys(cells);
+  }
   this->ArrowPolyData->Modified();
 }
 
