@@ -617,14 +617,12 @@ void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
   // The radius the arrow is drawn from the center.
   double radius = 0.5;
   // The thickness of the tip.
-  double tipWidth = 2 * shaftWidth;
+  double tipSize = 3 * shaftWidth;
   // Angle where the arrow starts
   double startAngle = PI / 2.0;
   // Angle where the arrow stops. If this value is smaller than the 
   // start value the arrow will point clockwise, else counter-clockwise.
   double endAngle = PI / 2.0 + 0.8;
-  // The angle between the start and end of the tip.
-  double tipAngle = 15.0 / 180.0 * PI; // 10 degrees
   // The center of the circle the arrow is drawn on.
   double center[3];
   center[0] = center[1] = center[2] = 0.0;
@@ -633,6 +631,11 @@ void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
 
   // Usefull variables deduced from the parameters.
 
+  // The angle between the start and end of the tip.
+  // Calculate it as the tip size divided by the circumference
+  // and the mutiplied by 2 radians to get the angle; the
+  // equation can be simplified to the following though.
+  double tipAngle = tipSize / radius;
   // The points include the outside curve's (segments + 1),
   // inside curve's (segments + 1) and 3 points for the tip.
   int numPoints = (numSegment + 1) * 2 + 3;
@@ -658,8 +661,8 @@ void vtkProsthesisRepresentation::GenerateArrow(double shaftWidth)
   }
 
   // Position the tip points
-  double tipOutsideRadius = radius + tipWidth / 2.0;
-  double tipInsideRadius = radius - tipWidth / 2.0;
+  double tipOutsideRadius = radius + tipSize / 2.0;
+  double tipInsideRadius = radius - tipSize / 2.0;
   this->ArrowPoints->SetPoint(numSegment + 1, tipOutsideRadius * sin(tipStartAngle), 0, tipOutsideRadius * cos(tipStartAngle));
   this->ArrowPoints->SetPoint(numSegment + 2, radius * sin(endAngle), 0, radius * cos(endAngle));
   this->ArrowPoints->SetPoint(numSegment + 3, tipInsideRadius * sin(tipStartAngle), 0, tipInsideRadius * cos(tipStartAngle));
