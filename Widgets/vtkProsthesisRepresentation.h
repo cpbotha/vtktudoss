@@ -46,6 +46,10 @@ public:
   vtkSetVectorMacro(Center, double, 3);
   vtkGetVectorMacro(Center, double, 3);
 
+  double Radius;
+  vtkSetMacro(Radius, double);
+  vtkGetMacro(Radius, double);
+
   // Flag used to show/hide the outline of the widget
   bool ShowOutline;
   void SetShowOutline(bool);
@@ -108,9 +112,6 @@ protected:
   // Arrow polydata
   vtkPolyData* LeftArrowPolyData;
   vtkPolyData* RightArrowPolyData;
-  vtkTransformPolyDataFilter* LeftArrowTransformer;
-  vtkTransformPolyDataFilter* RightArrowTransformer;
-  vtkTransform* ArrowTransform;
   // GenerateArrow parameters:
   // shaftWidth : The thickness of the shaft.
   // clockwise : Determines which way the arrow points.

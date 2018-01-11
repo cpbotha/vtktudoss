@@ -29,11 +29,10 @@ vtkStandardNewMacro(vtkProsthesisRepresentation);
 //----------------------------------------------------------------------------
 vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
+  Radius(0.5),
   ShowOutline(true),
   LeftArrowPolyData(vtkPolyData::New()),
   RightArrowPolyData(vtkPolyData::New()),
-  LeftArrowTransformer(vtkTransformPolyDataFilter::New()),
-  RightArrowTransformer(vtkTransformPolyDataFilter::New()),
   Transform(vtkTransform::New())
 {
   // The initial state
@@ -50,8 +49,24 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->HandleGeometry->SetRadius(this->HandleSize);
   this->HandleGeometry->SetCenter(0, 0, 0);
   this->HandleGeometry->GeneratePolylineOff();
-  this->HandleMapper = vtkPolyDataMapper::New();
-  this->HandleMapper->SetInputConnection(this->HandleGeometry->GetOutputPort());
+
+  // NOTE: This is a temoporary solution to display the handles in the y-axis
+  // direction, since that is how they will be used in HPS desktop.
+  // TODO: Implement a feature that always arients the handles to face the 
+  // camera with a look-at transform matrix.
+  {
+    vtkTransform* transform = vtkTransform::New();
+    transform->Identity();
+    transform->RotateX(90);
+    vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
+    transformer->SetInputConnection(this->HandleGeometry->GetOutputPort());
+    transformer->SetTransform(transform);
+    transform->Delete();
+    this->HandleMapper = vtkPolyDataMapper::New();
+    this->HandleMapper->SetInputConnection(transformer->GetOutputPort());
+    transformer->Delete();
+  }
+
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
@@ -62,22 +77,30 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->RotateHandleGeometry->SetCenter(0, 0, 0);
   this->RotateHandleGeometry->GeneratePolylineOff();
 
-  this->ArrowTransform = vtkTransform::New();
-  this->ArrowTransform->Identity();
-
-  this->LeftArrowTransformer->SetInputData(this->LeftArrowPolyData);
-  this->LeftArrowTransformer->SetTransform(this->ArrowTransform);
-  this->RightArrowTransformer->SetInputData(this->RightArrowPolyData);
-  this->RightArrowTransformer->SetTransform(this->ArrowTransform);
-
   // Combine the marker and arrows
   this->RotateGeometryCombiner = vtkAppendPolyData::New();
   this->RotateGeometryCombiner->AddInputConnection(this->RotateHandleGeometry->GetOutputPort());
-  this->RotateGeometryCombiner->AddInputConnection(this->LeftArrowTransformer->GetOutputPort());
-  this->RotateGeometryCombiner->AddInputConnection(this->RightArrowTransformer->GetOutputPort());
+  this->RotateGeometryCombiner->AddInputData(this->LeftArrowPolyData);
+  this->RotateGeometryCombiner->AddInputData(this->RightArrowPolyData);
 
-  this->RotateHandleMapper = vtkPolyDataMapper::New();
-  this->RotateHandleMapper->SetInputConnection(this->RotateGeometryCombiner->GetOutputPort());
+  // NOTE: This is a temoporary solution to display the handles in the y-axis
+  // direction, since that is how they will be used in HPS desktop.
+  // TODO: Implement a feature that always arients the handles to face the 
+  // camera with a look-at transform matrix.
+  {
+    vtkTransform* transform = vtkTransform::New();
+    transform->Identity();
+    transform->RotateX(90);
+    vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
+    transformer->SetInputConnection(this->RotateGeometryCombiner->GetOutputPort());
+    transformer->SetTransform(transform);
+    transform->Delete();
+
+    this->RotateHandleMapper = vtkPolyDataMapper::New();
+    this->RotateHandleMapper->SetInputConnection(transformer->GetOutputPort());
+    transformer->Delete();
+  }
+
   this->RotateHandle = vtkActor::New();
   this->RotateHandle->SetMapper(this->RotateHandleMapper);
   this->RotateHandle->SetProperty(this->HandleProperty);
@@ -428,21 +451,22 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
 //----------------------------------------------------------------------------
 void vtkProsthesisRepresentation::PositionHandles()
 {
-  this->HandleGeometry->SetCenter(this->Center);
-  double start[3];
-  double up[3];
-  this->Points->GetPoint(0, start);
-  this->Points->GetPoint(1, up);
-  double handlePos[3];
-  handlePos[0] = this->Center[0] + (up[0] - start[0]) / 2.0;
-  handlePos[1] = this->Center[1] + (up[1] - start[1]) / 2.0;
-  handlePos[2] = this->Center[2] + (up[2] - start[2]) / 2.0;
-  this->RotateHandleGeometry->SetCenter(handlePos);
   this->GenerateOutline();
+  this->UpdateTransform();
+
+  vtkTransform* t = vtkTransform::New();
+  this->GetTransform(t);
+  this->Handle->SetUserTransform(t);
+
+  vtkTransform* tRot = vtkTransform::New();
+  tRot->DeepCopy(t);
+  tRot->Translate(this->Radius, 0, 0);
+  this->RotateHandle->SetUserTransform(tRot);
+  t->Delete();
+  tRot->Delete();
+
   // Required so the handles stay the right size on screen during interaction.
   this->SizeHandles();
-  this->UpdateTransform();
-  this->GetTransform(this->ArrowTransform);
 }
 
 //----------------------------------------------------------------------------
@@ -556,7 +580,7 @@ void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
 {
   // Parameters needed to generate an arrow
   // The radius the arrow is drawn from the center.
-  double radius = 0.5;
+  double radius = this->Radius;
   // The thickness of the tip.
   double tipSize = 3 * shaftWidth;
   // Angle where the arrow starts
@@ -600,18 +624,21 @@ void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
   // Position the shaft points
   double angle = startAngle;
   double angleInc = (tipStartAngle - startAngle) / numSegment;
+  double xOff = radius * sin(angle);
+  double yOff = radius * cos(angle);
+
   for (double i = 0; i <= numSegment; i++, angle += angleInc)
   {
-    arrowPoints->SetPoint(i, outsideRadius * sin(angle), 0, outsideRadius * cos(angle));
-    arrowPoints->SetPoint(numPoints - i - 1, insideRadius * sin(angle), 0, insideRadius * cos(angle));
+    arrowPoints->SetPoint(i, outsideRadius * sin(angle) - xOff, outsideRadius * cos(angle) - yOff, 0);
+    arrowPoints->SetPoint(numPoints - i - 1, insideRadius * sin(angle) - xOff, insideRadius * cos(angle) - yOff, 0);
   }
 
   // Position the tip points
   double tipOutsideRadius = radius + tipSize / 2.0;
   double tipInsideRadius = radius - tipSize / 2.0;
-  arrowPoints->SetPoint(numSegment + 1, tipOutsideRadius * sin(tipStartAngle), 0, tipOutsideRadius * cos(tipStartAngle));
-  arrowPoints->SetPoint(numSegment + 2, radius * sin(endAngle), 0, radius * cos(endAngle));
-  arrowPoints->SetPoint(numSegment + 3, tipInsideRadius * sin(tipStartAngle), 0, tipInsideRadius * cos(tipStartAngle));
+  arrowPoints->SetPoint(numSegment + 1, tipOutsideRadius * sin(tipStartAngle) - xOff, tipOutsideRadius * cos(tipStartAngle) - yOff, 0);
+  arrowPoints->SetPoint(numSegment + 2, radius * sin(endAngle) - xOff, radius * cos(endAngle) - yOff, 0);
+  arrowPoints->SetPoint(numSegment + 3, tipInsideRadius * sin(tipStartAngle) - xOff, tipInsideRadius * cos(tipStartAngle) - yOff, 0);
   arrowPolyData->SetPoints(arrowPoints);
   arrowPoints->Delete();
 
