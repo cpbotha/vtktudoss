@@ -944,3 +944,11 @@ void vtkProsthesisRepresentation::SetSelectedHandleColour(double r, double g, do
   this->SelectedHandleProperty->SetColor(r, g, b);
 
 }
+
+void vtkProsthesisRepresentation::SetRadius(double value)
+{
+  if (value <= 0.0) value = 0.01;
+  this->Radius = value;
+  this->OutlineGeometry->SetRadius(value);
+  this->PositionHandles();
+}

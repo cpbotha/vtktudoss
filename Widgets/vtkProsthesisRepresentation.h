@@ -48,7 +48,7 @@ public:
   vtkGetVectorMacro(Center, double, 3);
 
   double Radius;
-  vtkSetMacro(Radius, double);
+  void SetRadius(double value);
   vtkGetMacro(Radius, double);
 
   double HandleColour[3];
