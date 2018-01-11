@@ -15,6 +15,7 @@ class vtkPolyData;
 class vtkTransform;
 class vtkAppendPolyData;
 class vtkTransformPolyDataFilter;
+class vtkAlgorithmOutput;
 
 
 class VTKINTERACTIONWIDGETS_EXPORT vtkProsthesisRepresentation : public vtkWidgetRepresentation
@@ -114,10 +115,8 @@ protected:
 
   // wireframe outline
   vtkActor* Outline;
+  vtkRegularPolygonSource* OutlineGeometry;
   vtkPolyDataMapper* OutlineMapper;
-  vtkPolyData* OutlinePolyData;
-  // Generate an outline on the bounds of the widget
-  void GenerateOutline();
 
   // Arrow polydata
   vtkPolyData* LeftArrowPolyData;
@@ -140,6 +139,8 @@ protected:
 private:
   vtkProsthesisRepresentation(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
   void operator=(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
+
+  void TransformPolyData(vtkAlgorithmOutput* algoOutput, vtkPolyDataMapper* mapper);
 };
 
 #endif

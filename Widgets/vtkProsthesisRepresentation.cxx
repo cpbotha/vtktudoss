@@ -21,6 +21,7 @@
 #include "vtkDoubleArray.h"
 #include "vtkTransform.h"
 #include "vtkMath.h"
+#include "vtkAlgorithmOutput.h"
 
 #define PI 3.14159265358979323846
 
@@ -56,22 +57,9 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->HandleGeometry->SetCenter(0, 0, 0);
   this->HandleGeometry->GeneratePolylineOff();
 
-  // NOTE: This is a temoporary solution to display the handles in the y-axis
-  // direction, since that is how they will be used in HPS desktop.
-  // TODO: Implement a feature that always arients the handles to face the 
-  // camera with a look-at transform matrix.
-  {
-    vtkTransform* transform = vtkTransform::New();
-    transform->Identity();
-    transform->RotateX(90);
-    vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
-    transformer->SetInputConnection(this->HandleGeometry->GetOutputPort());
-    transformer->SetTransform(transform);
-    transform->Delete();
-    this->HandleMapper = vtkPolyDataMapper::New();
-    this->HandleMapper->SetInputConnection(transformer->GetOutputPort());
-    transformer->Delete();
-  }
+  this->HandleMapper = vtkPolyDataMapper::New();
+  this->TransformPolyData(this->HandleGeometry->GetOutputPort(),
+                          this->HandleMapper);
 
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
@@ -89,23 +77,9 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->RotateGeometryCombiner->AddInputData(this->LeftArrowPolyData);
   this->RotateGeometryCombiner->AddInputData(this->RightArrowPolyData);
 
-  // NOTE: This is a temoporary solution to display the handles in the y-axis
-  // direction, since that is how they will be used in HPS desktop.
-  // TODO: Implement a feature that always arients the handles to face the 
-  // camera with a look-at transform matrix.
-  {
-    vtkTransform* transform = vtkTransform::New();
-    transform->Identity();
-    transform->RotateX(90);
-    vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
-    transformer->SetInputConnection(this->RotateGeometryCombiner->GetOutputPort());
-    transformer->SetTransform(transform);
-    transform->Delete();
-
-    this->RotateHandleMapper = vtkPolyDataMapper::New();
-    this->RotateHandleMapper->SetInputConnection(transformer->GetOutputPort());
-    transformer->Delete();
-  }
+  this->RotateHandleMapper = vtkPolyDataMapper::New();
+  this->TransformPolyData(this->RotateGeometryCombiner->GetOutputPort(),
+                          this->RotateHandleMapper);
 
   this->RotateHandle = vtkActor::New();
   this->RotateHandle->SetMapper(this->RotateHandleMapper);
@@ -115,23 +89,21 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Points = vtkPoints::New(VTK_DOUBLE);
   this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
 
-  // Create the outline for the hex
-  this->OutlinePolyData = vtkPolyData::New();
-  this->OutlinePolyData->SetPoints(this->Points);
+  // Create the outline circle
+  this->OutlineGeometry = vtkRegularPolygonSource::New();
+  this->OutlineGeometry->SetNumberOfSides(50);
+  this->OutlineGeometry->SetRadius(this->Radius);
+  this->OutlineGeometry->SetCenter(0, 0, 0);
+  this->OutlineGeometry->GeneratePolygonOff();
+
   this->OutlineMapper = vtkPolyDataMapper::New();
-  this->OutlineMapper->SetInputData(this->OutlinePolyData);
+  this->TransformPolyData(this->OutlineGeometry->GetOutputPort(),
+                          this->OutlineMapper);
+
   this->Outline = vtkActor::New();
   this->Outline->SetMapper(this->OutlineMapper);
   this->Outline->SetProperty(this->OutlineProperty);
-  {
-    vtkCellArray* cells = vtkCellArray::New();
-    cells->Allocate(cells->EstimateSize(15,2));
-    this->OutlinePolyData->SetLines(cells);
-    cells->Delete();
-  }
 
-  // Create the outline
-  this->GenerateOutline();
   this->GenerateArrow(this->RightArrowPolyData, 0.05, true);
   this->GenerateArrow(this->LeftArrowPolyData, 0.05, false);
 
@@ -149,6 +121,25 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->HandlePicker->PickFromListOn();
 }
 
+void vtkProsthesisRepresentation::TransformPolyData(vtkAlgorithmOutput* algoOutput,
+                                                    vtkPolyDataMapper* mapper)
+{
+  // NOTE: This is a temoporary solution to display the handles in the y-axis
+  // direction, since that is how they will be used in HPS desktop.
+  // TODO: Implement a feature that always arients the handles to face the
+  // camera with a look-at transform matrix.
+  vtkTransform* transform = vtkTransform::New();
+  transform->Identity();
+  transform->RotateX(90);
+  vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
+  transformer->SetInputConnection(algoOutput);
+  transformer->SetTransform(transform);
+  transform->Delete();
+
+  mapper->SetInputConnection(transformer->GetOutputPort());
+  transformer->Delete();
+}
+
 //----------------------------------------------------------------------------
 vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
 {
@@ -164,7 +155,7 @@ vtkProsthesisRepresentation::~vtkProsthesisRepresentation()
   this->HandleProperty->Delete();
   this->SelectedHandleProperty->Delete();
 
-  this->OutlinePolyData->Delete();
+  this->OutlineGeometry->Delete();
   this->OutlineMapper->Delete();
   this->Outline->Delete();
 
@@ -406,8 +397,10 @@ int vtkProsthesisRepresentation::RenderOpaqueGeometry(vtkViewport *v)
   this->BuildRepresentation();
 
   // Render all the actors of the widget
-  count += this->Outline->RenderOpaqueGeometry(v);
-  // count += this->Arrow->RenderOpaqueGeometry(v);
+  if (this->Outline->GetVisibility())
+  {
+    count += this->Outline->RenderOpaqueGeometry(v);
+  }
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderOpaqueGeometry(v);
@@ -458,12 +451,12 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
 //----------------------------------------------------------------------------
 void vtkProsthesisRepresentation::PositionHandles()
 {
-  this->GenerateOutline();
   this->UpdateTransform();
 
   vtkTransform* t = vtkTransform::New();
   this->GetTransform(t);
   this->Handle->SetUserTransform(t);
+  this->Outline->SetUserTransform(t);
 
   vtkTransform* tRot = vtkTransform::New();
   tRot->DeepCopy(t);
@@ -534,50 +527,7 @@ void vtkProsthesisRepresentation::SetInteractionState(int state)
 void vtkProsthesisRepresentation::SetShowOutline(bool show) {
   if (this->ShowOutline != show) {
     this->ShowOutline = show;
-    this->GenerateOutline();
-  }
-}
-
-//----------------------------------------------------------------------------
-void vtkProsthesisRepresentation::GenerateOutline()
-{
-  // Whatever the case may be, we have to reset the Lines of the
-  // OutlinePolyData (i.e. nuke all current line data)
-  vtkCellArray* cells = this->OutlinePolyData->GetLines();
-  cells->Reset();
-
-  if (this->ShowOutline)
-  {
-    vtkIdType pts[2];
-    pts[0] = 0; pts[1] = 1;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 1; pts[1] = 2;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 2; pts[1] = 3;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 3; pts[1] = 0;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 4; pts[1] = 5;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 5; pts[1] = 6;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 6; pts[1] = 7;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 7; pts[1] = 4;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 0; pts[1] = 4;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 1; pts[1] = 5;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 2; pts[1] = 6;
-    cells->InsertNextCell(2, pts);
-    pts[0] = 3; pts[1] = 7;
-    cells->InsertNextCell(2, pts);
-    this->OutlinePolyData->Modified();
-  }
-  if (this->OutlineProperty)
-  {
-    this->OutlineProperty->SetRepresentationToWireframe();
+    this->Outline->SetVisibility(show);
   }
 }
 
