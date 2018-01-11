@@ -100,7 +100,10 @@ protected:
   // The translation handle.
   vtkActor* Handle;
   vtkPolyDataMapper* HandleMapper;
+  vtkAppendPolyData* TranslateGeometryCombiner;
   vtkRegularPolygonSource* HandleGeometry;
+  vtkPolyData* TranslateArrowPolyData;
+  void GenerateTranslateArrow(double shaftWidth = 0.05);
 
   // The up handles.
   vtkActor* UpHandle;

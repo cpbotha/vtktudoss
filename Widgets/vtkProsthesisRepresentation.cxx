@@ -32,6 +32,7 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
   Radius(0.5),
   ShowOutline(true),
+  TranslateArrowPolyData(vtkPolyData::New()),
   PlusPolyData(vtkPolyData::New()),
   MinusPolyData(vtkPolyData::New()),
   LeftArrowPolyData(vtkPolyData::New()),
@@ -59,8 +60,12 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->HandleGeometry->SetCenter(0, 0, 0);
   this->HandleGeometry->GeneratePolylineOff();
 
+  this->TranslateGeometryCombiner = vtkAppendPolyData::New();
+  this->TranslateGeometryCombiner->AddInputConnection(this->HandleGeometry->GetOutputPort());
+  this->TranslateGeometryCombiner->AddInputData(this->TranslateArrowPolyData);
+
   this->HandleMapper = vtkPolyDataMapper::New();
-  this->TransformPolyData(this->HandleGeometry->GetOutputPort(),
+  this->TransformPolyData(this->TranslateGeometryCombiner->GetOutputPort(),
                           this->HandleMapper);
 
   this->Handle = vtkActor::New();
@@ -122,6 +127,7 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Outline->SetMapper(this->OutlineMapper);
   this->Outline->SetProperty(this->OutlineProperty);
 
+  this->GenerateTranslateArrow(0.05);
   this->GeneratePlus(1.0);
   this->GenerateMinus(1.0);
   this->GenerateArrow(this->RightArrowPolyData, 0.05, true);
@@ -517,7 +523,6 @@ void vtkProsthesisRepresentation::PositionHandles()
 
   vtkTransform* t = vtkTransform::New();
   this->GetTransform(t);
-  this->Handle->SetUserTransform(t);
   this->Outline->SetUserTransform(t);
 
   vtkTransform* tRot = vtkTransform::New();
@@ -541,6 +546,8 @@ void vtkProsthesisRepresentation::UpdateHandles()
   vtkTransform* tUp = vtkTransform::New();
   this->GetAlwaysUpTransform(tUp);
 
+  this->Handle->SetUserTransform(tUp);
+
   vtkTransform* tPlus = vtkTransform::New();
   tPlus->DeepCopy(tUp);
   tPlus->Translate(-handleSizeCenter * 10, 0, handleSizeCenter * 3);
@@ -561,6 +568,7 @@ void vtkProsthesisRepresentation::UpdateHandles()
 
   this->GeneratePlus(handleSizeCenter * 6);
   this->GenerateMinus(handleSizeCenter * 6);
+  this->GenerateTranslateArrow(handleSizeCenter);
   this->GenerateArrow(this->RightArrowPolyData, rotateRadius, true);
   this->GenerateArrow(this->LeftArrowPolyData, rotateRadius, false);
 }
@@ -725,6 +733,77 @@ void vtkProsthesisRepresentation::GenerateMinus(double size, bool outline)
     this->MinusPolyData->SetPolys(cells);
   }
   this->MinusPolyData->Modified();
+}
+
+void vtkProsthesisRepresentation::GenerateTranslateArrow(double shaftWidth)
+{
+  double halfShaft = shaftWidth / 2.0;
+  // The thickness of the tip.
+  double tipSize = 3 * halfShaft;
+  // The length of the shaft.
+  double shaftLength = 7 * halfShaft;
+  // The length of the arrow.
+  double arrowLength = tipSize + shaftLength;
+  // The center of the circle the arrow is drawn on.
+  double center[3];
+  center[0] = center[1] = center[2] = 0.0;
+
+  int numPoints = 20; // 8 for the horizontal and vertical bars (shafts) and 
+                      // 12 for the 4 triangles (tips).
+
+  vtkPoints* points = vtkPoints::New();
+  points->SetNumberOfPoints(numPoints);
+  points->SetPoint( 0, -shaftLength,  halfShaft, 0);
+  points->SetPoint( 1,  shaftLength,  halfShaft, 0);
+  points->SetPoint( 2,  shaftLength, -halfShaft, 0);
+  points->SetPoint( 3, -shaftLength, -halfShaft, 0);
+  points->SetPoint( 4, -halfShaft,  shaftLength, 0);
+  points->SetPoint( 5,  halfShaft,  shaftLength, 0);
+  points->SetPoint( 6,  halfShaft, -shaftLength, 0);
+  points->SetPoint( 7, -halfShaft, -shaftLength, 0);
+  points->SetPoint( 8,  shaftLength,  tipSize, 0);
+  points->SetPoint( 9,  arrowLength,        0, 0);
+  points->SetPoint(10,  shaftLength, -tipSize, 0);
+  points->SetPoint(11, -shaftLength,  tipSize, 0);
+  points->SetPoint(12, -arrowLength,        0, 0);
+  points->SetPoint(13, -shaftLength, -tipSize, 0);
+  points->SetPoint(14,  tipSize,  shaftLength, 0);
+  points->SetPoint(15,        0,  arrowLength, 0);
+  points->SetPoint(16, -tipSize,  shaftLength, 0);
+  points->SetPoint(17,  tipSize, -shaftLength, 0);
+  points->SetPoint(18,        0, -arrowLength, 0);
+  points->SetPoint(19, -tipSize, -shaftLength, 0);
+  this->TranslateArrowPolyData->SetPoints(points);
+  points->Delete();
+
+  // Create the lines of the arrow  
+  vtkCellArray* cells = vtkCellArray::New();
+  cells->Reset();
+  vtkIdType pts[3];
+  // horizontal shaft
+  pts[0] = 0; pts[1] = 1; pts[2] = 2;
+  cells->InsertNextCell(3, pts);
+  pts[0] = 0; pts[1] = 2; pts[2] = 3;
+  cells->InsertNextCell(3, pts);
+  // vertical shaft
+  pts[0] = 4; pts[1] = 5; pts[2] = 6;
+  cells->InsertNextCell(3, pts);
+  pts[0] = 4; pts[1] = 6; pts[2] = 7;
+  // right arrow
+  cells->InsertNextCell(3, pts);
+  pts[0] = 8; pts[1] = 9; pts[2] = 10;
+  cells->InsertNextCell(3, pts);
+  // left arrow
+  pts[0] = 11; pts[1] = 12; pts[2] = 13;
+  cells->InsertNextCell(3, pts);
+  // top arrow
+  pts[0] = 14; pts[1] = 15; pts[2] = 16;
+  cells->InsertNextCell(3, pts);
+  // bottom arrow
+  pts[0] = 17; pts[1] = 18; pts[2] = 19;
+  cells->InsertNextCell(3, pts);
+  this->TranslateArrowPolyData->SetPolys(cells);
+  this->TranslateArrowPolyData->Modified();
 }
 
 void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
