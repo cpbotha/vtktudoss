@@ -608,11 +608,18 @@ void vtkProsthesisRepresentation::SetInteractionState(int state)
 }
 
 //----------------------------------------------------------------------------
+void vtkProsthesisRepresentation::SetShowHandles(bool show)
+{
+  this->ShowHandles = show;
+  this->Handle->SetVisibility(show);
+  this->UpHandle->SetVisibility(show);
+  this->DownHandle->SetVisibility(show);
+  this->RotateHandle->SetVisibility(show);
+}
+
 void vtkProsthesisRepresentation::SetShowOutline(bool show) {
-  if (this->ShowOutline != show) {
-    this->ShowOutline = show;
-    this->Outline->SetVisibility(show);
-  }
+  this->ShowOutline = show;
+  this->Outline->SetVisibility(show);
 }
 
 void vtkProsthesisRepresentation::GeneratePlus(double size, bool outline)

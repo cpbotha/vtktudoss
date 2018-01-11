@@ -61,6 +61,12 @@ public:
   void SetSelectedHandleColour(double, double, double);
   vtkGetVector3Macro(SelectedHandleColour, double);
 
+  // Flag used to show/hide the handles of the widget
+  bool ShowHandles;
+  void SetShowHandles(bool);
+  vtkGetMacro(ShowHandles, bool);
+  vtkBooleanMacro(ShowHandles, bool);
+
   // Flag used to show/hide the outline of the widget
   bool ShowOutline;
   void SetShowOutline(bool);
