@@ -87,7 +87,7 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
 
   // Construct initial points
   this->Points = vtkPoints::New(VTK_DOUBLE);
-  this->Points->SetNumberOfPoints(8); // 8 corners of the bounds
+  this->Points->SetNumberOfPoints(4); // center, x, y and z axis.
 
   // Create the outline circle
   this->OutlineGeometry = vtkRegularPolygonSource::New();
@@ -312,14 +312,10 @@ void vtkProsthesisRepresentation::PlaceWidget(double bds[6])
 
   this->AdjustBounds(bds, bounds, center);
 
-  this->Points->SetPoint(0, bounds[0], bounds[2], bounds[4]);
-  this->Points->SetPoint(1, bounds[1], bounds[2], bounds[4]);
-  this->Points->SetPoint(2, bounds[1], bounds[3], bounds[4]);
-  this->Points->SetPoint(3, bounds[0], bounds[3], bounds[4]);
-  this->Points->SetPoint(4, bounds[0], bounds[2], bounds[5]);
-  this->Points->SetPoint(5, bounds[1], bounds[2], bounds[5]);
-  this->Points->SetPoint(6, bounds[1], bounds[3], bounds[5]);
-  this->Points->SetPoint(7, bounds[0], bounds[3], bounds[5]);
+  this->Points->SetPoint(0, 0, 0, 0); // center
+  this->Points->SetPoint(1, 1, 0, 0); // x
+  this->Points->SetPoint(2, 0, 1, 0); // y
+  this->Points->SetPoint(3, 0, 0, 1); // z
 
   for (i=0; i<6; i++)
   {
@@ -645,8 +641,8 @@ void vtkProsthesisRepresentation::UpdateTransform()
      static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
   double* p0 = pts;
   double* px = pts + 3 * 1;
-  double* py = pts + 3 * 3;
-  double* pz = pts + 3 * 4;
+  double* py = pts + 3 * 2;
+  double* pz = pts + 3 * 3;
 
   double nx[3], ny[3], nz[3]; // The normals vectors
   vtkMath::Subtract(p0, px, nx);
