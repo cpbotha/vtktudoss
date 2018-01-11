@@ -276,6 +276,7 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   //Set the corners
   vtkPoints* newPts = vtkPoints::New(VTK_DOUBLE);
   transform->TransformPoints(this->Points, newPts);
+  transform->Delete();
 
   double* pts = 
     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
