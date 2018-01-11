@@ -76,6 +76,14 @@ void vtkProsthesisWidget::SelectAction(vtkAbstractWidget* w)
   {
     return;
   }
+  else if (interactionState == vtkProsthesisRepresentation::UpClick)
+  {
+    self->InvokeEvent(vtkCommand::UserEvent, NULL);
+  }
+  else if (interactionState == vtkProsthesisRepresentation::DownClick)
+  {
+    self->InvokeEvent(vtkCommand::UserEvent + 1, NULL);
+  }
 
   self->GrabFocus(self->EventCallbackCommand);
 

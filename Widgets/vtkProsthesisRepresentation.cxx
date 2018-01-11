@@ -137,6 +137,8 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->HandlePicker = vtkCellPicker::New();
   this->HandlePicker->SetTolerance(0.001);
   this->HandlePicker->AddPickList(this->Handle);
+  this->HandlePicker->AddPickList(this->UpHandle);
+  this->HandlePicker->AddPickList(this->DownHandle);
   this->HandlePicker->AddPickList(this->RotateHandle);
   this->HandlePicker->PickFromListOn();
 }
@@ -392,6 +394,12 @@ int vtkProsthesisRepresentation::ComputeInteractionState(int X, int Y, int modif
     else if (pickedHandle == this->RotateHandle) {
       this->InteractionState = vtkProsthesisRepresentation::Rotating;
     }
+    else if (pickedHandle == this->UpHandle) {
+      this->InteractionState = vtkProsthesisRepresentation::UpClick;
+    }
+    else if (pickedHandle == this->DownHandle) {
+      this->InteractionState = vtkProsthesisRepresentation::DownClick;
+    }
   }
   else {
     this->InteractionState = vtkProsthesisRepresentation::Outside;
@@ -556,6 +564,8 @@ void vtkProsthesisRepresentation::HighlightHandle(vtkProp* prop)
   // Unhighlight all
   this->Handle->SetProperty(this->HandleProperty);
   this->RotateHandle->SetProperty(this->HandleProperty);
+  this->UpHandle->SetProperty(this->HandleProperty);
+  this->DownHandle->SetProperty(this->HandleProperty);
 
   vtkActor* actorToHighlight = static_cast<vtkActor*>(prop);
   if (actorToHighlight)
@@ -575,7 +585,7 @@ void vtkProsthesisRepresentation::SetInteractionState(int state)
 {
   // Clamp to allowable values
   state = (state < vtkProsthesisRepresentation::Outside ? vtkProsthesisRepresentation::Outside :
-          (state > vtkProsthesisRepresentation::Scaling ? vtkProsthesisRepresentation::Scaling : state));
+          (state > vtkProsthesisRepresentation::DownClick ? vtkProsthesisRepresentation::Outside : state));
 
   this->InteractionState = state;
   switch (state)
@@ -586,7 +596,12 @@ void vtkProsthesisRepresentation::SetInteractionState(int state)
     case vtkProsthesisRepresentation::Rotating:
       this->HighlightHandle(this->RotateHandle);
       break;
-    case vtkProsthesisRepresentation::Scaling:
+    case vtkProsthesisRepresentation::UpClick:
+      this->HighlightHandle(this->UpHandle);
+      break;
+    case vtkProsthesisRepresentation::DownClick:
+      this->HighlightHandle(this->DownHandle);
+      break;
     default:
       this->HighlightHandle(NULL);
   }

@@ -78,7 +78,7 @@ public:
   void SetInteractionState(int state);
 
   // Used to manage the state of the widget.
-  enum {Outside=0, Translating, Rotating, Scaling};
+  enum {Outside=0, Translating, Rotating, UpClick, DownClick};
 
 protected:
   // Constructor and destructor.
