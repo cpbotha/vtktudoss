@@ -6,8 +6,8 @@
 
 class vtkActor;
 class vtkPolyDataMapper;
-class vtkSphereSource;
 class vtkArrowSource;
+class vtkRegularPolygonSource;
 class vtkCellPicker;
 class vtkProperty;
 class vtkPoints;
@@ -79,10 +79,10 @@ protected:
   // The translation handle.
   vtkActor* Handle;
   vtkPolyDataMapper* HandleMapper;
-  vtkSphereSource* HandleGeometry;
+  vtkRegularPolygonSource* HandleGeometry;
   vtkActor* RotateHandle;
   vtkPolyDataMapper* RotateHandleMapper;
-  vtkSphereSource* RotateHandleGeometry;
+  vtkRegularPolygonSource* RotateHandleGeometry;
   vtkAppendPolyData* RotateGeometryCombiner;
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();

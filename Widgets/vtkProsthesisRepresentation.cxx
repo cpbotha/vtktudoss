@@ -4,9 +4,9 @@
 
 #include "vtkActor.h"
 #include "vtkSmartPointer.h"
-#include "vtkSphereSource.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkArrowSource.h"
+#include "vtkRegularPolygonSource.h"
 #include "vtkAppendPolyData.h"
 #include "vtkTransformPolyDataFilter.h"
 #include "vtkProperty.h"
@@ -45,19 +45,22 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   // Set up the initial properties
   this->CreateDefaultProperties();
 
-  // Create the handles
-  this->HandleGeometry = vtkSphereSource::New();
-  this->HandleGeometry->SetThetaResolution(16);
-  this->HandleGeometry->SetPhiResolution(8);
+  this->HandleGeometry = vtkRegularPolygonSource::New();
+  this->HandleGeometry->SetNumberOfSides(18);
+  this->HandleGeometry->SetRadius(this->HandleSize);
+  this->HandleGeometry->SetCenter(0, 0, 0);
+  this->HandleGeometry->GeneratePolylineOff();
   this->HandleMapper = vtkPolyDataMapper::New();
   this->HandleMapper->SetInputConnection(this->HandleGeometry->GetOutputPort());
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
 
-  this->RotateHandleGeometry = vtkSphereSource::New();
-  this->RotateHandleGeometry->SetThetaResolution(16);
-  this->RotateHandleGeometry->SetPhiResolution(8);
+  this->RotateHandleGeometry = vtkRegularPolygonSource::New();
+  this->RotateHandleGeometry->SetNumberOfSides(18);
+  this->RotateHandleGeometry->SetRadius(this->HandleSize);
+  this->RotateHandleGeometry->SetCenter(0, 0, 0);
+  this->RotateHandleGeometry->GeneratePolylineOff();
 
   this->ArrowTransform = vtkTransform::New();
   this->ArrowTransform->Identity();
