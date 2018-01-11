@@ -367,7 +367,7 @@ void vtkProsthesisRepresentation::PlaceWidget(double bds[6])
 
   this->PositionHandles();
   this->ValidPick = 1; //since we have set up widget
-  this->SizeHandles();
+  this->UpdateHandles();
 }
 
 //----------------------------------------------------------------------------
@@ -417,7 +417,7 @@ void vtkProsthesisRepresentation::BuildRepresentation()
         (this->Renderer->GetVTKWindow()->GetMTime() > this->BuildTime ||
         this->Renderer->GetActiveCamera()->GetMTime() > this->BuildTime)) )
   {
-    this->SizeHandles();
+    this->UpdateHandles();
     this->BuildTime.Modified();
   }
 }
@@ -520,18 +520,6 @@ void vtkProsthesisRepresentation::PositionHandles()
   this->Handle->SetUserTransform(t);
   this->Outline->SetUserTransform(t);
 
-  vtkTransform* tPlus = vtkTransform::New();
-  tPlus->DeepCopy(t);
-  tPlus->Translate(-this->Radius/2.0, 0, this->Radius/2.0);
-  this->UpHandle->SetUserTransform(tPlus);
-  tPlus->Delete();
-
-  vtkTransform* tMinus = vtkTransform::New();
-  tMinus->DeepCopy(t);
-  tMinus->Translate(-this->Radius/2.0, 0,-this->Radius/2.0);
-  this->DownHandle->SetUserTransform(tMinus);
-  tMinus->Delete();
-
   vtkTransform* tRot = vtkTransform::New();
   tRot->DeepCopy(t);
   tRot->Translate(this->Radius, 0, 0);
@@ -539,13 +527,31 @@ void vtkProsthesisRepresentation::PositionHandles()
   tRot->Delete();
   t->Delete();
 
-  // Required so the handles stay the right size on screen during interaction.
-  this->SizeHandles();
+  this->UpdateHandles();
 }
 
 //----------------------------------------------------------------------------
-void vtkProsthesisRepresentation::SizeHandles()
+void vtkProsthesisRepresentation::UpdateHandles()
 {
+  // Transform the up and down handles so they're always right side up in 
+  // relation to the camera.
+  vtkTransform* tUp = vtkTransform::New();
+  this->GetAlwaysUpTransform(tUp);
+
+  vtkTransform* tPlus = vtkTransform::New();
+  tPlus->DeepCopy(tUp);
+  tPlus->Translate(-this->Radius/2.0, 0, this->Radius/2.0);
+  this->UpHandle->SetUserTransform(tPlus);
+  tPlus->Delete();
+
+  vtkTransform* tMinus = vtkTransform::New();
+  tMinus->DeepCopy(tUp);
+  tMinus->Translate(-this->Radius/2.0, 0,-this->Radius/2.0);
+  this->DownHandle->SetUserTransform(tMinus);
+  tMinus->Delete();
+  tUp->Delete();
+
+  // Size the handles based on how far they are from the camera.
   this->HandleGeometry->SetRadius(
     this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
                                                        this->Center));
@@ -851,6 +857,58 @@ void vtkProsthesisRepresentation::UpdateTransform()
     matrix->SetElement(i, 2, -nz[i]);
   }
   this->Transform->Concatenate(matrix);
+  matrix->Delete();
+}
+
+void vtkProsthesisRepresentation::GetAlwaysUpTransform(vtkTransform* t)
+{
+  t->Identity();
+  t->Translate(this->Center);
+  if (!this->Renderer) {
+    return;
+  }
+
+  vtkCamera* camera = this->Renderer->GetActiveCamera();
+  if (!camera)
+  {
+    return;
+  }
+
+  // Orientation
+  vtkMatrix4x4* matrix = vtkMatrix4x4::New();
+  matrix->Identity();
+
+  // Compute normals
+  double* pts =
+     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  double* p0 = pts;
+  double* px = pts + 3 * 1;
+  double* py = pts + 3 * 2;
+  double* pz = pts + 3 * 3;
+
+  double nx[3], ny[3], nz[3]; // The normals vectors
+  vtkMath::Subtract(p0, px, nx);
+  vtkMath::Subtract(p0, py, ny);
+  vtkMath::Subtract(p0, pz, nz);
+  vtkMath::Normalize(ny);
+
+  vtkMath::Cross(camera->GetViewUp(), ny, nx);
+  vtkMath::Normalize(nx);
+  // TODO: Make this robust if the widget is changed to handle any up vector.
+  if (nx[0] == 0 && nx[1] == 0 && nx[2] == 0) {
+    std::cout << "Error: Up same as y-axis." << std::endl;
+    return;
+  }
+
+  vtkMath::Cross(ny, nx, nz);
+
+  for (int i = 0; i < 3; i++)
+  {
+    matrix->SetElement(i, 0, nx[i]);
+    matrix->SetElement(i, 1, ny[i]);
+    matrix->SetElement(i, 2, nz[i]);
+  }
+  t->Concatenate(matrix);
   matrix->Delete();
 }
 

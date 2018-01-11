@@ -132,7 +132,7 @@ protected:
 
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();
-  virtual void SizeHandles();
+  virtual void UpdateHandles();
 
   // Do the picking
   vtkCellPicker *HandlePicker;
@@ -155,6 +155,7 @@ protected:
 
   vtkTransform* Transform;
   void UpdateTransform();
+  void GetAlwaysUpTransform(vtkTransform* t);
 
 private:
   vtkProsthesisRepresentation(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
