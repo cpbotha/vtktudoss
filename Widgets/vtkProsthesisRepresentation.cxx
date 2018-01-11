@@ -35,6 +35,8 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   RightArrowPolyData(vtkPolyData::New()),
   Transform(vtkTransform::New())
 {
+  this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+
   // The initial state
   this->InteractionState = vtkProsthesisRepresentation::Outside;
 
