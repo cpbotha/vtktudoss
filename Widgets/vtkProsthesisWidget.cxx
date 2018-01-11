@@ -48,8 +48,6 @@ void vtkProsthesisWidget::CreateDefaultRepresentation()
 
 void vtkProsthesisWidget::SelectAction(vtkAbstractWidget* w)
 {
-  std::cout << "↓" << std::endl;
-
   // We are in a static method, cast to ourself
   vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
@@ -100,7 +98,6 @@ void vtkProsthesisWidget::SelectAction(vtkAbstractWidget* w)
 
 void vtkProsthesisWidget::EndSelectAction(vtkAbstractWidget* w)
 {
-  std::cout << "↑" << std::endl;
   vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
   // If interaction has started, the widget will be in the active state
@@ -123,7 +120,6 @@ void vtkProsthesisWidget::EndSelectAction(vtkAbstractWidget* w)
 
 void vtkProsthesisWidget::MoveAction(vtkAbstractWidget* w)
 {
-  std::cout << "↔";
   vtkProsthesisWidget* self = reinterpret_cast<vtkProsthesisWidget*>(w);
 
   // See whether we're active
