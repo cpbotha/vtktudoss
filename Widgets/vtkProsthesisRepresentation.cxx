@@ -533,6 +533,9 @@ void vtkProsthesisRepresentation::PositionHandles()
 //----------------------------------------------------------------------------
 void vtkProsthesisRepresentation::UpdateHandles()
 {
+  double handleSizeCenter =
+    this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->Center);
+
   // Transform the up and down handles so they're always right side up in 
   // relation to the camera.
   vtkTransform* tUp = vtkTransform::New();
@@ -540,21 +543,19 @@ void vtkProsthesisRepresentation::UpdateHandles()
 
   vtkTransform* tPlus = vtkTransform::New();
   tPlus->DeepCopy(tUp);
-  tPlus->Translate(-this->Radius/2.0, 0, this->Radius/2.0);
+  tPlus->Translate(-handleSizeCenter * 10, 0, handleSizeCenter * 3);
   this->UpHandle->SetUserTransform(tPlus);
   tPlus->Delete();
 
   vtkTransform* tMinus = vtkTransform::New();
   tMinus->DeepCopy(tUp);
-  tMinus->Translate(-this->Radius/2.0, 0,-this->Radius/2.0);
+  tMinus->Translate(-handleSizeCenter * 10, 0,-handleSizeCenter * 3);
   this->DownHandle->SetUserTransform(tMinus);
   tMinus->Delete();
   tUp->Delete();
 
   // Size the handles based on how far they are from the camera.
-  this->HandleGeometry->SetRadius(
-    this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0,
-                                                       this->Center));
+  this->HandleGeometry->SetRadius(handleSizeCenter);
   double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
   this->RotateHandleGeometry->SetRadius(rotateRadius);
 
