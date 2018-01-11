@@ -36,6 +36,10 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   Transform(vtkTransform::New())
 {
   this->Center[0] = this->Center[1] = this->Center[2] = 0.0;
+  this->HandleColour[0] = this->HandleColour[1] = this->HandleColour[2] = 1.0;
+  this->SelectedHandleColour[0] = 0.627;
+  this->SelectedHandleColour[1] = 0.909;
+  this->SelectedHandleColour[2] = 0.192;
 
   // The initial state
   this->InteractionState = vtkProsthesisRepresentation::Outside;
@@ -296,10 +300,10 @@ void vtkProsthesisRepresentation::CreateDefaultProperties()
 {
   // Handle properties
   this->HandleProperty = vtkProperty::New();
-  this->HandleProperty->SetColor(1, 1, 1);
+  this->HandleProperty->SetColor(this->HandleColour);
 
   this->SelectedHandleProperty = vtkProperty::New();
-  this->SelectedHandleProperty->SetColor(1, 0, 0);
+  this->SelectedHandleProperty->SetColor(this->SelectedHandleColour);
 
   // Outline properties
   this->OutlineProperty = vtkProperty::New();
@@ -720,4 +724,26 @@ double* vtkProsthesisRepresentation::GetBounds()
 {
   this->BuildRepresentation();
   return this->Outline->GetBounds();
+}
+
+void vtkProsthesisRepresentation::SetHandleColour(double* rgb)
+{
+  this->HandleProperty->SetColor(rgb);
+}
+
+void vtkProsthesisRepresentation::SetHandleColour(double r, double g, double b)
+{
+  this->HandleProperty->SetColor(r, g, b);
+
+}
+
+void vtkProsthesisRepresentation::SetSelectedHandleColour(double* rgb)
+{
+  this->SelectedHandleProperty->SetColor(rgb);
+}
+
+void vtkProsthesisRepresentation::SetSelectedHandleColour(double r, double g, double b)
+{
+  this->SelectedHandleProperty->SetColor(r, g, b);
+
 }

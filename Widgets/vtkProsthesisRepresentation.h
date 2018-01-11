@@ -50,6 +50,16 @@ public:
   vtkSetMacro(Radius, double);
   vtkGetMacro(Radius, double);
 
+  double HandleColour[3];
+  void SetHandleColour(double*);
+  void SetHandleColour(double, double, double);
+  vtkGetVector3Macro(HandleColour, double);
+
+  double SelectedHandleColour[3];
+  void SetSelectedHandleColour(double*);
+  void SetSelectedHandleColour(double, double, double);
+  vtkGetVector3Macro(SelectedHandleColour, double);
+
   // Flag used to show/hide the outline of the widget
   bool ShowOutline;
   void SetShowOutline(bool);
