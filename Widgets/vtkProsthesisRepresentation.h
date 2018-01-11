@@ -96,6 +96,18 @@ protected:
   vtkPolyDataMapper* HandleMapper;
   vtkRegularPolygonSource* HandleGeometry;
 
+  // The up handles.
+  vtkActor* UpHandle;
+  vtkPolyDataMapper* UpHandleMapper;
+  vtkPolyData* PlusPolyData;
+  void GeneratePlus(double size, bool outline = false);
+
+  // The down handle.
+  vtkActor* DownHandle;
+  vtkPolyDataMapper* DownHandleMapper;
+  vtkPolyData* MinusPolyData;
+  void GenerateMinus(double size, bool outline = false);
+
   // The rotation handle.
   vtkActor* RotateHandle;
   vtkPolyDataMapper* RotateHandleMapper;
@@ -143,6 +155,7 @@ private:
   void operator=(const vtkProsthesisRepresentation&) VTK_DELETE_FUNCTION;
 
   void TransformPolyData(vtkAlgorithmOutput* algoOutput, vtkPolyDataMapper* mapper);
+  void TransformPolyData(vtkPolyData* polyData, vtkPolyDataMapper* mapper);
 };
 
 #endif

@@ -32,6 +32,8 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
   Radius(0.5),
   ShowOutline(true),
+  PlusPolyData(vtkPolyData::New()),
+  MinusPolyData(vtkPolyData::New()),
   LeftArrowPolyData(vtkPolyData::New()),
   RightArrowPolyData(vtkPolyData::New()),
   Transform(vtkTransform::New())
@@ -64,6 +66,22 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Handle = vtkActor::New();
   this->Handle->SetMapper(this->HandleMapper);
   this->Handle->SetProperty(this->HandleProperty);
+
+  this->UpHandleMapper = vtkPolyDataMapper::New();
+  this->TransformPolyData(this->PlusPolyData,
+                          this->UpHandleMapper);
+
+  this->UpHandle = vtkActor::New();
+  this->UpHandle->SetMapper(this->UpHandleMapper);
+  this->UpHandle->SetProperty(this->HandleProperty);
+
+  this->DownHandleMapper = vtkPolyDataMapper::New();
+  this->TransformPolyData(this->MinusPolyData,
+                          this->DownHandleMapper);
+
+  this->DownHandle = vtkActor::New();
+  this->DownHandle->SetMapper(this->DownHandleMapper);
+  this->DownHandle->SetProperty(this->HandleProperty);
 
   this->RotateHandleGeometry = vtkRegularPolygonSource::New();
   this->RotateHandleGeometry->SetNumberOfSides(18);
@@ -104,6 +122,8 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->Outline->SetMapper(this->OutlineMapper);
   this->Outline->SetProperty(this->OutlineProperty);
 
+  this->GeneratePlus(1.0);
+  this->GenerateMinus(1.0);
   this->GenerateArrow(this->RightArrowPolyData, 0.05, true);
   this->GenerateArrow(this->LeftArrowPolyData, 0.05, false);
 
@@ -133,6 +153,24 @@ void vtkProsthesisRepresentation::TransformPolyData(vtkAlgorithmOutput* algoOutp
   transform->RotateX(90);
   vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
   transformer->SetInputConnection(algoOutput);
+  transformer->SetTransform(transform);
+  transform->Delete();
+
+  mapper->SetInputConnection(transformer->GetOutputPort());
+  transformer->Delete();
+}
+
+void vtkProsthesisRepresentation::TransformPolyData(vtkPolyData* polyData, vtkPolyDataMapper* mapper)
+{
+  // NOTE: This is a temoporary solution to display the handles in the y-axis
+  // direction, since that is how they will be used in HPS desktop.
+  // TODO: Implement a feature that always arients the handles to face the
+  // camera with a look-at transform matrix.
+  vtkTransform* transform = vtkTransform::New();
+  transform->Identity();
+  transform->RotateX(90);
+  vtkTransformPolyDataFilter* transformer = vtkTransformPolyDataFilter::New();
+  transformer->SetInputData(polyData);
   transformer->SetTransform(transform);
   transform->Delete();
 
@@ -381,9 +419,10 @@ void vtkProsthesisRepresentation::ReleaseGraphicsResources(vtkWindow *w)
 {
   // Release the graphics resources associated with the actors of the widget
   this->Handle->ReleaseGraphicsResources(w);
+  this->UpHandle->ReleaseGraphicsResources(w);
+  this->DownHandle->ReleaseGraphicsResources(w);
   this->RotateHandle->ReleaseGraphicsResources(w);
   this->Outline->ReleaseGraphicsResources(w);
-  // this->Arrow->ReleaseGraphicsResources(w);
 }
 
 //----------------------------------------------------------------------------
@@ -401,6 +440,14 @@ int vtkProsthesisRepresentation::RenderOpaqueGeometry(vtkViewport *v)
   {
     count += this->Handle->RenderOpaqueGeometry(v);
   }
+  if (this->UpHandle->GetVisibility())
+  {
+    count += this->UpHandle->RenderOpaqueGeometry(v);
+  }
+  if (this->DownHandle->GetVisibility())
+  {
+    count += this->DownHandle->RenderOpaqueGeometry(v);
+  }
   if (this->RotateHandle->GetVisibility())
   {
     count += this->RotateHandle->RenderOpaqueGeometry(v);
@@ -416,8 +463,18 @@ int vtkProsthesisRepresentation::RenderTranslucentPolygonalGeometry(vtkViewport 
   this->BuildRepresentation();
 
   // Render all transparent actors of the widget
-  count += this->Outline->RenderTranslucentPolygonalGeometry(v);
-  // count += this->Arrow->RenderTranslucentPolygonalGeometry(v);
+  if (this->Outline->GetVisibility())
+  {
+    count += this->Outline->RenderTranslucentPolygonalGeometry(v);
+  }
+  if (this->UpHandle->GetVisibility())
+  {
+    count += this->UpHandle->RenderTranslucentPolygonalGeometry(v);
+  }
+  if (this->DownHandle->GetVisibility())
+  {
+    count += this->DownHandle->RenderTranslucentPolygonalGeometry(v);
+  }
   if (this->Handle->GetVisibility())
   {
     count += this->Handle->RenderTranslucentPolygonalGeometry(v);
@@ -437,7 +494,8 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
   this->BuildRepresentation();
 
   result |= this->Outline->HasTranslucentPolygonalGeometry();
-  // result |= this->Arrow->HasTranslucentPolygonalGeometry();
+  result |= this->UpHandle->HasTranslucentPolygonalGeometry();
+  result |= this->DownHandle->HasTranslucentPolygonalGeometry();
   result |= this->Handle->HasTranslucentPolygonalGeometry();
   result |= this->RotateHandle->HasTranslucentPolygonalGeometry();
 
@@ -454,12 +512,24 @@ void vtkProsthesisRepresentation::PositionHandles()
   this->Handle->SetUserTransform(t);
   this->Outline->SetUserTransform(t);
 
+  vtkTransform* tPlus = vtkTransform::New();
+  tPlus->DeepCopy(t);
+  tPlus->Translate(-this->Radius/2.0, 0, this->Radius/2.0);
+  this->UpHandle->SetUserTransform(tPlus);
+  tPlus->Delete();
+
+  vtkTransform* tMinus = vtkTransform::New();
+  tMinus->DeepCopy(t);
+  tMinus->Translate(-this->Radius/2.0, 0,-this->Radius/2.0);
+  this->DownHandle->SetUserTransform(tMinus);
+  tMinus->Delete();
+
   vtkTransform* tRot = vtkTransform::New();
   tRot->DeepCopy(t);
   tRot->Translate(this->Radius, 0, 0);
   this->RotateHandle->SetUserTransform(tRot);
-  t->Delete();
   tRot->Delete();
+  t->Delete();
 
   // Required so the handles stay the right size on screen during interaction.
   this->SizeHandles();
@@ -473,6 +543,9 @@ void vtkProsthesisRepresentation::SizeHandles()
                                                        this->Center));
   double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
   this->RotateHandleGeometry->SetRadius(rotateRadius);
+
+  this->GeneratePlus(handleSizeCenter * 6);
+  this->GenerateMinus(handleSizeCenter * 6);
   this->GenerateArrow(this->RightArrowPolyData, rotateRadius, true);
   this->GenerateArrow(this->LeftArrowPolyData, rotateRadius, false);
 }
@@ -525,6 +598,104 @@ void vtkProsthesisRepresentation::SetShowOutline(bool show) {
     this->ShowOutline = show;
     this->Outline->SetVisibility(show);
   }
+}
+
+void vtkProsthesisRepresentation::GeneratePlus(double size, bool outline)
+{
+  double halfSize = size / 2.0;
+  // Half the line thickness
+  double lineSize = halfSize / 4.0; // line is a quarter of the size
+
+  int numPoints = 12;
+  vtkPoints* points = vtkPoints::New();
+  points->SetNumberOfPoints(numPoints);
+  points->SetPoint( 0,  lineSize,  lineSize, 0);
+  points->SetPoint( 1,  halfSize,  lineSize, 0);
+  points->SetPoint( 2,  halfSize, -lineSize, 0);
+  points->SetPoint( 3,  lineSize, -lineSize, 0);
+  points->SetPoint( 4,  lineSize, -halfSize, 0);
+  points->SetPoint( 5, -lineSize, -halfSize, 0);
+  points->SetPoint( 6, -lineSize, -lineSize, 0);
+  points->SetPoint( 7, -halfSize, -lineSize, 0);
+  points->SetPoint( 8, -halfSize,  lineSize, 0);
+  points->SetPoint( 9, -lineSize,  lineSize, 0);
+  points->SetPoint(10, -lineSize,  halfSize, 0);
+  points->SetPoint(11,  lineSize,  halfSize, 0);
+  this->PlusPolyData->SetPoints(points);
+  points->Delete();
+
+  // Create the lines of the arrow  
+  vtkCellArray* cells = vtkCellArray::New();
+  cells->Reset();
+  int maxPointId = numPoints - 1;
+
+  if (outline) {
+    vtkIdType pts[2];
+    for (double i = 0; i < maxPointId; i++)
+    {
+      pts[0] = i; pts[1] = i+1;
+      cells->InsertNextCell(2, pts);
+    }
+    pts[0] = maxPointId; pts[1] = 0;
+    cells->InsertNextCell(2, pts);
+    this->PlusPolyData->SetLines(cells);
+  }
+  else {
+    vtkIdType pts[3];
+    pts[0] = 1; pts[1] = 2; pts[2] = 7;
+    cells->InsertNextCell(3, pts);
+    pts[0] = 7; pts[1] = 8; pts[2] = 1;
+    cells->InsertNextCell(3, pts);
+    pts[0] = 4; pts[1] = 5; pts[2] = 10;
+    cells->InsertNextCell(3, pts);
+    pts[0] = 10; pts[1] = 11; pts[2] = 4;
+    cells->InsertNextCell(3, pts);
+    this->PlusPolyData->SetPolys(cells);
+  }
+  this->PlusPolyData->Modified();
+}
+
+void vtkProsthesisRepresentation::GenerateMinus(double size, bool outline)
+{
+  double halfSize = size / 2.0;
+  // Half the line thickness
+  double lineSize = halfSize / 4.0; // line is a quarter of the size
+
+  int numPoints = 4;
+  vtkPoints* points = vtkPoints::New();
+  points->SetNumberOfPoints(numPoints);
+  points->SetPoint(0,  halfSize,  lineSize, 0);
+  points->SetPoint(1,  halfSize, -lineSize, 0);
+  points->SetPoint(2, -halfSize, -lineSize, 0);
+  points->SetPoint(3, -halfSize,  lineSize, 0);
+  this->MinusPolyData->SetPoints(points);
+  points->Delete();
+
+  // Create the lines of the arrow  
+  vtkCellArray* cells = vtkCellArray::New();
+  cells->Reset();
+  int maxPointId = numPoints - 1;
+
+  if (outline) {
+    vtkIdType pts[2];
+    for (double i = 0; i < maxPointId; i++)
+    {
+      pts[0] = i; pts[1] = i+1;
+      cells->InsertNextCell(2, pts);
+    }
+    pts[0] = maxPointId; pts[1] = 0;
+    cells->InsertNextCell(2, pts);
+    this->MinusPolyData->SetLines(cells);
+  }
+  else {
+    vtkIdType pts[3];
+    pts[0] = 0; pts[1] = 1; pts[2] = 2;
+    cells->InsertNextCell(3, pts);
+    pts[0] = 2; pts[1] = 3; pts[2] = 0;
+    cells->InsertNextCell(3, pts);
+    this->MinusPolyData->SetPolys(cells);
+  }
+  this->MinusPolyData->Modified();
 }
 
 void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
