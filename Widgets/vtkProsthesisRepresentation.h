@@ -95,10 +95,23 @@ protected:
   vtkActor* Handle;
   vtkPolyDataMapper* HandleMapper;
   vtkRegularPolygonSource* HandleGeometry;
+
+  // The rotation handle.
   vtkActor* RotateHandle;
   vtkPolyDataMapper* RotateHandleMapper;
-  vtkRegularPolygonSource* RotateHandleGeometry;
   vtkAppendPolyData* RotateGeometryCombiner;
+  vtkRegularPolygonSource* RotateHandleGeometry;
+  vtkPolyData* LeftArrowPolyData;
+  vtkPolyData* RightArrowPolyData;
+
+  // GenerateArrow parameters:
+  // shaftWidth : The thickness of the shaft.
+  // clockwise : Determines which way the arrow points.
+  // outline : If true, only draws the arrow's outline.
+  void GenerateArrow(vtkPolyData* arrowPolyData,
+                     double shaftWidth = 0.05, bool clockwise = true, 
+                     bool outline = false);
+
   void HighlightHandle(vtkProp *prop);
   virtual void PositionHandles();
   virtual void SizeHandles();
@@ -117,17 +130,6 @@ protected:
   vtkActor* Outline;
   vtkRegularPolygonSource* OutlineGeometry;
   vtkPolyDataMapper* OutlineMapper;
-
-  // Arrow polydata
-  vtkPolyData* LeftArrowPolyData;
-  vtkPolyData* RightArrowPolyData;
-  // GenerateArrow parameters:
-  // shaftWidth : The thickness of the shaft.
-  // clockwise : Determines which way the arrow points.
-  // outline : If true, only draws the arrow's outline.
-  void GenerateArrow(vtkPolyData* arrowPolyData,
-                     double shaftWidth = 0.05, bool clockwise = true, 
-                     bool outline = false);
 
   // Methods to update the widget
   virtual void Translate(double *p1, double *p2);
