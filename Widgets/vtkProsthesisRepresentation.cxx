@@ -30,7 +30,7 @@ vtkStandardNewMacro(vtkProsthesisRepresentation);
 //----------------------------------------------------------------------------
 vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   vtkWidgetRepresentation(),
-  Radius(0.5),
+  Radius(75),
   ShowOutline(true),
   TranslateArrowPolyData(vtkPolyData::New()),
   PlusPolyData(vtkPolyData::New()),
@@ -130,8 +130,8 @@ vtkProsthesisRepresentation::vtkProsthesisRepresentation() :
   this->GenerateTranslateArrow(0.05);
   this->GeneratePlus(1.0);
   this->GenerateMinus(1.0);
-  this->GenerateArrow(this->RightArrowPolyData, 0.05, true);
-  this->GenerateArrow(this->LeftArrowPolyData, 0.05, false);
+  this->GenerateArrow(this->RightArrowPolyData, 1.0, 0.05, true);
+  this->GenerateArrow(this->LeftArrowPolyData, 1.0, 0.05, false);
 
   // Define the point coordinates
   double bounds[6] = {-1.0, 1.0, 
@@ -287,7 +287,7 @@ void vtkProsthesisRepresentation::Translate(double *p1, double *p2)
     *pts++ += v[2];
   }
 
-  this->PositionHandles();
+  this->UpdateHandles();
 }
 
 //----------------------------------------------------------------------------
@@ -335,7 +335,7 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   }
 
   newPts->Delete();
-  this->PositionHandles();
+  this->UpdateHandles();
 }
 
 //----------------------------------------------------------------------------
@@ -377,7 +377,6 @@ void vtkProsthesisRepresentation::PlaceWidget(double bds[6])
                              (bounds[3] - bounds[2]) * (bounds[3] - bounds[2]) +
                              (bounds[5] - bounds[4]) * (bounds[5] - bounds[4]));
 
-  this->PositionHandles();
   this->ValidPick = 1; //since we have set up widget
   this->UpdateHandles();
 }
@@ -523,7 +522,7 @@ int vtkProsthesisRepresentation::HasTranslucentPolygonalGeometry()
 }
 
 //----------------------------------------------------------------------------
-void vtkProsthesisRepresentation::PositionHandles()
+void vtkProsthesisRepresentation::UpdateHandles()
 {
   this->UpdateTransform();
 
@@ -531,20 +530,20 @@ void vtkProsthesisRepresentation::PositionHandles()
   this->GetTransform(t);
   this->Outline->SetUserTransform(t);
 
+  double radiusSize =
+    this->vtkWidgetRepresentation::SizeHandlesInPixels(this->Radius / this->HandleSize,
+                                                       this->Center);
+
+  this->OutlineGeometry->SetRadius(radiusSize);
+
   vtkTransform* tRot = vtkTransform::New();
   tRot->DeepCopy(t);
-  tRot->Translate(this->Radius, 0, 0);
+  tRot->Translate(radiusSize, 0, 0);
   this->RotateHandle->SetUserTransform(tRot);
   tRot->Delete();
   t->Delete();
 
-  this->UpdateHandles();
-}
-
-//----------------------------------------------------------------------------
-void vtkProsthesisRepresentation::UpdateHandles()
-{
-  double handleSizeCenter =
+  double translateHandleSize =
     this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->Center);
 
   // Transform the up and down handles so they're always right side up in 
@@ -556,27 +555,27 @@ void vtkProsthesisRepresentation::UpdateHandles()
 
   vtkTransform* tPlus = vtkTransform::New();
   tPlus->DeepCopy(tUp);
-  tPlus->Translate(-handleSizeCenter * 10, 0, handleSizeCenter * 3);
+  tPlus->Translate(-translateHandleSize * 10, 0, translateHandleSize * 3);
   this->UpHandle->SetUserTransform(tPlus);
   tPlus->Delete();
 
   vtkTransform* tMinus = vtkTransform::New();
   tMinus->DeepCopy(tUp);
-  tMinus->Translate(-handleSizeCenter * 10, 0,-handleSizeCenter * 3);
+  tMinus->Translate(-translateHandleSize * 10, 0,-translateHandleSize * 3);
   this->DownHandle->SetUserTransform(tMinus);
   tMinus->Delete();
   tUp->Delete();
 
   // Size the handles based on how far they are from the camera.
-  this->HandleGeometry->SetRadius(handleSizeCenter);
-  double rotateRadius = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
-  this->RotateHandleGeometry->SetRadius(rotateRadius);
+  this->HandleGeometry->SetRadius(translateHandleSize);
+  double rotateHandleSize = this->vtkWidgetRepresentation::SizeHandlesInPixels(1.0, this->RotateHandle->GetCenter());
+  this->RotateHandleGeometry->SetRadius(rotateHandleSize);
 
-  this->GeneratePlus(handleSizeCenter * 6);
-  this->GenerateMinus(handleSizeCenter * 6);
-  this->GenerateTranslateArrow(handleSizeCenter);
-  this->GenerateArrow(this->RightArrowPolyData, rotateRadius, true);
-  this->GenerateArrow(this->LeftArrowPolyData, rotateRadius, false);
+  this->GeneratePlus(translateHandleSize * 6);
+  this->GenerateMinus(translateHandleSize * 6);
+  this->GenerateTranslateArrow(translateHandleSize);
+  this->GenerateArrow(this->RightArrowPolyData, radiusSize, rotateHandleSize, true);
+  this->GenerateArrow(this->LeftArrowPolyData, radiusSize, rotateHandleSize, false);
 }
 
 //----------------------------------------------------------------------------
@@ -813,12 +812,11 @@ void vtkProsthesisRepresentation::GenerateTranslateArrow(double shaftWidth)
 }
 
 void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
+                                                double radiusSize,
                                                 double shaftWidth, 
                                                 bool clockwise, bool outline)
 {
   // Parameters needed to generate an arrow
-  // The radius the arrow is drawn from the center.
-  double radius = this->Radius;
   // The thickness of the tip.
   double tipSize = 3 * shaftWidth;
   // Angle where the arrow starts
@@ -840,16 +838,16 @@ void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
   // the distance must be divided by the circumference and the mutiplied by 2 
   // radians to get the angle; the equation can be simplified to distance 
   // divided by radius, though.
-  double endAngle = startAngle + arrowLength / radius;
+  double endAngle = startAngle + arrowLength / radiusSize;
   // The angle between the start and end of the tip.
-  double tipAngle = tipSize / radius;
+  double tipAngle = tipSize / radiusSize;
   // The points include the outside curve's (segments + 1),
   // inside curve's (segments + 1) and 3 points for the tip.
   int numPoints = (numSegment + 1) * 2 + 3;
   // The radius of the outside of the shaft.
-  double outsideRadius = radius + shaftWidth / 2.0;
+  double outsideRadius = radiusSize + shaftWidth / 2.0;
   // The radius of the inside of the shaft.
-  double insideRadius = radius - shaftWidth / 2.0;
+  double insideRadius = radiusSize - shaftWidth / 2.0;
   // The exact angle the tip starts at.
   double tipStartAngle = endAngle - startAngle;
   // Handle the direction of the arrow correctly...
@@ -862,8 +860,8 @@ void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
   // Position the shaft points
   double angle = startAngle;
   double angleInc = (tipStartAngle - startAngle) / numSegment;
-  double xOff = radius * sin(angle);
-  double yOff = radius * cos(angle);
+  double xOff = radiusSize * sin(angle);
+  double yOff = radiusSize * cos(angle);
 
   for (double i = 0; i <= numSegment; i++, angle += angleInc)
   {
@@ -872,10 +870,10 @@ void vtkProsthesisRepresentation::GenerateArrow(vtkPolyData* arrowPolyData,
   }
 
   // Position the tip points
-  double tipOutsideRadius = radius + tipSize / 2.0;
-  double tipInsideRadius = radius - tipSize / 2.0;
+  double tipOutsideRadius = radiusSize + tipSize / 2.0;
+  double tipInsideRadius = radiusSize - tipSize / 2.0;
   arrowPoints->SetPoint(numSegment + 1, tipOutsideRadius * sin(tipStartAngle) - xOff, tipOutsideRadius * cos(tipStartAngle) - yOff, 0);
-  arrowPoints->SetPoint(numSegment + 2, radius * sin(endAngle) - xOff, radius * cos(endAngle) - yOff, 0);
+  arrowPoints->SetPoint(numSegment + 2, radiusSize * sin(endAngle) - xOff, radiusSize * cos(endAngle) - yOff, 0);
   arrowPoints->SetPoint(numSegment + 3, tipInsideRadius * sin(tipStartAngle) - xOff, tipInsideRadius * cos(tipStartAngle) - yOff, 0);
   arrowPolyData->SetPoints(arrowPoints);
   arrowPoints->Delete();
@@ -1033,8 +1031,7 @@ void vtkProsthesisRepresentation::SetSelectedHandleColour(double r, double g, do
 
 void vtkProsthesisRepresentation::SetRadius(double value)
 {
-  if (value <= 0.0) value = 0.01;
+  if (value <= 0.0) value = 1;
   this->Radius = value;
-  this->OutlineGeometry->SetRadius(value);
-  this->PositionHandles();
+  this->UpdateHandles();
 }

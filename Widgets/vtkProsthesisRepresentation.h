@@ -43,10 +43,12 @@ public:
 
   virtual void GetTransform(vtkTransform *t);
 
+  // The center of the widget in world space.
   double Center[3];
   vtkSetVectorMacro(Center, double, 3);
   vtkGetVectorMacro(Center, double, 3);
 
+  // The radius of the widget in pixels.
   double Radius;
   void SetRadius(double value);
   vtkGetMacro(Radius, double);
@@ -126,15 +128,15 @@ protected:
   vtkPolyData* RightArrowPolyData;
 
   // GenerateArrow parameters:
+  // radiusSize : The size of the radius in world units.
   // shaftWidth : The thickness of the shaft.
   // clockwise : Determines which way the arrow points.
   // outline : If true, only draws the arrow's outline.
-  void GenerateArrow(vtkPolyData* arrowPolyData,
+  void GenerateArrow(vtkPolyData* arrowPolyData, double radiusSize = 1,
                      double shaftWidth = 0.05, bool clockwise = true, 
                      bool outline = false);
 
   void HighlightHandle(vtkProp *prop);
-  virtual void PositionHandles();
   virtual void UpdateHandles();
 
   // Do the picking
