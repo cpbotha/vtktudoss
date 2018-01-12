@@ -234,8 +234,7 @@ void vtkProsthesisRepresentation::WidgetInteraction(double e[2])
     return;
   }
   double focalPoint[4], pickPoint[4], prevPickPoint[4];
-  double z, vpn[3];
-  camera->GetViewPlaneNormal(vpn);
+  double z;
 
   // Compute the two points defining the motion vector
   double pos[3];
@@ -256,7 +255,7 @@ void vtkProsthesisRepresentation::WidgetInteraction(double e[2])
   else if (this->InteractionState == vtkProsthesisRepresentation::Rotating)
   {
     this->Rotate(this->LastEventPosition[0], this->LastEventPosition[1],
-                 e[0], e[1], vpn);
+                 e[0], e[1]);
   }
 
   // Store the start position
@@ -293,9 +292,18 @@ void vtkProsthesisRepresentation::Translate(double *p1, double *p2)
 
 //----------------------------------------------------------------------------
 void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
-                                     double X, double Y,
-                                     double *vpn)
+                                         double X, double Y)
 {
+
+  // Compute normals
+  double* pts =
+     static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
+  double* p0 = pts;
+  double* py = pts + 3 * 2;
+  double ny[3]; // The y-axis is the widget's face normal.
+  vtkMath::Subtract(py, p0, ny);
+  vtkMath::Normalize(ny);
+
   double displayCenter[4];
   vtkInteractorObserver::ComputeWorldToDisplay(this->Renderer,
                                                this->Center[0],
@@ -313,7 +321,7 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   vtkTransform* transform = vtkTransform::New();
   transform->Identity();
   transform->Translate(this->Center[0], this->Center[1], this->Center[2]);
-  transform->RotateWXYZ(difference, vpn);
+  transform->RotateWXYZ(difference, ny);
   transform->Translate(-this->Center[0], -this->Center[1], -this->Center[2]);
 
   //Set the corners
@@ -321,8 +329,6 @@ void vtkProsthesisRepresentation::Rotate(double previousX, double previousY,
   transform->TransformPoints(this->Points, newPts);
   transform->Delete();
 
-  double* pts = 
-    static_cast<vtkDoubleArray*>(this->Points->GetData())->GetPointer(0);
   for (int i = 0; i < this->Points->GetNumberOfPoints(); i++, pts += 3)
   {
     this->Points->SetPoint(i, newPts->GetPoint(i));
